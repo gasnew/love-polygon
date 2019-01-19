@@ -1,9 +1,13 @@
+// @flow
+
 import React, { Component } from 'react';
 import getRendererElement from './renderer';
 
-class App extends Component {
+class App extends Component<{}> {
+  rootElement: ?HTMLDivElement;
+
   componentDidMount() {
-    this.rootElement.appendChild(getRendererElement());
+    if (this.rootElement) this.rootElement.appendChild(getRendererElement());
   }
 
   render() {

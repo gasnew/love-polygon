@@ -1,3 +1,5 @@
+// @flow
+
 import * as THREE from 'three';
 
 function animate(props) {
