@@ -9,6 +9,8 @@ const app = express();
 
 app.set('port', process.env.PORT || 3001);
 
+app.use(express.json());
+
 app.post('/api/register', registerPlayer);
 
 app.listen(app.get('port'), () => {

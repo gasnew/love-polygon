@@ -2,6 +2,8 @@
 
 import axios from 'axios';
 import React, { Component } from 'react';
+import uniqid from 'uniqid';
+
 import getRendererElement from './renderer';
 
 class App extends Component<{}> {
@@ -9,7 +11,8 @@ class App extends Component<{}> {
 
   componentDidMount() {
     if (this.rootElement) this.rootElement.appendChild(getRendererElement());
-    axios.post('api/register').then(console.log);
+
+    axios.post('api/register', { id: uniqid() }).then(console.log);
   }
 
   render() {
