@@ -9,7 +9,7 @@ class App extends Component<{}> {
 
   componentDidMount() {
     if (this.rootElement) this.rootElement.appendChild(getRendererElement());
-    axios.post('api/graph').then(console.log);
+    axios.post('api/register').then(console.log);
   }
 
   render() {

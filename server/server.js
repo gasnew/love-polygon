@@ -2,13 +2,14 @@
 
 import express from 'express';
 
+import { registerPlayer } from './api';
+
+// Express
 const app = express();
 
 app.set('port', process.env.PORT || 3001);
 
-app.post('/api/graph', (req, res) => {
-  res.json({ message: 'nice' });
-});
+app.post('/api/register', registerPlayer);
 
 app.listen(app.get('port'), () => {
   console.log(
