@@ -1,5 +1,6 @@
 // @flow
 
+import axios from 'axios';
 import React, { Component } from 'react';
 import getRendererElement from './renderer';
 
@@ -8,6 +9,7 @@ class App extends Component<{}> {
 
   componentDidMount() {
     if (this.rootElement) this.rootElement.appendChild(getRendererElement());
+    axios.post('api/graph').then(console.log);
   }
 
   render() {

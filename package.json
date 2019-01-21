@@ -1,31 +1,17 @@
 {
-  "name": "ffff",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
-    "react-scripts": "2.1.2",
-    "three": "^0.100.0"
-  },
+  "name": "love-polygon",
+  "version": "0.0.1",
+  "description": "Engage in a battle of deception, wit, and (mostly) unrequited love in this fun throwback to middle school romance.",
+  "main": "server/server.js",
+  "repository": "https://github.com/gasnew/love-polygon.git",
+  "author": "Garrett Newman <garrett.s.newman@gmail.com>",
+  "license": "MIT",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "concurrently \"yarn run server\" \"yarn run client\"",
+    "server": "node startServer.js",
+    "client": "node startClient.js"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-flow": "^6.23.0",
-    "flow-bin": "^0.91.0"
+  "dependencies": {
+    "concurrently": "^4.1.0"
   }
 }

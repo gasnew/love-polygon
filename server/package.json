@@ -1,0 +1,31 @@
+{
+  "name": "love-polygon",
+  "version": "0.0.1",
+  "description": "Engage in a battle of deception, wit, and (mostly) unrequited love in this fun throwback to middle school romance.",
+  "main": "server.js",
+  "repository": "https://github.com/gasnew/love-polygon.git",
+  "author": "Garrett Newman <garrett.s.newman@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "babel-preset-env": "^1.7.0",
+    "concurrently": "^4.1.0",
+    "express": "^4.16.4"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "scripts": {
+    "build": "babel server.js -d dist",
+    "start": "babel-watch server.js",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.2.3",
+    "babel-cli": "^6.26.0",
+    "babel-preset-flow": "^6.23.0",
+    "babel-watch": "^2.0.8",
+    "eslint": "^5.12.1",
+    "flow-bin": "^0.91.0",
+    "prettier": "^1.16.0"
+  }
+}
