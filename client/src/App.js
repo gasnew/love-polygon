@@ -1,22 +1,27 @@
 // @flow
 
-import axios from 'axios';
 import React, { Component } from 'react';
-import uniqid from 'uniqid';
 
-import getRendererElement from './renderer';
+import render from './renderer';
+import type { Tokens } from './types';
 
 class App extends Component<{}> {
-  rootElement: ?HTMLDivElement;
-
   componentDidMount() {
-    if (this.rootElement) this.rootElement.appendChild(getRendererElement());
-
-    axios.post('api/register', { id: uniqid() }).then(console.log);
+    const tokens: Tokens = [
+      {
+        x: -0.3,
+        y: -0.2,
+      },
+      {
+        x: 0.4,
+        y: 0.6,
+      },
+    ];
+    render({ tokens });
   }
 
   render() {
-    return <div ref={element => (this.rootElement = element)} />;
+    return <div />;
   }
 }
 

@@ -1,38 +1,65 @@
 // @flow
 
-import * as THREE from 'three';
+import startRegl from 'regl';
 
-function animate(props) {
-  requestAnimationFrame(() => animate(props));
+import type { Position, Tokens } from './types';
 
-  const { mesh, scene, camera, renderer } = props;
-  mesh.rotation.x += 0.01;
-  mesh.rotation.y += 0.02;
-
-  renderer.render(scene, camera);
+function vectorize(object: Position) {
+  return { location: [object.x, object.y] };
 }
 
-export default function getRendererElement() {
-  const camera = new THREE.PerspectiveCamera(
-    70,
-    window.innerWidth / window.innerHeight,
-    0.01,
-    10
-  );
-  camera.position.z = 1;
+function buildSquare(regl) {
+  return regl({
+    frag: `
+      precision mediump float;
+      uniform vec4 color;
+      void main () {
+        gl_FragColor = color;
+      }`,
 
-  const scene = new THREE.Scene();
+    vert: `
+      precision mediump float;
+      attribute vec2 position;
+      uniform vec2 location;
+      void main () {
+        gl_Position = vec4(position.x + location.x, position.y + location.y, 0, 1);
+      }`,
 
-  const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-  const material = new THREE.MeshNormalMaterial();
+    attributes: {
+      position: [
+        [-0.1, 0.1],
+        [-0.1, -0.1],
+        [0.1, -0.1],
+        [0.1, -0.1],
+        [0.1, 0.1],
+        [-0.1, 0.1],
+      ],
+    },
 
-  const mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
+    uniforms: {
+      color: [1, 0, 0, 1],
+      location: regl.prop('location'),
+    },
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  const props = { mesh, scene, camera, renderer };
-  animate(props);
+    count: 6,
+  });
+}
 
-  return renderer.domElement;
+function draw(command) {
+  return (data: Position) => command(vectorize(data));
+}
+
+export default function render({ tokens }: { tokens: Tokens }) {
+  const regl = startRegl();
+  const square = buildSquare(regl);
+  const drawToken = draw(square);
+
+  regl.frame(({ time }) => {
+    regl.clear({
+      color: [0, 0, 0, 1],
+      depth: 1,
+    });
+
+    tokens.forEach(token => drawToken(token));
+  });
 }
