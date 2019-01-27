@@ -31,7 +31,9 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-flow": "^6.23.0",
-    "flow-bin": "^0.91.0"
+    "flow-bin": "^0.91.0",
+    "glsl-noise": "^0.0.0",
+    "glslify": "^7.0.0"
   },
   "proxy": "http://localhost:3001/"
 }
