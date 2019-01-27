@@ -1,5 +1,9 @@
 // @flow
 
+export type ShaderProps = {
+  location: Array<number>,
+};
+
 export const solidFragmentShader = `
 precision mediump float;
 uniform vec4 color;
@@ -7,7 +11,7 @@ void main () {
   gl_FragColor = color;
 }`;
 
-export const squareVertexShader = `
+export const primitiveVertexShader = `
 precision mediump float;
 attribute vec2 position;
 uniform vec2 location;

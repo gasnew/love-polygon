@@ -2,16 +2,20 @@
 
 import startRegl from 'regl';
 
+import { buildPrimitive } from './commands';
 import draw from './graphics';
-import { buildSquare } from './commands';
+import { buildCircleMesh } from './meshes';
 
 import type { Tokens } from './types';
 
 export default function render({ tokens }: { tokens: Tokens }) {
   const regl = startRegl();
 
-  const square = buildSquare(regl);
-  const drawToken = draw(square);
+  const circle = buildPrimitive(
+    regl,
+    buildCircleMesh({ radius: 0.1, points: 10 })
+  );
+  const drawToken = draw(circle);
 
   regl.frame(({ time }) => {
     regl.clear({

@@ -1,31 +1,19 @@
 // @flow
 
-import {
-  solidFragmentShader,
-  squareVertexShader,
-  noiseFragmentShader,
-} from './shaders';
-
+import _ from 'lodash';
 import type { Regl } from 'regl';
 
-export type ShaderProps = {
-  location: Array<number>,
-};
+import { primitiveVertexShader, noiseFragmentShader } from './shaders';
+import type { ShaderProps } from './shaders';
+
 export type Command = ShaderProps => any;
 
-export function buildSquare(regl: Regl): Command {
+export function buildPrimitive(regl: Regl, mesh: Array<number>): Command {
   return regl({
     frag: noiseFragmentShader,
-    vert: squareVertexShader,
+    vert: primitiveVertexShader,
     attributes: {
-      position: [
-        [-0.1, 0.1],
-        [-0.1, -0.1],
-        [0.1, -0.1],
-        [0.1, -0.1],
-        [0.1, 0.1],
-        [-0.1, 0.1],
-      ],
+      position: mesh,
     },
 
     uniforms: {
@@ -33,6 +21,6 @@ export function buildSquare(regl: Regl): Command {
       location: regl.prop('location'),
     },
 
-    count: 6,
+    count: _.flattenDeep(mesh).length / 2,
   });
 }
