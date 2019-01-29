@@ -5,9 +5,19 @@ export type Position = {
   y: number,
 };
 
+export type Dimensions = {
+  width: number,
+  height: number,
+};
+
 export type Token = {
-  x: number,
-  y: number,
+  position: Position,
+  radius: number,
 };
 
 export type Tokens = Array<Token>;
+
+export type State = {
+  stage: Dimensions,
+  tokens: Tokens,
+};

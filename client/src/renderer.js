@@ -3,17 +3,18 @@
 import startRegl from 'regl';
 
 import { buildPrimitive } from './commands';
+import { getTokens } from './getters';
 import draw from './graphics';
 import { buildCircleMesh } from './meshes';
 
 import type { Tokens } from './types';
 
-export default function render({ tokens }: { tokens: Tokens }) {
+function renderWithProps(tokens: Tokens) {
   const regl = startRegl();
 
   const circle = buildPrimitive(
     regl,
-    buildCircleMesh({ radius: 0.1, points: 10 })
+    buildCircleMesh({ radius: 10, points: 10 })
   );
   const drawToken = draw(circle);
 
@@ -23,6 +24,10 @@ export default function render({ tokens }: { tokens: Tokens }) {
       depth: 1,
     });
 
-    tokens.forEach(token => drawToken(token));
+    tokens.forEach(token => drawToken(token.position));
   });
+}
+
+export default function render() {
+  renderWithProps(getTokens());
 }

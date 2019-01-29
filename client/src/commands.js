@@ -19,6 +19,8 @@ export function buildPrimitive(regl: Regl, mesh: Array<number>): Command {
     uniforms: {
       color: [1, 0, 0, 1],
       location: regl.prop('location'),
+      stageWidth: regl.prop('stageWidth'),
+      stageHeight: regl.prop('stageHeight'),
     },
 
     count: _.flattenDeep(mesh).length / 2,

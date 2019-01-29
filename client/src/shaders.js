@@ -13,12 +13,27 @@ void main () {
 
 export const primitiveVertexShader = `
 precision mediump float;
+
 attribute vec2 position;
+
 uniform vec2 location;
-varying vec2 lolpos;
+uniform float stageWidth;
+uniform float stageHeight;
+
+vec2 normalizeCoords(vec2 position) {
+  // read in the positions into x and y vars
+  float x = position[0];
+  float y = position[1];
+
+  return vec2(
+    2.0 * ((x / stageWidth) - 0.5),
+    -(2.0 * ((y / stageHeight) - 0.5))
+  );
+}
+
 void main () {
-  gl_Position = vec4(position.x + location.x, position.y + location.y, 0, 1);
-  lolpos = position + location;
+  vec2 truePosition = position + location;
+  gl_Position = vec4(normalize(truePosition), 0, 1);
 }`;
 
 export const noiseFragmentShader = `
