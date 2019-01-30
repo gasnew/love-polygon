@@ -13,14 +13,14 @@ export function buildPrimitive(regl: Regl, mesh: Array<number>): Command {
     frag: noiseFragmentShader,
     vert: primitiveVertexShader,
     attributes: {
-      position: mesh,
+      vertexPosition: mesh,
     },
 
     uniforms: {
       color: [1, 0, 0, 1],
       location: regl.prop('location'),
-      stageWidth: regl.prop('stageWidth'),
-      stageHeight: regl.prop('stageHeight'),
+      stageWidth: regl.prop('width'),
+      stageHeight: regl.prop('height'),
     },
 
     count: _.flattenDeep(mesh).length / 2,

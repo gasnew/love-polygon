@@ -1,6 +1,26 @@
 // @flow
 
-import type { State } from './types';
+export type Position = {
+  x: number,
+  y: number,
+};
+
+export type Dimensions = {
+  width: number,
+  height: number,
+};
+
+export type Token = {
+  position: Position,
+  radius: number,
+};
+
+export type Tokens = Array<Token>;
+
+export type State = {
+  stage: Dimensions,
+  tokens: Tokens,
+};
 
 export default function generateState(): State {
   return {
@@ -11,24 +31,24 @@ export default function generateState(): State {
     tokens: [
       {
         position: {
-          x: -0.3,
-          y: -0.2,
-        },
-        radius: 0.1,
-      },
-      {
-        position: {
-          x: 0.4,
-          y: 0.6,
-        },
-        radius: 0.2,
-      },
-      {
-        position: {
-          x: 40,
+          x: 60,
           y: 60,
         },
-        radius: 20,
+        radius: 6,
+      },
+      {
+        position: {
+          x: 12,
+          y: 40,
+        },
+        radius: 6,
+      },
+      {
+        position: {
+          x: 30,
+          y: 60,
+        },
+        radius: 6,
       },
     ],
   };

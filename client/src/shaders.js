@@ -14,16 +14,16 @@ void main () {
 export const primitiveVertexShader = `
 precision mediump float;
 
-attribute vec2 position;
+attribute vec2 vertexPosition;
 
 uniform vec2 location;
 uniform float stageWidth;
 uniform float stageHeight;
 
-vec2 normalizeCoords(vec2 position) {
+vec2 normalizeCoords(vec2 vector) {
   // read in the positions into x and y vars
-  float x = position[0];
-  float y = position[1];
+  float x = vector[0];
+  float y = vector[1];
 
   return vec2(
     2.0 * ((x / stageWidth) - 0.5),
@@ -32,8 +32,8 @@ vec2 normalizeCoords(vec2 position) {
 }
 
 void main () {
-  vec2 truePosition = position + location;
-  gl_Position = vec4(normalize(truePosition), 0, 1);
+  vec2 truePosition = vertexPosition + location;
+  gl_Position = vec4(normalizeCoords(truePosition), 0, 1);
 }`;
 
 export const noiseFragmentShader = `

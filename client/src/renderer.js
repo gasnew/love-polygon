@@ -7,14 +7,14 @@ import { getTokens } from './getters';
 import draw from './graphics';
 import { buildCircleMesh } from './meshes';
 
-import type { Tokens } from './types';
+import type { Tokens } from './state';
 
 function renderWithProps(tokens: Tokens) {
   const regl = startRegl();
 
   const circle = buildPrimitive(
     regl,
-    buildCircleMesh({ radius: 10, points: 10 })
+    buildCircleMesh({ radius: 6, points: 10 })
   );
   const drawToken = draw(circle);
 

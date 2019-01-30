@@ -1,6 +1,6 @@
 // @flow
 
-import type { Dimensions, State, Tokens } from './types';
+import type { Dimensions, State, Tokens } from './state';
 
 export function getState(): State {
   return window.state;
