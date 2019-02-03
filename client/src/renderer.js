@@ -10,8 +10,8 @@ import { buildCircleMesh } from './meshes';
 
 import type { Tokens } from './state';
 
-export default function render() {
-  const regl = startRegl();
+export default function render(element: HTMLDivElement) {
+  const regl = startRegl(element);
 
   const circle = buildPrimitive(
     regl,
