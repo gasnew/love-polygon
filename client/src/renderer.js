@@ -1,5 +1,6 @@
 // @flow
 
+import _ from 'lodash';
 import startRegl from 'regl';
 
 import { buildPrimitive } from './commands';
@@ -9,7 +10,7 @@ import { buildCircleMesh } from './meshes';
 
 import type { Tokens } from './state';
 
-function renderWithProps(tokens: Tokens) {
+export default function render() {
   const regl = startRegl();
 
   const circle = buildPrimitive(
@@ -19,15 +20,13 @@ function renderWithProps(tokens: Tokens) {
   const drawToken = draw(circle);
 
   regl.frame(({ time }) => {
+    const tokens: Tokens = getTokens();
+
     regl.clear({
       color: [0, 0, 0, 1],
       depth: 1,
     });
 
-    tokens.forEach(token => drawToken(token.position));
+    _.each(tokens, token => drawToken(token.position));
   });
-}
-
-export default function render() {
-  renderWithProps(getTokens());
 }

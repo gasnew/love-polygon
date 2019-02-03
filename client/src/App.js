@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import touches from 'touches';
 
-import { beginDrag, continueDrag, endDrag } from './actions';
+import { beginDrag, continueDrag, endDrag } from './input';
 import render from './renderer';
 import generateState from './state';
 

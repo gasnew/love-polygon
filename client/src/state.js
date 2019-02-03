@@ -15,10 +15,13 @@ export type Token = {
   radius: number,
 };
 
-export type Tokens = Array<Token>;
+export type Tokens = {
+  [string]: Token,
+};
 
 export type State = {
   stage: Dimensions,
+  currentTokenId: ?string,
   tokens: Tokens,
 };
 
@@ -28,28 +31,29 @@ export default function generateState(): State {
       width: window.innerWidth,
       height: window.innerHeight,
     },
-    tokens: [
-      {
+    currentTokenId: null,
+    tokens: {
+      abcd: {
         position: {
           x: 60,
           y: 60,
         },
         radius: 6,
       },
-      {
+      bcda: {
         position: {
           x: 12,
           y: 40,
         },
         radius: 6,
       },
-      {
+      zyx: {
         position: {
           x: 30,
           y: 60,
         },
         radius: 6,
       },
-    ],
+    },
   };
 }
