@@ -1,38 +1,32 @@
 // @flow
 
-import * as THREE from 'three';
+import _ from 'lodash';
+import startRegl from 'regl';
 
-function animate(props) {
-  requestAnimationFrame(() => animate(props));
+import { buildPrimitive } from './commands';
+import { getTokens } from './getters';
+import draw from './graphics';
+import { buildCircleMesh } from './meshes';
 
-  const { mesh, scene, camera, renderer } = props;
-  mesh.rotation.x += 0.01;
-  mesh.rotation.y += 0.02;
+import type { Tokens } from './state';
 
-  renderer.render(scene, camera);
-}
+export default function render() {
+  const regl = startRegl();
 
-export default function getRendererElement() {
-  const camera = new THREE.PerspectiveCamera(
-    70,
-    window.innerWidth / window.innerHeight,
-    0.01,
-    10
+  const circle = buildPrimitive(
+    regl,
+    buildCircleMesh({ radius: 6, points: 10 })
   );
-  camera.position.z = 1;
+  const drawToken = draw(circle);
 
-  const scene = new THREE.Scene();
+  regl.frame(({ time }) => {
+    const tokens: Tokens = getTokens();
 
-  const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-  const material = new THREE.MeshNormalMaterial();
+    regl.clear({
+      color: [0, 0, 0, 1],
+      depth: 1,
+    });
 
-  const mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  const props = { mesh, scene, camera, renderer };
-  animate(props);
-
-  return renderer.domElement;
+    _.each(tokens, token => drawToken(token.position));
+  });
 }

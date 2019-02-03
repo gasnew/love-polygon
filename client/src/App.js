@@ -1,22 +1,24 @@
 // @flow
 
-import axios from 'axios';
 import React, { Component } from 'react';
-import uniqid from 'uniqid';
+import touches from 'touches';
 
-import getRendererElement from './renderer';
+import { beginDrag, continueDrag, endDrag } from './input';
+import render from './renderer';
+import generateState from './state';
 
 class App extends Component<{}> {
-  rootElement: ?HTMLDivElement;
-
   componentDidMount() {
-    if (this.rootElement) this.rootElement.appendChild(getRendererElement());
-
-    axios.post('api/register', { id: uniqid() }).then(console.log);
+    window.state = generateState();
+    touches()
+      .on('start', beginDrag)
+      .on('move', continueDrag)
+      .on('end', endDrag);
+    render();
   }
 
   render() {
-    return <div ref={element => (this.rootElement = element)} />;
+    return <div />;
   }
 }
 
