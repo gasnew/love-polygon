@@ -4,27 +4,19 @@
 // https://github.com/mui-org/material-ui/blob/master/docs/src/pages/getting-started/page-layout-examples/sign-in/SignIn.js
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import Avatar from '@material-ui/core/Avatar';
-import Tabs from '@material-ui/core/Tabs';
-
-import SwipeableViews from 'react-swipeable-views';
-import Tab from '@material-ui/core/Tab';
-
-import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
+import Divider from '@material-ui/core/Divider';
 import FavoriteOutlinedIcon from '@material-ui/icons/FavoriteOutlined';
 import Paper from '@material-ui/core/Paper';
+import Step from '@material-ui/core/Step';
+import StepContent from '@material-ui/core/StepContent';
+import StepLabel from '@material-ui/core/StepLabel';
+import Stepper from '@material-ui/core/Stepper';
+import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
-import GroupAdd from '@material-ui/icons/GroupAdd';
-import Group from '@material-ui/icons/Group';
 
 import type { Session } from './state';
 
@@ -52,54 +44,88 @@ const styles = theme => ({
     margin: theme.spacing.unit,
     backgroundColor: theme.palette.secondary.main,
   },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing.unit,
+  stepper: {
+    width: '100%',
   },
-  submit: {
-    marginTop: theme.spacing.unit * 3,
+  button: {
+    marginTop: theme.spacing.unit,
+    marginRight: theme.spacing.unit,
+  },
+  divider: {
+    marginTop: theme.spacing.unit * 2,
+    marginBottom: theme.spacing.unit * 2,
+  },
+  actionsContainer: {
+    marginBottom: theme.spacing.unit * 2,
   },
 });
-
-function TabContainer({ children, dir }) {
-  return (
-    <Typography component="div" align="center" style={{ padding: 8 * 3 }}>
-      {children}
-    </Typography>
-  );
-}
 
 type Props = {
   classes: any,
   setSession: Session => void,
 };
 type State = {|
-  sessionId: ?string,
-  playerName: ?string,
-  tab: number,
+  sessionIdField: {
+    value: string,
+    error: boolean,
+  },
+  playerNameField: {
+    value: string,
+    error: boolean,
+  },
+  activeStep: number,
 |};
 
 class LandingPage extends Component<Props, State> {
-  state = { sessionId: null, playerName: null, tab: 0 };
+  state = {
+    sessionIdField: {
+      value: '',
+      error: false,
+    },
+    playerNameField: {
+      value: '',
+      error: false,
+    },
+    activeStep: 0,
+  };
 
   render() {
+    const { sessionIdField, playerNameField, activeStep } = this.state;
     const { setSession, classes } = this.props;
+
     const joinSession = () => {
-      setSession({
-        id: 'abcd',
-        name: 'joe bob joe',
-      });
+      if (!playerNameField.value) {
+        this.setState(() => ({ playerNameField: { value: '', error: true } }));
+        handleBack();
+      } else {
+        setSession({
+          id: sessionIdField.value,
+          name: playerNameField.value,
+        });
+      }
+    };
+    const createSession = () => {
+      joinSession();
     };
 
-    const handleTabChange = (event, tab) => {
-      this.setState({ tab });
+    const handleNext = () => {
+      this.setState(state => ({
+        activeStep: state.activeStep + 1,
+      }));
     };
-    const handleTabChangeBySwiping = tab => {
-      this.setState({ tab: tab });
+    const handleBack = () => {
+      this.setState(state => ({
+        activeStep: state.activeStep - 1,
+      }));
     };
     const handleTextInput = name => event => {
       const value = event.target.value;
-      this.setState(() => ({ [name]: value }));
+      this.setState(() => ({
+        [name]: {
+          value,
+          error: false,
+        },
+      }));
     };
 
     return (
@@ -112,69 +138,90 @@ class LandingPage extends Component<Props, State> {
           <Typography component="h1" variant="h5">
             Love Polygon
           </Typography>
-              <TextField
-                id="name"
-                label="Name"
-                value={this.state.playerName}
-                onChange={handleTextInput('playerName')}
-                margin="normal"
-                required
-                fullWidth
-              />
-          <Tabs
-            value={this.state.tab}
-            indicatorColor="primary"
-            textColor="primary"
-            onChange={handleTabChange}
+          <Stepper
+            activeStep={activeStep}
+            orientation="vertical"
+            className={classes.stepper}
           >
-            <Tab label="Join" icon={<Group />} />
-            <Tab label="Create" icon={<GroupAdd />} />
-          </Tabs>
-          <SwipeableViews
-            axis="x"
-            index={this.state.tab}
-            onChangeIndex={handleTabChangeBySwiping}
-          >
-            <TabContainer>
-              <TextField
-                id="sessionId"
-                label="Session ID"
-                value={this.state.sessionId}
-                onChange={handleTextInput('sessionId')}
-                margin="normal"
-                required
-                fullWidth
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-              >
-                Join Session
-              </Button>
-            </TabContainer>
-            <TabContainer dir="rtl">
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-              >
-                Create Session
-              </Button>
-            </TabContainer>
-          </SwipeableViews>
+            <Step>
+              <StepLabel>Enter your name</StepLabel>
+              <StepContent>
+                <TextField
+                  label="Name"
+                  value={playerNameField.value}
+                  onChange={handleTextInput('playerNameField')}
+                  {...(playerNameField.error
+                    ? {
+                        error: true,
+                        helperText: 'Please enter a valid name.',
+                      }
+                    : {})}
+                  margin="normal"
+                  variant="outlined"
+                  fullWidth
+                />
+                <div className={classes.actionsContainer}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleNext}
+                    className={classes.button}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </StepContent>
+            </Step>
+            <Step>
+              <StepLabel>Enter a session</StepLabel>
+              <StepContent>
+                <TextField
+                  label="Session ID"
+                  value={sessionIdField.value}
+                  onChange={handleTextInput('sessionIdField')}
+                  {...(sessionIdField.error
+                    ? {
+                        error: true,
+                        helperText: 'Please enter a valid session ID.',
+                      }
+                    : {})}
+                  margin="normal"
+                  variant="outlined"
+                  fullWidth
+                />
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={joinSession}
+                >
+                  Join Session
+                </Button>
+                <Divider className={classes.divider} />
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={createSession}
+                >
+                  Create Session
+                </Button>
+                <div className={classes.actionsContainer}>
+                  <Button
+                    disabled={activeStep === 0}
+                    onClick={handleBack}
+                    className={classes.button}
+                  >
+                    Back
+                  </Button>
+                </div>
+              </StepContent>
+            </Step>
+          </Stepper>
         </Paper>
       </main>
     );
   }
 }
-
-LandingPage.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
 
 export default withStyles(styles)(LandingPage);
