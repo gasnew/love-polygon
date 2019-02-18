@@ -13,10 +13,12 @@ type State = {|
 |};
 
 class App extends Component<Props, State> {
-  constructor() {
-    super();
-    this.state = { session: null };
-  }
+  state = {
+    session: {
+      id: 'abcd',
+      name: 'hahahah',
+    },
+  };
 
   render() {
     const setSession = (session: Session) => this.setState(() => ({ session }));

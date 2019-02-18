@@ -3,6 +3,7 @@
 // Some code in this file is modified from a Material Design example:
 // https://github.com/mui-org/material-ui/blob/master/docs/src/pages/getting-started/page-layout-examples/sign-in/SignIn.js
 
+import axios from 'axios';
 import React, { Component } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -79,33 +80,40 @@ type State = {|
 class LandingPage extends Component<Props, State> {
   state = {
     sessionIdField: {
-      value: '',
+      value: 'darginblargin',
       error: false,
     },
     playerNameField: {
-      value: '',
+      value: 'Bill just bill',
       error: false,
     },
-    activeStep: 0,
+    activeStep: 1,
   };
 
   render() {
     const { sessionIdField, playerNameField, activeStep } = this.state;
     const { setSession, classes } = this.props;
 
-    const joinSession = () => {
+    const joinSession = async () => {
       if (!playerNameField.value) {
         this.setState(() => ({ playerNameField: { value: '', error: true } }));
         handleBack();
       } else {
+        const response = await axios.post('api/join-session', {
+          sessionId: sessionIdField.value,
+          playerName: playerNameField.value,
+        });
         setSession({
           id: sessionIdField.value,
           name: playerNameField.value,
         });
       }
     };
-    const createSession = () => {
-      joinSession();
+    const generateSessionId = async () => {
+      const response = await axios.post('api/get-session-id');
+      this.setState(() => ({
+        sessionIdField: { value: response.data.message.id, error: false },
+      }));
     };
 
     const handleNext = () => {
@@ -192,19 +200,19 @@ class LandingPage extends Component<Props, State> {
                 <Button
                   fullWidth
                   variant="contained"
-                  color="primary"
-                  onClick={joinSession}
+                  color="secondary"
+                  onClick={generateSessionId}
                 >
-                  Join Session
+                  Generate Session ID
                 </Button>
                 <Divider className={classes.divider} />
                 <Button
                   fullWidth
                   variant="contained"
                   color="primary"
-                  onClick={createSession}
+                  onClick={joinSession}
                 >
-                  Create Session
+                  Join Session
                 </Button>
                 <div className={classes.actionsContainer}>
                   <Button
