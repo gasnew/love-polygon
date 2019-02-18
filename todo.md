@@ -1,10 +1,10 @@
 # Love Polygon--TODO
 
 + Draggable tokens
-- Landing page
-  - Session ids
-  - Create or join session
-  - Name selection
++ Landing page
+  + Session ids
+  + Create or join session
+  + Name selection
 - Server provides nodes
   - This happens once every player drops token center-screen
 - Node transfers
