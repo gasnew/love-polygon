@@ -1,40 +1,26 @@
-import redis from 'async-redis';
-import _ from 'lodash';
 import generateName from 'sillyname';
+
+import getSession from './session';
 
 export async function generateSessionId(request, response) {
   const id = generateName();
-  const sessionData = { id };
+  const sessionId = { id };
 
-  response.json({ message: sessionData });
+  response.json({ message: sessionId });
 }
 
 export async function joinSession(request, response) {
   const { sessionId, playerName } = request.body;
 
-  const redisClient = redis.createClient();
-  redisClient.on('error', function(err) {
-    console.log('Error ' + err);
+  const session = getSession(sessionId);
+  const playerData = JSON.parse(await session.get('players'));
+  await session.set('players', {
+    ...playerData,
+    [playerName]: {
+      ok: 'dude',
+    },
   });
-  const playerData = JSON.parse(await redisClient.hget(sessionId, 'players'));
-  await redisClient.hset(
-    sessionId,
-    'players',
-    JSON.stringify({
-      ...playerData,
-      [playerName]: {
-        ok: 'dude',
-      },
-    })
-  );
-  const session = _.reduce(
-    await redisClient.hgetall(sessionId),
-    (session, value, key) => ({
-      ...session,
-      [key]: JSON.parse(value),
-    }),
-    {}
-  );
 
-  response.json({ message: session });
+  const sessionData = await session.getAll();
+  response.json({ message: sessionData });
 }

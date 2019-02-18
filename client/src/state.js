@@ -24,10 +24,21 @@ export type Tokens = {
   [string]: Token,
 };
 
-export type State = {
+export type Node = {
+  position: Position,
+  radius: number,
+};
+
+export type Nodes = {
+  [string]: Node,
+};
+
+export type State = {|
+  session: Session,
   currentTokenId: ?string,
   tokens: Tokens,
-};
+  nodes: Nodes,
+|};
 
 export default function generateState(): State {
   return {
@@ -57,6 +68,22 @@ export default function generateState(): State {
           y: 60,
         },
         radius: 6,
+      },
+    },
+    nodes: {
+      ab: {
+        position: {
+          x: 10,
+          y: 10,
+        },
+        radius: 10,
+      },
+      cd: {
+        position: {
+          x: 50,
+          y: 10,
+        },
+        radius: 10,
       },
     },
   };

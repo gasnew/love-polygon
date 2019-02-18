@@ -15,8 +15,8 @@ type State = {|
 class App extends Component<Props, State> {
   state = {
     session: {
-      id: 'abcd',
-      name: 'hahahah',
+      id: 'abd',
+      name: 'bobbeh',
     },
   };
 

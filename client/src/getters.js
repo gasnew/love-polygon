@@ -1,6 +1,6 @@
 // @flow
 
-import type { Dimensions, State, Token, Tokens } from './state';
+import type { Dimensions, Node, Nodes, State, Token, Tokens } from './state';
 
 export function getState(): State {
   return window.state;
@@ -16,6 +16,14 @@ export function getStageDimensions(): Dimensions {
 
 export function getCurrentTokenId(): ?string {
   return getState().currentTokenId;
+}
+
+export function getNodes(): Nodes {
+  return getState().nodes;
+}
+
+export function getNode(nodeId: string): Node {
+  return getNodes()[nodeId];
 }
 
 export function getTokens(): Tokens {

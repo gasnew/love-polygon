@@ -4,7 +4,7 @@ import _ from 'lodash';
 import type { TouchEvent } from 'touches';
 
 import dispatch, { setTokenPosition, setCurrentTokenId } from './actions';
-import { getCurrentTokenId, getTokens } from './getters';
+import { getCurrentTokenId, getNode, getNodes, getTokens } from './getters';
 import { unstagify, unVectorize } from './graphics';
 import type { Position } from './state';
 
@@ -33,6 +33,7 @@ export function beginDrag(event: TouchEvent, mousePosition: Array<number>) {
     })
   );
   if (!id) return;
+
   dispatch(setTokenPosition(id, position.x, position.y));
   dispatch(setCurrentTokenId(id));
 }
@@ -46,5 +47,21 @@ export function continueDrag(event: TouchEvent, mousePosition: Array<number>) {
 }
 
 export function endDrag(event: TouchEvent, mousePosition: Array<number>) {
+  const tokenId = getCurrentTokenId();
+  if (!tokenId) return;
+
+  const position = unstagify(unVectorize(mousePosition));
+  const nodeId: string = _.findKey(getNodes(), node =>
+    isInCircle({
+      position,
+      center: node.position,
+      radius: node.radius,
+    })
+  );
+  if (nodeId) {
+    const node = getNode(nodeId);
+    dispatch(setTokenPosition(tokenId, node.position.x, node.position.y));
+  }
+
   dispatch(setCurrentTokenId(null));
 }

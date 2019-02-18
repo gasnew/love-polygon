@@ -7,8 +7,23 @@ import { primitiveVertexShader, solidFragmentShader } from './shaders';
 import type { ShaderProps } from './shaders';
 
 export type Command = ShaderProps => any;
+export type Uniforms = {
+  color: Array<number>,
+};
 
-export function buildPrimitive(regl: Regl, mesh: Array<number>): Command {
+type Props = {
+  regl: Regl,
+  mesh: Array<number>,
+  fragmentShader?: string,
+  uniforms?: Uniforms,
+};
+
+export function buildPrimitive({
+  regl,
+  mesh,
+  fragmentShader = solidFragmentShader,
+  uniforms = {},
+}: Props): Command {
   return regl({
     frag: solidFragmentShader,
     vert: primitiveVertexShader,
@@ -21,6 +36,7 @@ export function buildPrimitive(regl: Regl, mesh: Array<number>): Command {
       location: regl.prop('location'),
       stageWidth: regl.prop('width'),
       stageHeight: regl.prop('height'),
+      ...uniforms,
     },
 
     count: _.flattenDeep(mesh).length / 2,
