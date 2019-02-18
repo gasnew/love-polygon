@@ -6,19 +6,20 @@ import startRegl from 'regl';
 import { buildPrimitive } from './commands';
 import { getTokens } from './getters';
 import draw from './graphics';
-import { buildCircleMesh } from './meshes';
+import { buildCircleMesh, buildHeartMesh } from './meshes';
 
 import type { Tokens } from './state';
 
-export default function render() {
-  const regl = startRegl();
+export default function render(element: HTMLDivElement) {
+  const regl = startRegl(element);
 
-  const circle = buildPrimitive(
+  const heart = buildPrimitive(
     regl,
-    buildCircleMesh({ radius: 6, points: 10 })
+    buildHeartMesh({ scale: 6, steps: 50 })
   );
-  const drawToken = draw(circle);
+  const drawToken = draw(heart);
 
+  const tokens: Tokens = getTokens();
   regl.frame(({ time }) => {
     const tokens: Tokens = getTokens();
 

@@ -1,24 +1,34 @@
 // @flow
 
 import React, { Component } from 'react';
-import touches from 'touches';
 
-import { beginDrag, continueDrag, endDrag } from './input';
-import render from './renderer';
-import generateState from './state';
+import Game from './Game';
+import LandingPage from './LandingPage';
+import type { Session } from './state';
 
-class App extends Component<{}> {
-  componentDidMount() {
-    window.state = generateState();
-    touches()
-      .on('start', beginDrag)
-      .on('move', continueDrag)
-      .on('end', endDrag);
-    render();
-  }
+type Props = {};
+
+type State = {|
+  session: ?Session,
+|};
+
+class App extends Component<Props, State> {
+  state = {
+    session: {
+      id: 'abcd',
+      name: 'hahahah',
+    },
+  };
 
   render() {
-    return <div />;
+    const setSession = (session: Session) => this.setState(() => ({ session }));
+    const exitSession = () => this.setState(() => ({ session: null }));
+
+    return this.state.session ? (
+      <Game session={this.state.session} exitSession={exitSession} />
+    ) : (
+      <LandingPage setSession={setSession} />
+    );
   }
 }
 

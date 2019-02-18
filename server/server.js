@@ -2,7 +2,7 @@
 
 import express from 'express';
 
-import { registerPlayer } from './api';
+import { generateSessionId, joinSession } from './api';
 
 // Express
 const app = express();
@@ -11,7 +11,8 @@ app.set('port', process.env.PORT || 3001);
 
 app.use(express.json());
 
-app.post('/api/register', registerPlayer);
+app.post('/api/get-session-id', generateSessionId);
+app.post('/api/join-session', joinSession);
 
 app.listen(app.get('port'), () => {
   console.log(

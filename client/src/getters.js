@@ -7,7 +7,11 @@ export function getState(): State {
 }
 
 export function getStageDimensions(): Dimensions {
-  return getState().stage;
+  // NOTE: This one is secretly not in state. Shhhh
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
 }
 
 export function getCurrentTokenId(): ?string {

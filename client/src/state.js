@@ -1,5 +1,10 @@
 // @flow
 
+export type Session = {|
+  id: string,
+  name: string,
+|};
+
 export type Position = {
   x: number,
   y: number,
@@ -20,16 +25,15 @@ export type Tokens = {
 };
 
 export type State = {
-  stage: Dimensions,
   currentTokenId: ?string,
   tokens: Tokens,
 };
 
 export default function generateState(): State {
   return {
-    stage: {
-      width: window.innerWidth,
-      height: window.innerHeight,
+    session: {
+      id: 'abcd',
+      name: 'dude play game',
     },
     currentTokenId: null,
     tokens: {
