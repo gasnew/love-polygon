@@ -4,6 +4,7 @@ import { getState, getToken, getTokens } from './getters';
 import type { Token } from './state';
 
 const SET_TOKEN_POSITION = 'setTokenPosition';
+const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 
 type Action =
@@ -12,6 +13,11 @@ type Action =
       tokenId: string,
       x: number,
       y: number,
+    }
+  | {
+      type: 'setTokenNodeId',
+      tokenId: string,
+      nodeId: string,
     }
   | {
       type: 'setCurrentTokenId',
@@ -45,6 +51,17 @@ export function setTokenPosition(
   };
 }
 
+export function setTokenNodeId(
+  tokenId: string,
+  nodeId: string,
+): Action {
+  return {
+    type: SET_TOKEN_NODE_ID,
+    tokenId,
+    nodeId,
+  };
+}
+
 export function setCurrentTokenId(tokenId: ?string): Action {
   return {
     type: SET_CURRENT_TOKEN,
@@ -61,6 +78,12 @@ export default function dispatch(action: Action) {
           x: action.x,
           y: action.y,
         },
+      });
+      break;
+    case SET_TOKEN_NODE_ID:
+      mergeIntoTokens(action.tokenId, {
+        ...getToken(action.tokenId),
+        nodeId: action.nodeId,
       });
       break;
     case SET_CURRENT_TOKEN:

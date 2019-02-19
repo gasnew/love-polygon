@@ -15,19 +15,20 @@ export type Dimensions = {
   height: number,
 };
 
-export type Token = {
+export type Token = {|
   position: Position,
   radius: number,
-};
+  nodeId: string,
+|};
 
 export type Tokens = {
   [string]: Token,
 };
 
-export type Node = {
+export type Node = {|
   position: Position,
   radius: number,
-};
+|};
 
 export type Nodes = {
   [string]: Node,
@@ -50,24 +51,11 @@ export default function generateState(): State {
     tokens: {
       abcd: {
         position: {
-          x: 60,
-          y: 60,
+          x: 10,
+          y: 10,
         },
         radius: 6,
-      },
-      bcda: {
-        position: {
-          x: 12,
-          y: 40,
-        },
-        radius: 6,
-      },
-      zyx: {
-        position: {
-          x: 30,
-          y: 60,
-        },
-        radius: 6,
+        nodeId: 'ab',
       },
     },
     nodes: {
