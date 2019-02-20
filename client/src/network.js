@@ -1,5 +1,7 @@
 // @flow
 
+import { getSocket } from './getters';
+
 const TRANSFER_TOKEN = 'transferToken';
 
 type Message = {
@@ -22,6 +24,9 @@ export default function announce(message: Message) {
   switch (message.type) {
     case TRANSFER_TOKEN:
       console.log(message);
+      const socket = getSocket();
+      if (socket)
+        socket.emit('newMessage', message);
       break;
     default:
       throw new Error(`Yo, message ${message.type} doesn't exist!`);

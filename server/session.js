@@ -19,5 +19,9 @@ export default function getSession(id) {
         {}
       ),
     set: (key, value) => redisClient.hset(id, key, JSON.stringify(value)),
+    validMessage: () => true,
+    integrateMessage: (message) => {
+      return message;
+    },
   };
 }

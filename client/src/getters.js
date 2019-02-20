@@ -1,5 +1,7 @@
 // @flow
 
+import type Socket from 'socket.io-client';
+
 import type { Dimensions, Node, Nodes, State, Token, Tokens } from './state';
 
 export function getState(): State {
@@ -12,6 +14,10 @@ export function getStageDimensions(): Dimensions {
     width: window.innerWidth,
     height: window.innerHeight,
   };
+}
+
+export function getSocket(): ?Socket {
+  return getState().socket;
 }
 
 export function getCurrentTokenId(): ?string {

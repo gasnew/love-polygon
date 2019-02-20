@@ -1,13 +1,20 @@
 // @flow
 
+import type Socket from 'socket.io-client';
+
 import { getState, getToken, getTokens } from './getters';
 import type { Token } from './state';
 
+const SET_SOCKET = 'setSocket';
 const SET_TOKEN_POSITION = 'setTokenPosition';
 const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 
 type Action =
+  | {
+      type: 'setSocket',
+      socket: Socket,
+    }
   | {
       type: 'setTokenPosition',
       tokenId: string,
@@ -38,6 +45,13 @@ const mergeIntoTokens = (tokenId: string, token: Token) => {
   });
 };
 
+export function setSocket(socket: Socket): Action {
+  return {
+    type: SET_SOCKET,
+    socket,
+  };
+}
+
 export function setTokenPosition(
   tokenId: string,
   x: number,
@@ -51,10 +65,7 @@ export function setTokenPosition(
   };
 }
 
-export function setTokenNodeId(
-  tokenId: string,
-  nodeId: string,
-): Action {
+export function setTokenNodeId(tokenId: string, nodeId: string): Action {
   return {
     type: SET_TOKEN_NODE_ID,
     tokenId,
@@ -71,6 +82,9 @@ export function setCurrentTokenId(tokenId: ?string): Action {
 
 export default function dispatch(action: Action) {
   switch (action.type) {
+    case SET_SOCKET:
+      mergeIntoState('socket', action.socket);
+      break;
     case SET_TOKEN_POSITION:
       mergeIntoTokens(action.tokenId, {
         ...getToken(action.tokenId),

@@ -99,7 +99,7 @@ class LandingPage extends Component<Props, State> {
         this.setState(() => ({ playerNameField: { value: '', error: true } }));
         handleBack();
       } else {
-        const response = await axios.post('api/join-session', {
+        await axios.post('api/join-session', {
           sessionId: sessionIdField.value,
           playerName: playerNameField.value,
         });

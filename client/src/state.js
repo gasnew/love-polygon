@@ -1,19 +1,21 @@
 // @flow
 
+import type Socket from 'socket.io-client';
+
 export type Session = {|
   id: string,
   name: string,
 |};
 
-export type Position = {
+export type Position = {|
   x: number,
   y: number,
-};
+|};
 
-export type Dimensions = {
+export type Dimensions = {|
   width: number,
   height: number,
-};
+|};
 
 export type Token = {|
   position: Position,
@@ -35,6 +37,7 @@ export type Nodes = {
 };
 
 export type State = {|
+  socket: ?Socket,
   session: Session,
   currentTokenId: ?string,
   tokens: Tokens,
@@ -43,6 +46,7 @@ export type State = {|
 
 export default function generateState(): State {
   return {
+    socket: null,
     session: {
       id: 'abcd',
       name: 'dude play game',
