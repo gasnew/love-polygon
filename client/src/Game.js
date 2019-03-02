@@ -39,15 +39,12 @@ export default class Game extends Component<Props, State> {
       if (!element)
         throw new Error('Idk how, but this component aint mounted yet');
       //if (screenfull.isFullscreen) {
-      window.state = generateState(this.props.sessionInfo);
-
       const touchEmitter = touches();
       touchEmitter
         .on('start', beginDrag)
         .on('move', continueDrag)
         .on('end', endDrag);
 
-      console.log(this.props.sessionInfo);
       const socket = io({ query: this.props.sessionInfo });
       socket
         .on('connect', socketConnect)
@@ -55,6 +52,8 @@ export default class Game extends Component<Props, State> {
         .on('setState', setState)
         .on('disconnect', socketDisconnect);
       dispatch(setSocket(socket));
+
+      window.state = generateState(this.props.sessionInfo, socket);
 
       render(element);
 

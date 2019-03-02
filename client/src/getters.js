@@ -1,5 +1,7 @@
 // @flow
 
+import _ from 'lodash';
+
 import type Socket from 'socket.io-client';
 
 import type {
@@ -54,10 +56,20 @@ export function getNode(nodeId: string): Node {
   return getNodes()[nodeId];
 }
 
+export function getOwnNodes(): Nodes {
+  const { playerId } = getSessionInfo();
+  return _.pickBy(getNodes(), ['playerId', playerId]);
+}
+
 export function getTokens(): Tokens {
   return getState().tokens;
 }
 
 export function getToken(tokenId: string): Token {
   return getTokens()[tokenId];
+}
+
+export function getOwnTokens(): Tokens {
+  const nodes = getOwnNodes();
+  return _.pickBy(getTokens(), token => nodes[token.nodeId]);
 }

@@ -8,6 +8,10 @@ export type SessionInfo = {|
   playerName: string,
 |};
 
+export type Phase = {|
+  name: 'consent',
+|};
+
 export type Position = {|
   x: number,
   y: number,
@@ -21,11 +25,11 @@ export type Dimensions = {|
 export type Player = {
   id: string,
   name: string,
-}
+};
 
 export type Players = {
   [string]: Player,
-}
+};
 
 export type Token = {|
   id: string,
@@ -38,8 +42,10 @@ export type Tokens = {
   [string]: Token,
 };
 
+export type NodeType = 'storage' | 'shared' | 'loveBucket';
 export type Node = {|
   id: string,
+  type: NodeType,
   position: Position,
   radius: number,
   playerId: string,
@@ -50,7 +56,8 @@ export type Nodes = {
 };
 
 export type State = {|
-  socket: ?Socket,
+  phase: ?Phase,
+  socket: Socket,
   sessionInfo: SessionInfo,
   currentTokenId: ?string,
   players: Players,
@@ -58,10 +65,14 @@ export type State = {|
   nodes: Nodes,
 |};
 
-export default function generateState(sessionInfo: SessionInfo): State {
+export default function generateState(
+  sessionInfo: SessionInfo,
+  socket: Socket
+): State {
   return {
-    socket: null,
     sessionInfo,
+    phase: null,
+    socket,
     currentTokenId: null,
     players: {},
     tokens: {},

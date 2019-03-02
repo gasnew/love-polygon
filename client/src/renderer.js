@@ -4,7 +4,7 @@ import _ from 'lodash';
 import startRegl from 'regl';
 
 import { buildPrimitive } from './commands';
-import { getNodes, getTokens } from './getters';
+import { getNodes, getOwnNodes, getOwnTokens, getTokens } from './getters';
 import draw, { toRGB } from './graphics';
 import { buildCircleMesh, buildHeartMesh } from './meshes';
 
@@ -31,8 +31,8 @@ export default function render(element: HTMLDivElement) {
   const drawNode = draw(circle);
 
   regl.frame(({ time }) => {
-    const tokens: Tokens = getTokens();
-    const nodes: Nodes = getNodes();
+    const nodes: Nodes = getOwnNodes();
+    const tokens: Tokens = getOwnTokens();
 
     regl.clear({
       color: toRGB('#FEFEFF'),

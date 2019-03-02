@@ -9,15 +9,18 @@ import {
   getPlayers,
   getNode,
   getNodes,
+  getOwnNodes,
+  getOwnTokens,
   getToken,
   getTokens,
 } from './getters';
 import layout from './layout';
-import type { Node, Player, Token } from './state';
+import type { Node, NodeType, Phase, Player, Token } from './state';
 
 const ADD_PLAYER = 'addPlayer';
 const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
+const SET_PHASE = 'setPhase';
 const SET_SOCKET = 'setSocket';
 const SET_NODE_POSITION = 'setNodePosition';
 const SET_TOKEN_POSITION = 'setTokenPosition';
@@ -28,6 +31,7 @@ type Action =
   | {
       type: 'addNode',
       id: string,
+      nodeType: NodeType,
       playerId: string,
     }
   | {
@@ -39,6 +43,10 @@ type Action =
       type: 'addToken',
       id: string,
       nodeId: string,
+    }
+  | {
+      type: 'setPhase',
+      phase: Phase,
     }
   | {
       type: 'setSocket',
@@ -94,6 +102,13 @@ const mergeIntoTokens = (tokenId: string, token: Token) => {
   });
 };
 
+export function setPhase(phase: Phase): Action {
+  return {
+    type: SET_PHASE,
+    phase,
+  };
+}
+
 export function setSocket(socket: Socket): Action {
   return {
     type: SET_SOCKET,
@@ -109,10 +124,11 @@ export function addPlayer(id: string, name: string) {
   };
 }
 
-export function addNode(id: string, playerId: string) {
+export function addNode(id: string, type: NodeType, playerId: string) {
   return {
     type: ADD_NODE,
     id,
+    nodeType: type,
     playerId,
   };
 }
@@ -167,6 +183,7 @@ export default function dispatch(action: Action) {
     case ADD_NODE:
       mergeIntoNodes(action.id, {
         id: action.id,
+        type: action.nodeType,
         position: {
           x: 0,
           y: 0,
@@ -174,12 +191,12 @@ export default function dispatch(action: Action) {
         radius: 10,
         playerId: action.playerId,
       });
-      const nodeIds = _.map(getNodes(), (node, id) => id);
+      const nodeIds = _.map(getOwnNodes(), (node, id) => id);
       const nodeLayout = layout(nodeIds);
       _.each(nodeIds, id =>
         dispatch(setNodePosition(id, nodeLayout[id].x, nodeLayout[id].y))
       );
-      _.each(getTokens(), token => {
+      _.each(getOwnTokens(), token => {
         dispatch(setTokenNodeId(token.id, token.nodeId));
         const node = getNode(token.nodeId);
         dispatch(setTokenPosition(token.id, node.position.x, node.position.y));
@@ -199,6 +216,9 @@ export default function dispatch(action: Action) {
         radius: 10,
         nodeId: action.nodeId,
       });
+      break;
+    case SET_PHASE:
+      mergeIntoState('phase', action.phase);
       break;
     case SET_SOCKET:
       mergeIntoState('socket', action.socket);

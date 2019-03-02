@@ -41,11 +41,15 @@ export default function getSession(id) {
     set,
     update,
     join: async ({ playerId, playerName }) => {
+      // Init if not init
+      if (_.isEmpty(await get('phase')))
+        await set('phase', {
+          name: 'consent',
+        });
+
       const playersData = await get('players');
       if (playersData[playerId]) {
-        await update('players', playerId, {
-          active: true,
-        });
+        await update('players', playerId, { active: true });
         return;
       }
 
@@ -58,12 +62,19 @@ export default function getSession(id) {
         },
       });
       const nodesData = await get('nodes');
-      const nodeId = uniqid();
+      const nodeId1 = uniqid();
+      const nodeId2 = uniqid();
       await set('nodes', {
         ...nodesData,
-        [nodeId]: {
-          id: nodeId,
+        [nodeId1]: {
+          id: nodeId1,
           playerId,
+          type: 'storage',
+        },
+        [nodeId2]: {
+          id: nodeId2,
+          playerId,
+          type: 'loveBucket',
         },
       });
       const tokensData = await get('tokens');
@@ -72,7 +83,7 @@ export default function getSession(id) {
         ...tokensData,
         [tokenId]: {
           id: tokenId,
-          nodeId,
+          nodeId: nodeId1,
         },
       });
     },

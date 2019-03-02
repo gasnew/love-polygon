@@ -6,10 +6,12 @@ import dispatch, {
   addPlayer,
   addNode,
   addToken,
+  setPhase,
   setTokenNodeId,
   setTokenPosition,
 } from './actions';
 import { getNode, getPlayer, getSessionInfo, getToken } from './getters';
+import type { Phase, NodeType } from './state';
 
 export function socketConnect() {
   console.log('Feel the love connection!');
@@ -20,6 +22,7 @@ export function socketDisconnect() {
 }
 
 type ServerState = {
+  phase: Phase,
   players: {
     [string]: {
       id: string,
@@ -30,6 +33,7 @@ type ServerState = {
   nodes: {
     [string]: {
       id: string,
+      type: NodeType,
       playerId: string,
     },
   },
@@ -51,7 +55,9 @@ export function updateState(serverState: ServerState) {
   addNew(getNew(players, getPlayer), player =>
     addPlayer(player.id, player.name)
   );
-  addNew(getNew(nodes, getNode), node => addNode(node.id, node.playerId));
+  addNew(getNew(nodes, getNode), node =>
+    addNode(node.id, node.type, node.playerId)
+  );
   addNew(getNew(tokens, getToken), token => addToken(token.id, token.nodeId));
 
   _.each(tokens, serverToken => {
@@ -68,7 +74,6 @@ export function updateState(serverState: ServerState) {
         // likely just lagging behind the client here.
         return;
       }
-      console.log('transfer record now!', nodeId, serverNodeId);
       dispatch(setTokenNodeId(id, serverNodeId));
       const serverNode = getNode(serverNodeId);
       dispatch(
@@ -81,8 +86,9 @@ export function updateState(serverState: ServerState) {
 export function setState(serverState: ServerState) {
   console.log('state set');
   console.log(serverState);
-  const { players, nodes, tokens } = serverState;
+  const { phase, players, nodes, tokens } = serverState;
+  dispatch(setPhase(phase));
   _.each(players, (player, id) => dispatch(addPlayer(id, player.name)));
-  _.each(nodes, (node, id) => dispatch(addNode(id, node.playerId)));
+  _.each(nodes, (node, id) => dispatch(addNode(id, node.type, node.playerId)));
   _.each(tokens, (token, id) => dispatch(addToken(id, token.nodeId)));
 }
