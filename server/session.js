@@ -77,8 +77,15 @@ export default function getSession(id) {
       });
     },
     validMessage: () => true,
-    integrateMessage: message => {
-      console.log(`Integrating message ${message}`);
+    integrateMessage: async message => {
+      console.log('Integrating message', message);
+      const TRANSFER_TOKEN = 'transferToken';
+      if (message.type === TRANSFER_TOKEN) {
+        const { tokenId, toId: nodeId } = message;
+        await update('tokens', tokenId, {
+          nodeId,
+        });
+      } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
       return getAll();
     },
   };

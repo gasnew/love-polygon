@@ -61,11 +61,7 @@ export type State = {|
 export default function generateState(sessionInfo: SessionInfo): State {
   return {
     socket: null,
-    sessionInfo: {
-      sessionId: 'abcd',
-      playerId: 'bob',
-      playerName: 'yo',
-    },
+    sessionInfo,
     currentTokenId: null,
     players: {},
     tokens: {},

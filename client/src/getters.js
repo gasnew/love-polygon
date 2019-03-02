@@ -8,6 +8,7 @@ import type {
   Nodes,
   Player,
   Players,
+  SessionInfo,
   State,
   Token,
   Tokens,
@@ -15,6 +16,10 @@ import type {
 
 export function getState(): State {
   return window.state;
+}
+
+export function getSessionInfo(): SessionInfo {
+  return getState().sessionInfo;
 }
 
 export function getStageDimensions(): Dimensions {
