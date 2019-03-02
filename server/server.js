@@ -4,7 +4,7 @@ import express from 'express';
 import { createServer } from 'http';
 import createIO from 'socket.io';
 
-import { generateSessionId, joinSession } from './api';
+import { generateSessionId, checkSession } from './api';
 import { handleConnection } from './socket';
 
 // Express
@@ -17,7 +17,7 @@ app.set('port', process.env.PORT || 3001);
 app.use(express.json());
 
 app.post('/api/get-session-id', generateSessionId);
-app.post('/api/join-session', joinSession);
+app.post('/api/check-session', checkSession);
 
 io.on('connection', handleConnection);
 

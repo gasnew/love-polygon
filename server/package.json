@@ -12,7 +12,8 @@
     "express": "^4.16.4",
     "lodash": "^4.17.11",
     "sillyname": "^0.1.0",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "uniqid": "^5.0.3"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -23,11 +24,12 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-watch": "^2.0.8",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/plugin-proposal-optional-chaining": "^7.2.0",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "babel-watch": "^7.0.0",
     "eslint": "^5.12.1",
     "flow-bin": "^0.91.0",
     "prettier": "^1.16.0"

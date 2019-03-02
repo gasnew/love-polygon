@@ -1,17 +1,27 @@
 import getSession from './session';
 
-export function handleConnection(socket) {
-  const { playerName, sessionId } = socket.handshake.query;
+export async function handleConnection(socket) {
+  const { playerId, playerName, sessionId } = socket.handshake.query;
   socket.join(sessionId);
-  console.log(`My dudes, ${playerName} has joined session ${sessionId}`);
 
   const session = getSession(sessionId);
+  await session.join({ playerId, playerName });
+  console.log(`My dudes, ${playerName} has joined session ${sessionId}`);
 
-  socket.on('newMessage', async (message) => {
+  const sessionData = await session.getAll();
+  socket.emit('setState', sessionData);
+  socket.to(sessionId).emit('updateState', sessionData);
+
+  socket.on('disconnect', () => {
+    console.log(`Fam, ${playerName} has disconnected from ${sessionId}`);
+    session.update('players', playerId, { active: false });
+  });
+
+  socket.on('newMessage', async message => {
     if (await session.validMessage(message)) {
-      await session.integrateMessage(message);
-      socket.to(sessionId).emit('updateState', await session.getAll());
-    } else
-      socket.emit('setState', await session.getAll());
+      socket
+        .to(sessionId)
+        .emit('updateState', await session.integrateMessage(message));
+    } else socket.emit('setState', await session.getAll());
   });
 }

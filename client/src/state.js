@@ -2,9 +2,10 @@
 
 import type Socket from 'socket.io-client';
 
-export type Session = {|
-  id: string,
-  name: string,
+export type SessionInfo = {|
+  sessionId: string,
+  playerId: string,
+  playerName: string,
 |};
 
 export type Position = {|
@@ -17,7 +18,17 @@ export type Dimensions = {|
   height: number,
 |};
 
+export type Player = {
+  id: string,
+  name: string,
+}
+
+export type Players = {
+  [string]: Player,
+}
+
 export type Token = {|
+  id: string,
   position: Position,
   radius: number,
   nodeId: string,
@@ -28,8 +39,10 @@ export type Tokens = {
 };
 
 export type Node = {|
+  id: string,
   position: Position,
   radius: number,
+  playerId: string,
 |};
 
 export type Nodes = {
@@ -38,45 +51,24 @@ export type Nodes = {
 
 export type State = {|
   socket: ?Socket,
-  session: Session,
+  sessionInfo: SessionInfo,
   currentTokenId: ?string,
+  players: Players,
   tokens: Tokens,
   nodes: Nodes,
 |};
 
-export default function generateState(): State {
+export default function generateState(sessionInfo: SessionInfo): State {
   return {
     socket: null,
-    session: {
-      id: 'abcd',
-      name: 'dude play game',
+    sessionInfo: {
+      sessionId: 'abcd',
+      playerId: 'bob',
+      playerName: 'yo',
     },
     currentTokenId: null,
-    tokens: {
-      abcd: {
-        position: {
-          x: 10,
-          y: 10,
-        },
-        radius: 6,
-        nodeId: 'ab',
-      },
-    },
-    nodes: {
-      ab: {
-        position: {
-          x: 10,
-          y: 10,
-        },
-        radius: 10,
-      },
-      cd: {
-        position: {
-          x: 50,
-          y: 10,
-        },
-        radius: 10,
-      },
-    },
+    players: {},
+    tokens: {},
+    nodes: {},
   };
 }

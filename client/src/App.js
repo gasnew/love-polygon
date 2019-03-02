@@ -1,31 +1,36 @@
 // @flow
 
 import React, { Component } from 'react';
+import uniqid from 'uniqid';
 
 import Game from './Game';
 import LandingPage from './LandingPage';
-import type { Session } from './state';
+import type { SessionInfo } from './state';
 
 type Props = {};
 
 type State = {|
-  session: ?Session,
+  sessionInfo: ?SessionInfo,
 |};
 
 class App extends Component<Props, State> {
   state = {
-    session: {
-      id: 'abd',
-      name: 'bobbeh',
+    // This is a default ONLY for testing
+    sessionInfo: {
+      sessionId: '1234my sesh',
+      playerId: uniqid(),
+      playerName: 'Garrett',
     },
+    sessionInfo: null
   };
 
   render() {
-    const setSession = (session: Session) => this.setState(() => ({ session }));
-    const exitSession = () => this.setState(() => ({ session: null }));
+    const setSession = (sessionInfo: SessionInfo) =>
+      this.setState(() => ({ sessionInfo }));
+    const exitSession = () => this.setState(() => ({ sessionInfo: null }));
 
-    return this.state.session ? (
-      <Game session={this.state.session} exitSession={exitSession} />
+    return this.state.sessionInfo ? (
+      <Game sessionInfo={this.state.sessionInfo} exitSession={exitSession} />
     ) : (
       <LandingPage setSession={setSession} />
     );

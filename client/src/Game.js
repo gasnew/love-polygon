@@ -16,10 +16,10 @@ import {
   updateState,
 } from './socket';
 import generateState from './state';
-import type { Session } from './state';
+import type { SessionInfo } from './state';
 
 type Props = {|
-  session: Session,
+  sessionInfo: SessionInfo,
   exitSession: () => void,
 |};
 
@@ -39,7 +39,7 @@ export default class Game extends Component<Props, State> {
       if (!element)
         throw new Error('Idk how, but this component aint mounted yet');
       //if (screenfull.isFullscreen) {
-      window.state = generateState();
+      window.state = generateState(this.props.sessionInfo);
 
       const touchEmitter = touches();
       touchEmitter
@@ -47,7 +47,8 @@ export default class Game extends Component<Props, State> {
         .on('move', continueDrag)
         .on('end', endDrag);
 
-      const socket = io({ query: { sessionId: 'blag', playerName: 'blorg' } });
+      console.log(this.props.sessionInfo);
+      const socket = io({ query: this.props.sessionInfo });
       socket
         .on('connect', socketConnect)
         .on('updateState', updateState)

@@ -2,7 +2,16 @@
 
 import type Socket from 'socket.io-client';
 
-import type { Dimensions, Node, Nodes, State, Token, Tokens } from './state';
+import type {
+  Dimensions,
+  Node,
+  Nodes,
+  Player,
+  Players,
+  State,
+  Token,
+  Tokens,
+} from './state';
 
 export function getState(): State {
   return window.state;
@@ -22,6 +31,14 @@ export function getSocket(): ?Socket {
 
 export function getCurrentTokenId(): ?string {
   return getState().currentTokenId;
+}
+
+export function getPlayers(): Players {
+  return getState().players;
+}
+
+export function getPlayer(playerId: string): Player {
+  return getPlayers()[playerId];
 }
 
 export function getNodes(): Nodes {
