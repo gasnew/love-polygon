@@ -1,7 +1,16 @@
-import getSession from './session';
+// @flow
 
-export async function handleConnection(socket) {
-  const { playerId, playerName, sessionId } = socket.handshake.query;
+import type Socket from 'socket.io';
+
+import getSession from './session';
+import type { SessionInfo, Message } from './networkTypes';
+
+export async function handleConnection(socket: Socket) {
+  const {
+    playerId,
+    playerName,
+    sessionId,
+  }: SessionInfo = socket.handshake.query;
   socket.join(sessionId);
 
   const session = getSession(sessionId);
@@ -17,7 +26,7 @@ export async function handleConnection(socket) {
     session.update('players', playerId, { active: false });
   });
 
-  socket.on('newMessage', async message => {
+  socket.on('newMessage', async (message: Message) => {
     if (await session.validMessage(message)) {
       socket
         .to(sessionId)

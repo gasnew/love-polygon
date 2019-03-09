@@ -2,16 +2,15 @@
 
 import { getSocket } from './getters';
 
+import type { Message } from '../../server/networkTypes';
+
 const TRANSFER_TOKEN = 'transferToken';
 
-type Message = {
-  type: 'transferToken',
+export function transferToken(
   tokenId: string,
   fromId: string,
-  toId: string,
-};
-
-export function transferToken(tokenId: string, fromId: string, toId: string) {
+  toId: string
+): Message {
   return {
     type: TRANSFER_TOKEN,
     tokenId,
@@ -25,8 +24,7 @@ export default function announce(message: Message) {
     case TRANSFER_TOKEN:
       console.log(message);
       const socket = getSocket();
-      if (socket)
-        socket.emit('newMessage', message);
+      if (socket) socket.emit('newMessage', message);
       break;
     default:
       throw new Error(`Yo, message ${message.type} doesn't exist!`);

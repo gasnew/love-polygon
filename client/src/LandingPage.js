@@ -19,7 +19,7 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 
-import type { SessionInfo } from './state';
+import type { SessionInfo } from '../../server/networkTypes';
 
 const styles = theme => ({
   main: {

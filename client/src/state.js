@@ -2,15 +2,7 @@
 
 import type Socket from 'socket.io-client';
 
-export type SessionInfo = {|
-  sessionId: string,
-  playerId: string,
-  playerName: string,
-|};
-
-export type Phase = {|
-  name: 'consent',
-|};
+import type { Phase, SessionInfo } from '../../server/networkTypes';
 
 export type Position = {|
   x: number,

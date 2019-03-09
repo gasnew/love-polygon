@@ -16,7 +16,7 @@ import {
   updateState,
 } from './socket';
 import generateState from './state';
-import type { SessionInfo } from './state';
+import type { SessionInfo } from '../../server/networkTypes';
 
 type Props = {|
   sessionInfo: SessionInfo,
@@ -45,7 +45,7 @@ export default class Game extends Component<Props, State> {
         .on('move', continueDrag)
         .on('end', endDrag);
 
-      const socket = io({ query: this.props.sessionInfo });
+      const socket = io('', { query: this.props.sessionInfo });
       socket
         .on('connect', socketConnect)
         .on('updateState', updateState)

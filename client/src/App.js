@@ -5,7 +5,7 @@ import uniqid from 'uniqid';
 
 import Game from './Game';
 import LandingPage from './LandingPage';
-import type { SessionInfo } from './state';
+import type { SessionInfo } from '../../server/networkTypes';
 
 type Props = {};
 

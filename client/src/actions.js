@@ -15,7 +15,8 @@ import {
   getTokens,
 } from './getters';
 import layout from './layout';
-import type { Node, NodeType, Phase, Player, Token } from './state';
+import type { Phase } from '../../server/networkTypes';
+import type { Node, NodeType, Player, Token } from './state';
 
 const ADD_PLAYER = 'addPlayer';
 const ADD_NODE = 'addNode';

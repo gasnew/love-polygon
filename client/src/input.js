@@ -32,7 +32,7 @@ function isInCircle({
 
 export function beginDrag(event: TouchEvent, mousePosition: Array<number>) {
   const position = unstagify(unVectorize(mousePosition));
-  const id: string = _.findKey(getOwnTokens(), token =>
+  const id: ?string = _.findKey(getOwnTokens(), token =>
     isInCircle({
       position,
       center: token.position,
@@ -58,7 +58,7 @@ export function endDrag(event: TouchEvent, mousePosition: Array<number>) {
   if (!tokenId) return;
 
   const position = unstagify(unVectorize(mousePosition));
-  const newNodeId: string = _.findKey(getOwnNodes(), node =>
+  const newNodeId: ?string = _.findKey(getOwnNodes(), node =>
     isInCircle({
       position,
       center: node.position,

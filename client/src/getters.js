@@ -4,13 +4,13 @@ import _ from 'lodash';
 
 import type Socket from 'socket.io-client';
 
+import type { SessionInfo } from '../../server/networkTypes';
 import type {
   Dimensions,
   Node,
   Nodes,
   Player,
   Players,
-  SessionInfo,
   State,
   Token,
   Tokens,

@@ -1,6 +1,6 @@
 // @flow
 
-import _ from 'lodash';
+import _, { map } from 'lodash';
 
 import dispatch, {
   addPlayer,
@@ -11,7 +11,7 @@ import dispatch, {
   setTokenPosition,
 } from './actions';
 import { getNode, getPlayer, getSessionInfo, getToken } from './getters';
-import type { Phase, NodeType } from './state';
+import type { ServerState, SubServerState } from '../../server/networkTypes';
 
 export function socketConnect() {
   console.log('Feel the love connection!');
@@ -21,44 +21,24 @@ export function socketDisconnect() {
   console.log('Love never dies, but it seemed worth giving up this time');
 }
 
-type ServerState = {
-  phase: Phase,
-  players: {
-    [string]: {
-      id: string,
-      name: string,
-      active: string,
-    },
-  },
-  nodes: {
-    [string]: {
-      id: string,
-      type: NodeType,
-      playerId: string,
-    },
-  },
-  tokens: {
-    [string]: {
-      id: string,
-      nodeId: string,
-    },
-  },
-};
-
 export function updateState(serverState: ServerState) {
   console.log('update state');
   console.log('serverState', serverState);
+
   const { players, nodes, tokens } = serverState;
-  const getNew = (objects, get) => _.filter(objects, object => !get(object.id));
-  const addNew = (objects, add) =>
-    _.each(objects, object => dispatch(add(object)));
-  addNew(getNew(players, getPlayer), player =>
-    addPlayer(player.id, player.name)
+  const getIsNew = getObject => object => !getObject(object.id);
+  const playerIsNew = getIsNew(getPlayer);
+  const tokenIsNew = getIsNew(getToken);
+  const nodeIsNew = getIsNew(getNode);
+
+  const newPlayers = _.filter(players, playerIsNew);
+  _.each(newPlayers, player => dispatch(addPlayer(player.id, player.name)));
+  const newNodes = _.filter(nodes, nodeIsNew);
+  _.each(newNodes, node =>
+    dispatch(addNode(node.id, node.type, node.playerId))
   );
-  addNew(getNew(nodes, getNode), node =>
-    addNode(node.id, node.type, node.playerId)
-  );
-  addNew(getNew(tokens, getToken), token => addToken(token.id, token.nodeId));
+  const newTokens = _.filter(tokens, tokenIsNew);
+  _.each(newTokens, token => dispatch(addToken(token.id, token.nodeId)));
 
   _.each(tokens, serverToken => {
     // Update if not an internal move (node playerIds haven't changed)

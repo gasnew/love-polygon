@@ -1,10 +1,26 @@
+// @flow
+
 import redis from 'async-redis';
 import _ from 'lodash';
 import uniqid from 'uniqid';
 
-function redisMethods(redisClient, id) {
+import getFollowEdge from './phase';
+
+import type {
+  Message,
+  Players,
+  ServerState,
+  ServerStateKeys,
+  SubServerState,
+} from './networkTypes';
+
+type RedisMethods = {|
+  getAll: () => Promise<ServerState>,
+  set: (ServerStateKeys, SubServerState) => void,
+|};
+
+function redisMethods(redisClient, id): RedisMethods {
   return {
-    get: async key => JSON.parse((await redisClient.hget(id, key)) || '{}'),
     getAll: async () =>
       _.reduce(
         await redisClient.hgetall(id),
@@ -18,15 +34,23 @@ function redisMethods(redisClient, id) {
   };
 }
 
-export default function getSession(id) {
+type Session = {|
+  ...RedisMethods,
+  update: (ServerStateKeys, string, mixed) => Promise<void>,
+  join: ({ playerId: string, playerName: string }) => Promise<void>,
+  validMessage: Message => boolean,
+  integrateMessage: Message => Promise<ServerState>,
+|};
+
+export default function getSession(id: string): Session {
   const redisClient = redis.createClient();
   redisClient.on('error', function(err) {
     console.log('Error ' + err);
   });
 
-  const { get, getAll, set } = redisMethods(redisClient, id);
+  const { getAll, set } = redisMethods(redisClient, id);
   const update = async (key, id, object) => {
-    const data = await get(key);
+    const data = (await getAll())[key];
     set(key, {
       ...data,
       [id]: {
@@ -35,19 +59,26 @@ export default function getSession(id) {
       },
     });
   };
+
+  const getPhaseName = async () => (await getAll).phase.name;
+  const setPhaseName = name => set('phase', { name });
+  const startGame = async () => {};
+
+  const followEdge = getFollowEdge(getPhaseName, setPhaseName, { startGame });
+
+  const quorum = async (): Promise<boolean> => {
+    const { nodes, tokens } = await getAll();
+    const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
+    return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
+  };
+
   return {
-    get,
     getAll,
     set,
     update,
     join: async ({ playerId, playerName }) => {
-      // Init if not init
-      if (_.isEmpty(await get('phase')))
-        await set('phase', {
-          name: 'consent',
-        });
-
-      const playersData = await get('players');
+      const sessionData = await getAll();
+      const playersData = sessionData.players || {};
       if (playersData[playerId]) {
         await update('players', playerId, { active: true });
         return;
@@ -61,7 +92,8 @@ export default function getSession(id) {
           active: true,
         },
       });
-      const nodesData = await get('nodes');
+
+      const nodesData = sessionData.nodes;
       const nodeId1 = uniqid();
       const nodeId2 = uniqid();
       await set('nodes', {
@@ -77,7 +109,7 @@ export default function getSession(id) {
           type: 'loveBucket',
         },
       });
-      const tokensData = await get('tokens');
+      const tokensData = sessionData.tokens;
       const tokenId = uniqid();
       await set('tokens', {
         ...tokensData,
@@ -97,6 +129,9 @@ export default function getSession(id) {
           nodeId,
         });
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
+
+      if (await quorum()) followEdge(startGame);
+
       return getAll();
     },
   };

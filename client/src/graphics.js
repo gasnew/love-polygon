@@ -47,7 +47,7 @@ export function stagifyPosition(position: Position): Position {
   };
 }
 
-export function stagifyVector(vector: Array<number>): Array<number> {
+export function stagifyVector(vector: number[][][]): Array<number> {
   const { width } = getStageDimensions();
   return _.map(_.flattenDeep(vector), value => (value * width) / screenScale);
 }
