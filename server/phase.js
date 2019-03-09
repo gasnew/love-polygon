@@ -1,3 +1,7 @@
+// @flow
+
+import type { PhaseName } from './networkTypes';
+
 // Phases
 export const LOBBY = 'lobby';
 export const ROMANCE = 'romance';
@@ -6,26 +10,47 @@ export const ROMANCE = 'romance';
 export const START_GAME = 'startGame';
 export const RESTART = 'restart';
 
-export default async function getFollowEdge(
+type Edge = 'startGame' | 'restart';
+type Action = () => Promise<void>;
+type Transition = ((PhaseName) => void) => Promise<void>;
+
+function transition(phase: PhaseName, action: Action): Transition {
+  return async setPhaseName => {
+    await setPhaseName(phase);
+    action();
+  };
+}
+
+type Graph = {
+  [PhaseName]: {
+    [Edge]: Transition,
+  },
+};
+
+type Props = {
+  getPhaseName: () => Promise<PhaseName>,
+  setPhaseName: PhaseName => void,
+  startGame: Action,
+};
+export default function getFollowEdge({
   getPhaseName,
   setPhaseName,
-  { startGame }
-) {
-  const graph = {
-    [LOBBY]: {
-      [START_GAME]: startGame,
+  startGame,
+}: Props) {
+  const graph: Graph = {
+    lobby: {
+      startGame: transition('romance', startGame),
     },
-    [ROMANCE]: {
-      [RESTART]: startGame,
+    romance: {
+      restart: transition('romance', startGame),
     },
   };
 
-  return async edge => {
-    const phaseName = await getPhaseName();
-    const phase = graph[phaseName];
-    if (phase && phase[edge]) {
-      await setPhaseName(edge);
-      graph[edge]();
-    } else console.log(`Cannot follow edge ${edge} on phase ${phase}!`);
+  return async (edge: Edge) => {
+    const phaseName: PhaseName = await getPhaseName();
+    const edges = graph[phaseName];
+    if (edges && edges[edge]) {
+      await edges[edge](setPhaseName);
+    } else console.log(`Cannot follow edge ${edge} on phase ${phaseName}!`);
   };
 }

@@ -1,7 +1,8 @@
 // @flow
 
+export type PhaseName = 'lobby' | 'romance';
 export type Phase = {|
-  name: 'lobby', // or sweatyHandshake
+  name: PhaseName,
 |};
 
 export type Players = {|

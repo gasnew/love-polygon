@@ -8,6 +8,7 @@ import getFollowEdge from './phase';
 
 import type {
   Message,
+  PhaseName,
   Players,
   ServerState,
   ServerStateKeys,
@@ -37,6 +38,8 @@ function redisMethods(redisClient, id): RedisMethods {
 type Session = {|
   ...RedisMethods,
   update: (ServerStateKeys, string, mixed) => Promise<void>,
+  exists: () => Promise<boolean>,
+  init: () => Promise<void>,
   join: ({ playerId: string, playerName: string }) => Promise<void>,
   validMessage: Message => boolean,
   integrateMessage: Message => Promise<ServerState>,
@@ -60,11 +63,14 @@ export default function getSession(id: string): Session {
     });
   };
 
-  const getPhaseName = async () => (await getAll).phase.name;
-  const setPhaseName = name => set('phase', { name });
-  const startGame = async () => {};
+  const getPhaseName = async () => (await getAll()).phase.name;
+  const setPhaseName = (name: PhaseName) => set('phase', { name });
+  const startGame = async () => {
+    const { players } = await getAll();
+    console.log('start game now');
+  };
 
-  const followEdge = getFollowEdge(getPhaseName, setPhaseName, { startGame });
+  const followEdge = getFollowEdge({ getPhaseName, setPhaseName, startGame });
 
   const quorum = async (): Promise<boolean> => {
     const { nodes, tokens } = await getAll();
@@ -76,6 +82,13 @@ export default function getSession(id: string): Session {
     getAll,
     set,
     update,
+    exists: async () => (await getAll()).phase !== undefined,
+    init: async () => {
+      await setPhaseName('lobby');
+      await set('players', {});
+      await set('nodes', {});
+      await set('tokens', {});
+    },
     join: async ({ playerId, playerName }) => {
       const sessionData = await getAll();
       const playersData = sessionData.players || {};
@@ -130,7 +143,7 @@ export default function getSession(id: string): Session {
         });
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
-      if (await quorum()) followEdge(startGame);
+      if (await quorum()) await followEdge('startGame');
 
       return getAll();
     },
