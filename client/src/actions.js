@@ -16,11 +16,12 @@ import {
 } from './getters';
 import layout from './layout';
 import type { Phase } from '../../server/networkTypes';
-import type { Node, NodeType, Player, Token } from './state';
+import type { Node, Nodes, NodeType, Player, Token, Tokens } from './state';
 
 const ADD_PLAYER = 'addPlayer';
 const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
+const CLEAR_STAGE = 'clearStage';
 const SET_PHASE = 'setPhase';
 const SET_SOCKET = 'setSocket';
 const SET_NODE_POSITION = 'setNodePosition';
@@ -44,6 +45,9 @@ type Action =
       type: 'addToken',
       id: string,
       nodeId: string,
+    }
+  | {
+      type: 'clearStage',
     }
   | {
       type: 'setPhase',
@@ -103,6 +107,14 @@ const mergeIntoTokens = (tokenId: string, token: Token) => {
   });
 };
 
+const setNodes = (nodes: Nodes) => {
+  mergeIntoState('nodes', nodes);
+}
+
+const setTokens = (tokens: Tokens) => {
+  mergeIntoState('tokens', tokens);
+}
+
 export function setPhase(phase: Phase): Action {
   return {
     type: SET_PHASE,
@@ -139,6 +151,12 @@ export function addToken(id: string, nodeId: string) {
     type: ADD_TOKEN,
     id,
     nodeId,
+  };
+}
+
+export function clearStage() {
+  return {
+    type: CLEAR_STAGE,
   };
 }
 
@@ -217,6 +235,10 @@ export default function dispatch(action: Action) {
         radius: 10,
         nodeId: action.nodeId,
       });
+      break;
+    case CLEAR_STAGE:
+      setTokens({});
+      setNodes({});
       break;
     case SET_PHASE:
       mergeIntoState('phase', action.phase);

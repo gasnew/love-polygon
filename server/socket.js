@@ -1,11 +1,12 @@
 // @flow
 
-import type Socket from 'socket.io';
+import type { Socket, IO } from 'socket.io';
 
+import withEvents from './events';
 import getSession from './session';
 import type { SessionInfo, Message } from './networkTypes';
 
-export async function handleConnection(socket: Socket) {
+export async function handleConnection(socket: Socket, io: IO) {
   const {
     playerId,
     playerName,
@@ -13,7 +14,12 @@ export async function handleConnection(socket: Socket) {
   }: SessionInfo = socket.handshake.query;
   socket.join(sessionId);
 
-  const session = getSession(sessionId);
+  const session = getSession
+    .register('changePhase', async () =>
+      io.in(sessionId).emit('setState', await session.getAll())
+    )
+    .call({ id: sessionId });
+
   if (!(await session.exists())) await session.init();
   await session.join({ playerId, playerName });
   console.log(`My dudes, ${playerName} has joined session ${sessionId}`);

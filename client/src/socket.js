@@ -6,6 +6,7 @@ import dispatch, {
   addPlayer,
   addNode,
   addToken,
+  clearStage,
   setPhase,
   setTokenNodeId,
   setTokenPosition,
@@ -68,6 +69,7 @@ export function setState(serverState: ServerState) {
   console.log(serverState);
   const { phase, players, nodes, tokens } = serverState;
   dispatch(setPhase(phase));
+  dispatch(clearStage());
   _.each(players, (player, id) => dispatch(addPlayer(id, player.name)));
   _.each(nodes, (node, id) => dispatch(addNode(id, node.type, node.playerId)));
   _.each(tokens, (token, id) => dispatch(addToken(id, token.nodeId)));

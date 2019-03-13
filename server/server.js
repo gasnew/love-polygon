@@ -20,10 +20,8 @@ app.use(express.json());
 app.post('/api/get-session-id', generateSessionId);
 app.post('/api/check-session', checkSession);
 
-io.on('connection', handleConnection);
+io.on('connection', socket => handleConnection(socket, io));
 
 server.listen(app.get('port'), () => {
-  console.log(
-    `love-polygon server has started at http://localhost:${port}/`
-  );
+  console.log(`love-polygon server has started at http://localhost:${port}/`);
 });

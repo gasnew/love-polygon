@@ -4,7 +4,9 @@ import redis from 'async-redis';
 import _ from 'lodash';
 import uniqid from 'uniqid';
 
+import withEvents from './events';
 import getFollowEdge from './phase';
+import type { Emitter } from './events';
 
 import type {
   Message,
@@ -35,17 +37,16 @@ function redisMethods(redisClient, id): RedisMethods {
   };
 }
 
-type Session = {|
+type BaseSession = {|
   ...RedisMethods,
   update: (ServerStateKeys, string, mixed) => Promise<void>,
-  exists: () => Promise<boolean>,
-  init: () => Promise<void>,
-  join: ({ playerId: string, playerName: string }) => Promise<void>,
-  validMessage: Message => boolean,
-  integrateMessage: Message => Promise<ServerState>,
 |};
 
-export default function getSession(id: string): Session {
+export type BaseSessionProps = {
+  id: string,
+};
+
+export function getBaseSession({ id }: BaseSessionProps): BaseSession {
   const redisClient = redis.createClient();
   redisClient.on('error', function(err) {
     console.log('Error ' + err);
@@ -63,10 +64,33 @@ export default function getSession(id: string): Session {
     });
   };
 
+  return {
+    getAll,
+    set,
+    update,
+  };
+}
+
+type Session = {
+  ...BaseSessionProps,
+  exists: () => Promise<boolean>,
+  init: () => Promise<void>,
+  join: ({ playerId: string, playerName: string }) => Promise<void>,
+  validMessage: Message => boolean,
+  integrateMessage: Message => Promise<ServerState>,
+};
+
+type SessionProps = BaseSessionProps & { emit: Emitter };
+
+function getSession({ id, emit }: SessionProps): Session {
+  const { getAll, set, update } = getBaseSession({ id });
+
   const getPhaseName = async () => (await getAll()).phase.name;
   const setPhaseName = (name: PhaseName) => set('phase', { name });
   const startGame = async () => {
     const { players } = await getAll();
+    await set('tokens', {});
+    emit('changePhase');
     console.log('start game now');
   };
 
@@ -91,7 +115,7 @@ export default function getSession(id: string): Session {
     },
     join: async ({ playerId, playerName }) => {
       const sessionData = await getAll();
-      const playersData = sessionData.players || {};
+      const playersData = sessionData.players;
       if (playersData[playerId]) {
         await update('players', playerId, { active: true });
         return;
@@ -149,3 +173,5 @@ export default function getSession(id: string): Session {
     },
   };
 }
+
+export default withEvents<BaseSessionProps>(getSession);
