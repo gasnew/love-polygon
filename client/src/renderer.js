@@ -4,7 +4,7 @@ import _ from 'lodash';
 import startRegl from 'regl';
 
 import { buildPrimitive } from './commands';
-import { getNodes, getOwnNodes, getOwnTokens, getTokens } from './getters';
+import { getOwnNodes, getOwnTokens } from './getters';
 import draw, { toRGB } from './graphics';
 import { buildCircleMesh, buildHeartMesh } from './meshes';
 

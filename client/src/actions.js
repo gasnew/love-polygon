@@ -34,7 +34,7 @@ type Action =
       type: 'addNode',
       id: string,
       nodeType: NodeType,
-      playerId: string,
+      playerIds: string[],
     }
   | {
       type: 'addPlayer',
@@ -137,12 +137,12 @@ export function addPlayer(id: string, name: string) {
   };
 }
 
-export function addNode(id: string, type: NodeType, playerId: string) {
+export function addNode(id: string, type: NodeType, playerIds: string[]) {
   return {
     type: ADD_NODE,
     id,
     nodeType: type,
-    playerId,
+    playerIds,
   };
 }
 
@@ -208,7 +208,7 @@ export default function dispatch(action: Action) {
           y: 0,
         },
         radius: 10,
-        playerId: action.playerId,
+        playerIds: action.playerIds,
       });
       const nodeIds = _.map(getOwnNodes(), (node, id) => id);
       const nodeLayout = layout(nodeIds);

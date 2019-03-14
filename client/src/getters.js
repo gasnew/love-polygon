@@ -58,7 +58,7 @@ export function getNode(nodeId: string): Node {
 
 export function getOwnNodes(): Nodes {
   const { playerId } = getSessionInfo();
-  return _.pickBy(getNodes(), ['playerId', playerId]);
+  return _.pickBy(getNodes(), node => _.includes(node.playerIds, playerId));
 }
 
 export function getTokens(): Tokens {

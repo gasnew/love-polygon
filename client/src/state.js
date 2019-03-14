@@ -40,7 +40,7 @@ export type Node = {|
   type: NodeType,
   position: Position,
   radius: number,
-  playerId: string,
+  playerIds: string[],
 |};
 
 export type Nodes = {

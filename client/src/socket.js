@@ -1,6 +1,6 @@
 // @flow
 
-import _, { map } from 'lodash';
+import _ from 'lodash';
 
 import dispatch, {
   addPlayer,
@@ -12,7 +12,7 @@ import dispatch, {
   setTokenPosition,
 } from './actions';
 import { getNode, getPlayer, getSessionInfo, getToken } from './getters';
-import type { ServerState, SubServerState } from '../../server/networkTypes';
+import type { ServerState } from '../../server/networkTypes';
 
 export function socketConnect() {
   console.log('Feel the love connection!');
@@ -36,7 +36,7 @@ export function updateState(serverState: ServerState) {
   _.each(newPlayers, player => dispatch(addPlayer(player.id, player.name)));
   const newNodes = _.filter(nodes, nodeIsNew);
   _.each(newNodes, node =>
-    dispatch(addNode(node.id, node.type, node.playerId))
+    dispatch(addNode(node.id, node.type, node.playerIds))
   );
   const newTokens = _.filter(tokens, tokenIsNew);
   _.each(newTokens, token => dispatch(addToken(token.id, token.nodeId)));
@@ -47,10 +47,14 @@ export function updateState(serverState: ServerState) {
     const { nodeId } = getToken(id);
 
     if (serverNodeId !== nodeId) {
-      const { playerId: serverPlayerId } = nodes[serverNodeId];
-      const { playerId } = getNode(nodeId);
+      // A transfer happened
+      const { playerIds: serverPlayerIds } = nodes[serverNodeId];
+      const { playerIds } = getNode(nodeId);
       const { playerId: currentPlayerId } = getSessionInfo();
-      if (serverPlayerId === currentPlayerId && playerId === currentPlayerId) {
+      if (
+        _.isEqual(serverPlayerIds, [currentPlayerId]) &&
+        _.isEqual(playerIds, [currentPlayerId])
+      ) {
         // This transfer is internal to the current player. The server is
         // likely just lagging behind the client here.
         return;
@@ -71,6 +75,6 @@ export function setState(serverState: ServerState) {
   dispatch(setPhase(phase));
   dispatch(clearStage());
   _.each(players, (player, id) => dispatch(addPlayer(id, player.name)));
-  _.each(nodes, (node, id) => dispatch(addNode(id, node.type, node.playerId)));
+  _.each(nodes, (node, id) => dispatch(addNode(id, node.type, node.playerIds)));
   _.each(tokens, (token, id) => dispatch(addToken(id, token.nodeId)));
 }

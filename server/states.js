@@ -27,12 +27,12 @@ export function getNewPlayerState({
     nodes: {
       [nodeId1]: {
         id: nodeId1,
-        playerId,
+        playerIds: [playerId],
         type: 'storage',
       },
       [nodeId2]: {
         id: nodeId2,
-        playerId,
+        playerIds: [playerId],
         type: 'loveBucket',
       },
     },

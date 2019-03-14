@@ -6,27 +6,27 @@ export type Phase = {|
 |};
 
 export type Players = {|
-  [string]: {
+  [string]: {|
     id: string,
     name: string,
     active: string,
-  },
+  |},
 |};
 
 type NodeType = 'storage' | 'shared' | 'loveBucket';
 export type Nodes = {|
-  [string]: {
+  [string]: {|
     id: string,
     type: NodeType,
-    playerId: string,
-  },
+    playerIds: string[],
+  |},
 |};
 
 export type Tokens = {|
-  [string]: {
+  [string]: {|
     id: string,
     nodeId: string,
-  },
+  |},
 |};
 
 export type ServerState = {|
