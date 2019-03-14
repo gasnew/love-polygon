@@ -30,7 +30,7 @@ export async function handleConnection(socket: Socket, io: IO) {
 
   socket.on('disconnect', () => {
     console.log(`Fam, ${playerName} has disconnected from ${sessionId}`);
-    session.update('players', playerId, { active: false });
+    session.update('players', { [playerId]: { active: false } });
   });
 
   socket.on('newMessage', async (message: Message) => {

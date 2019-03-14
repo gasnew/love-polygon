@@ -6,6 +6,7 @@ import uniqid from 'uniqid';
 
 import withEvents from './events';
 import getFollowEdge from './phase';
+import { getNewPlayerState } from './states';
 import type { Emitter } from './events';
 
 import type {
@@ -39,7 +40,8 @@ function redisMethods(redisClient, id): RedisMethods {
 
 type BaseSession = {|
   ...RedisMethods,
-  update: (ServerStateKeys, string, mixed) => Promise<void>,
+  update: (ServerStateKeys, SubServerState, ?SubServerState) => Promise<void>,
+  updateAll: ServerState => Promise<void>,
 |};
 
 export type BaseSessionProps = {
@@ -53,21 +55,42 @@ export function getBaseSession({ id }: BaseSessionProps): BaseSession {
   });
 
   const { getAll, set } = redisMethods(redisClient, id);
-  const update = async (key, id, object) => {
-    const data = (await getAll())[key];
+  const update = async (
+    key: ServerStateKeys,
+    objects: SubServerState,
+    subState: ?SubServerState = null
+  ) => {
+    const currentObjects = subState || (await getAll())[key];
+    const updatedObjects = _.reduce(
+      objects,
+      (allObjects, object, id) => ({
+        ...allObjects,
+        [id]: {
+          ...currentObjects[id],
+          ...object,
+        },
+      }),
+      {}
+    );
     set(key, {
-      ...data,
-      [id]: {
-        ...data[id],
-        ...object,
-      },
+      ...currentObjects,
+      ...updatedObjects,
     });
+  };
+  const updateAll = async (serverState: ServerState) => {
+    const currentServerState = await getAll();
+    _.each(
+      serverState,
+      async (objects, key) =>
+        await update(key, objects, currentServerState[key])
+    );
   };
 
   return {
     getAll,
     set,
     update,
+    updateAll,
   };
 }
 
@@ -83,7 +106,7 @@ type Session = {
 type SessionProps = BaseSessionProps & { emit: Emitter };
 
 function getSession({ id, emit }: SessionProps): Session {
-  const { getAll, set, update } = getBaseSession({ id });
+  const { getAll, set, update, updateAll } = getBaseSession({ id });
 
   const getPhaseName = async () => (await getAll()).phase.name;
   const setPhaseName = (name: PhaseName) => set('phase', { name });
@@ -117,44 +140,10 @@ function getSession({ id, emit }: SessionProps): Session {
       const sessionData = await getAll();
       const playersData = sessionData.players;
       if (playersData[playerId]) {
-        await update('players', playerId, { active: true });
+        await update('players', { [playerId]: { active: true } });
         return;
       }
-
-      await set('players', {
-        ...playersData,
-        [playerId]: {
-          id: playerId,
-          name: playerName,
-          active: true,
-        },
-      });
-
-      const nodesData = sessionData.nodes;
-      const nodeId1 = uniqid();
-      const nodeId2 = uniqid();
-      await set('nodes', {
-        ...nodesData,
-        [nodeId1]: {
-          id: nodeId1,
-          playerId,
-          type: 'storage',
-        },
-        [nodeId2]: {
-          id: nodeId2,
-          playerId,
-          type: 'loveBucket',
-        },
-      });
-      const tokensData = sessionData.tokens;
-      const tokenId = uniqid();
-      await set('tokens', {
-        ...tokensData,
-        [tokenId]: {
-          id: tokenId,
-          nodeId: nodeId1,
-        },
-      });
+      await updateAll(getNewPlayerState({ playerId, playerName }));
     },
     validMessage: () => true,
     integrateMessage: async message => {
@@ -162,8 +151,10 @@ function getSession({ id, emit }: SessionProps): Session {
       const TRANSFER_TOKEN = 'transferToken';
       if (message.type === TRANSFER_TOKEN) {
         const { tokenId, toId: nodeId } = message;
-        await update('tokens', tokenId, {
-          nodeId,
+        await update('tokens', {
+          [tokenId]: {
+            nodeId,
+          },
         });
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
