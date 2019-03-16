@@ -9,7 +9,7 @@ export type Players = {|
   [string]: {|
     id: string,
     name: string,
-    active: string,
+    active: boolean,
   |},
 |};
 

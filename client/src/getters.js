@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import type Socket from 'socket.io-client';
 
-import type { SessionInfo } from '../../server/networkTypes';
+import type { Phase, SessionInfo } from '../../server/networkTypes';
 import type {
   Dimensions,
   Node,
@@ -18,6 +18,10 @@ import type {
 
 export function getState(): State {
   return window.state;
+}
+
+export function getPhase(): ?Phase {
+  return getState().phase;
 }
 
 export function getSessionInfo(): SessionInfo {

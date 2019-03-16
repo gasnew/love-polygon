@@ -87,7 +87,7 @@ class LandingPage extends Component<Props, State> {
       value: 'Garrett',
       error: '',
     },
-    activeStep: 1,
+    activeStep: 0,
   };
 
   render() {

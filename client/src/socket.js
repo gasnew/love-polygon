@@ -11,7 +11,13 @@ import dispatch, {
   setTokenNodeId,
   setTokenPosition,
 } from './actions';
-import { getNode, getPlayer, getSessionInfo, getToken } from './getters';
+import {
+  getNode,
+  getPhase,
+  getPlayer,
+  getSessionInfo,
+  getToken,
+} from './getters';
 import type { ServerState } from '../../server/networkTypes';
 
 export function socketConnect() {
@@ -23,6 +29,10 @@ export function socketDisconnect() {
 }
 
 export function updateState(serverState: ServerState) {
+  // Ignore updates when phase isn't set or isn't the same as client phase
+  const phase = getPhase();
+  if (!phase || serverState.phase.name !== phase.name) return;
+
   console.log('update state');
   console.log('serverState', serverState);
 

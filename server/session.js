@@ -6,7 +6,7 @@ import uniqid from 'uniqid';
 
 import withEvents from './events';
 import getFollowEdge from './phase';
-import { getNewPlayerState } from './states';
+import { getNewPlayerState, getRomanceState } from './states';
 import type { Emitter } from './events';
 
 import type {
@@ -99,7 +99,7 @@ type Session = {
   exists: () => Promise<boolean>,
   init: () => Promise<void>,
   join: ({ playerId: string, playerName: string }) => Promise<void>,
-  validMessage: Message => boolean,
+  validMessage: (ServerState, Message) => boolean,
   integrateMessage: Message => Promise<ServerState>,
 };
 
@@ -111,18 +111,21 @@ function getSession({ id, emit }: SessionProps): Session {
   const getPhaseName = async () => (await getAll()).phase.name;
   const setPhaseName = (name: PhaseName) => set('phase', { name });
   const startGame = async () => {
-    const { players } = await getAll();
+    await set('nodes', {});
     await set('tokens', {});
-    emit('changePhase');
+    await updateAll(getRomanceState(await getAll()));
     console.log('start game now');
+    emit('changePhase');
   };
 
   const followEdge = getFollowEdge({ getPhaseName, setPhaseName, startGame });
 
   const quorum = async (): Promise<boolean> => {
-    const { nodes, tokens } = await getAll();
+    const { nodes, players, tokens } = await getAll();
     const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
-    return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
+    // TODO remove this temp quota definition
+    return _.size(players) >= 1;
+    //return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
   };
 
   return {
@@ -145,11 +148,26 @@ function getSession({ id, emit }: SessionProps): Session {
       }
       await updateAll(getNewPlayerState({ playerId, playerName }));
     },
-    validMessage: () => true,
+    validMessage: (
+      serverState: ServerState,
+      message: Message
+    ): boolean => {
+      if (message.type !== 'transferToken') return false;
+
+      const { tokenId, fromId, toId } = message;
+      const { nodes, tokens } = serverState;
+      const token = tokens[tokenId];
+      const fromNode = nodes[fromId];
+      const toNode = nodes[toId];
+      if (!token || !fromNode || !toNode) return false;
+      if (token.nodeId !== fromId) return false;
+      if (_.some(tokens, ['nodeId', toId])) return false;
+
+      return true;
+    },
     integrateMessage: async message => {
       console.log('Integrating message', message);
-      const TRANSFER_TOKEN = 'transferToken';
-      if (message.type === TRANSFER_TOKEN) {
+      if (message.type === 'transferToken') {
         const { tokenId, toId: nodeId } = message;
         await update('tokens', {
           [tokenId]: {

@@ -34,10 +34,11 @@ export async function handleConnection(socket: Socket, io: IO) {
   });
 
   socket.on('newMessage', async (message: Message) => {
-    if (await session.validMessage(message)) {
+    const serverState = await session.getAll();
+    if (session.validMessage(serverState, message)) {
       socket
         .to(sessionId)
         .emit('updateState', await session.integrateMessage(message));
-    } else socket.emit('setState', await session.getAll());
+    } else socket.emit('setState', serverState);
   });
 }
