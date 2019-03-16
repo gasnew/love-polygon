@@ -1,63 +1,73 @@
 // @flow
 
-export type Session = {|
-  id: string,
-  name: string,
-|};
+import type Socket from 'socket.io-client';
 
-export type Position = {
+import type { Phase, SessionInfo } from '../../server/networkTypes';
+
+export type Position = {|
   x: number,
   y: number,
-};
+|};
 
-export type Dimensions = {
+export type Dimensions = {|
   width: number,
   height: number,
+|};
+
+export type Player = {
+  id: string,
+  name: string,
 };
 
-export type Token = {
+export type Players = {
+  [string]: Player,
+};
+
+export type Token = {|
+  id: string,
   position: Position,
   radius: number,
-};
+  nodeId: string,
+|};
 
 export type Tokens = {
   [string]: Token,
 };
 
-export type State = {
-  currentTokenId: ?string,
-  tokens: Tokens,
+export type NodeType = 'storage' | 'shared' | 'loveBucket';
+export type Node = {|
+  id: string,
+  type: NodeType,
+  position: Position,
+  radius: number,
+  playerIds: string[],
+|};
+
+export type Nodes = {
+  [string]: Node,
 };
 
-export default function generateState(): State {
+export type State = {|
+  phase: ?Phase,
+  socket: Socket,
+  sessionInfo: SessionInfo,
+  currentTokenId: ?string,
+  players: Players,
+  tokens: Tokens,
+  nodes: Nodes,
+|};
+
+export default function generateState(
+  sessionInfo: SessionInfo,
+  socket: Socket
+): State {
   return {
-    session: {
-      id: 'abcd',
-      name: 'dude play game',
-    },
+    sessionInfo,
+    phase: null,
+    socket,
     currentTokenId: null,
-    tokens: {
-      abcd: {
-        position: {
-          x: 60,
-          y: 60,
-        },
-        radius: 6,
-      },
-      bcda: {
-        position: {
-          x: 12,
-          y: 40,
-        },
-        radius: 6,
-      },
-      zyx: {
-        position: {
-          x: 30,
-          y: 60,
-        },
-        radius: 6,
-      },
-    },
+    players: {},
+    tokens: {},
+    nodes: {},
   };
 }

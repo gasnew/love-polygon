@@ -9,6 +9,20 @@ import type { Position } from './state';
 
 const screenScale = 60;
 
+export function toRGB(hex: string): Array<number> {
+  var result: ?Array<string> = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(
+    hex
+  );
+  return result
+    ? [
+        parseInt(result[1], 16) / 255,
+        parseInt(result[2], 16) / 255,
+        parseInt(result[3], 16) / 255,
+        1,
+      ]
+    : [1, 0, 0, 1];
+}
+
 function vectorize(position: Position): ShaderProps {
   return { location: [position.x, position.y] };
 }
@@ -33,7 +47,7 @@ export function stagifyPosition(position: Position): Position {
   };
 }
 
-export function stagifyVector(vector: Array<number>): Array<number> {
+export function stagifyVector(vector: number[][][]): Array<number> {
   const { width } = getStageDimensions();
   return _.map(_.flattenDeep(vector), value => (value * width) / screenScale);
 }

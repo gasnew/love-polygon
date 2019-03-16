@@ -19,7 +19,7 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 
-import type { Session } from './state';
+import type { SessionInfo } from '../../server/networkTypes';
 
 const styles = theme => ({
   main: {
@@ -63,16 +63,16 @@ const styles = theme => ({
 
 type Props = {
   classes: any,
-  setSession: Session => void,
+  setSession: SessionInfo => void,
 };
 type State = {|
   sessionIdField: {
     value: string,
-    error: boolean,
+    error: string,
   },
   playerNameField: {
     value: string,
-    error: boolean,
+    error: string,
   },
   activeStep: number,
 |};
@@ -80,14 +80,14 @@ type State = {|
 class LandingPage extends Component<Props, State> {
   state = {
     sessionIdField: {
-      value: 'darginblargin',
-      error: false,
+      value: '',
+      error: '',
     },
     playerNameField: {
-      value: 'Bill just bill',
-      error: false,
+      value: 'Garrett',
+      error: '',
     },
-    activeStep: 1,
+    activeStep: 0,
   };
 
   render() {
@@ -96,23 +96,38 @@ class LandingPage extends Component<Props, State> {
 
     const joinSession = async () => {
       if (!playerNameField.value) {
-        this.setState(() => ({ playerNameField: { value: '', error: true } }));
+        this.setState(() => ({
+          playerNameField: { value: '', error: 'Please enter a valid name.' },
+        }));
         handleBack();
       } else {
-        const response = await axios.post('api/join-session', {
+        const sessionInfo = {
           sessionId: sessionIdField.value,
           playerName: playerNameField.value,
-        });
-        setSession({
-          id: sessionIdField.value,
-          name: playerNameField.value,
-        });
+        };
+        const { playerId, error } = (await axios.post(
+          'api/check-session',
+          sessionInfo
+        )).data;
+        if (error) {
+          this.setState(() => ({
+            playerNameField: {
+              value: this.state.playerNameField.value,
+              error: error.message,
+            },
+          }));
+          handleBack();
+        } else
+          setSession({
+            ...sessionInfo,
+            playerId,
+          });
       }
     };
     const generateSessionId = async () => {
       const response = await axios.post('api/get-session-id');
       this.setState(() => ({
-        sessionIdField: { value: response.data.message.id, error: false },
+        sessionIdField: { value: response.data.sessionId, error: '' },
       }));
     };
 
@@ -131,7 +146,7 @@ class LandingPage extends Component<Props, State> {
       this.setState(() => ({
         [name]: {
           value,
-          error: false,
+          error: '',
         },
       }));
     };
@@ -161,7 +176,7 @@ class LandingPage extends Component<Props, State> {
                   {...(playerNameField.error
                     ? {
                         error: true,
-                        helperText: 'Please enter a valid name.',
+                        helperText: playerNameField.error,
                       }
                     : {})}
                   margin="normal"
@@ -190,7 +205,7 @@ class LandingPage extends Component<Props, State> {
                   {...(sessionIdField.error
                     ? {
                         error: true,
-                        helperText: 'Please enter a valid session ID.',
+                        helperText: sessionIdField.error,
                       }
                     : {})}
                   margin="normal"

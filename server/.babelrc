@@ -1,12 +1,17 @@
 {
   "presets": [
+    "@babel/preset-flow",
     [
-      "env", {
+      "@babel/preset-env",
+      {
         "targets": {
           "node": "current"
         }
       }
     ]
   ],
-  "plugins": ["transform-object-rest-spread"]
+  "plugins": [
+    "@babel/plugin-proposal-optional-chaining",
+    "@babel/plugin-proposal-object-rest-spread"
+  ]
 }

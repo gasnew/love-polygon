@@ -4,30 +4,42 @@ import _ from 'lodash';
 import startRegl from 'regl';
 
 import { buildPrimitive } from './commands';
-import { getTokens } from './getters';
-import draw from './graphics';
+import { getOwnNodes, getOwnTokens } from './getters';
+import draw, { toRGB } from './graphics';
 import { buildCircleMesh, buildHeartMesh } from './meshes';
 
-import type { Tokens } from './state';
+import type { Nodes, Tokens } from './state';
 
 export default function render(element: HTMLDivElement) {
   const regl = startRegl(element);
 
-  const heart = buildPrimitive(
+  const heart = buildPrimitive({
     regl,
-    buildHeartMesh({ scale: 6, steps: 50 })
-  );
+    mesh: buildHeartMesh({ scale: 6, steps: 50 }),
+    uniforms: {
+      color: toRGB('#FF5E5B'),
+    },
+  });
+  const circle = buildPrimitive({
+    regl,
+    mesh: buildCircleMesh({ scale: 6, steps: 50 }),
+    uniforms: {
+      color: toRGB('#D6EFFF'),
+    },
+  });
   const drawToken = draw(heart);
+  const drawNode = draw(circle);
 
-  const tokens: Tokens = getTokens();
   regl.frame(({ time }) => {
-    const tokens: Tokens = getTokens();
+    const nodes: Nodes = getOwnNodes();
+    const tokens: Tokens = getOwnTokens();
 
     regl.clear({
-      color: [0, 0, 0, 1],
+      color: toRGB('#FEFEFF'),
       depth: 1,
     });
 
     _.each(tokens, token => drawToken(token.position));
+    _.each(nodes, node => drawNode(node.position));
   });
 }

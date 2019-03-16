@@ -36,7 +36,7 @@ export function buildCircleMesh({ scale, steps }: CircleProps): Array<number> {
   })(steps);
 }
 
-export function buildHeartMesh({ scale, steps }: CircleProps): Array<number> {
+export function buildHeartMesh({ scale, steps }: HeartProps): Array<number> {
   return getMeshBuilder({
     getX: angle => scale * Math.sin(angle) ** 3,
     getY: angle =>

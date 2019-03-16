@@ -1,40 +1,47 @@
-import redis from 'async-redis';
+// @flow
+
 import _ from 'lodash';
 import generateName from 'sillyname';
+import uniqid from 'uniqid';
+import type { $Request, $Response } from 'express';
 
-export async function generateSessionId(request, response) {
-  const id = generateName();
-  const sessionData = { id };
+import { getBaseSession } from './session';
+import type { Players } from './networkTypes';
 
-  response.json({ message: sessionData });
+export async function generateSessionId(
+  request: $Request,
+  response: $Response
+) {
+  const sessionId = generateName();
+
+  response.json({ sessionId });
 }
 
-export async function joinSession(request, response) {
-  const { sessionId, playerName } = request.body;
+type SessionCheck = {
+  sessionId: string,
+  playerName: string,
+};
+type CheckRequest = {
+  ...$Request,
+  body: SessionCheck,
+};
+export async function checkSession(request: CheckRequest, response: $Response) {
+  const { sessionId, playerName }: SessionCheck = request.body;
 
-  const redisClient = redis.createClient();
-  redisClient.on('error', function(err) {
-    console.log('Error ' + err);
-  });
-  const playerData = JSON.parse(await redisClient.hget(sessionId, 'players'));
-  await redisClient.hset(
-    sessionId,
-    'players',
-    JSON.stringify({
-      ...playerData,
-      [playerName]: {
-        ok: 'dude',
+  console.log(`${playerName} is checking to see if ${sessionId} is cool.`);
+  const session = getBaseSession({ id: sessionId });
+  const players = (await session.getAll()).players;
+  const playerId = _.findKey(players, player => player.name == playerName);
+  if (playerId && players[playerId].active) {
+    response.json({
+      error: {
+        field: 'playerId',
+        message: `A player named ${playerName} is already in this session!
+        Please choose another name`,
       },
-    })
-  );
-  const session = _.reduce(
-    await redisClient.hgetall(sessionId),
-    (session, value, key) => ({
-      ...session,
-      [key]: JSON.parse(value),
-    }),
-    {}
-  );
+    });
+    return;
+  }
 
-  response.json({ message: session });
+  response.json({ playerId: playerId || uniqid() });
 }
