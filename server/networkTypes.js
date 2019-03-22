@@ -29,11 +29,22 @@ export type Tokens = {|
   |},
 |};
 
+export type RelationshipType = 'crush' | 'wingman';
+export type Relationships = {|
+  [string]: {|
+    id: string,
+    type: RelationshipType,
+    fromId: string,
+    toId: string,
+  |}
+|};
+
 export type ServerState = {|
   phase: Phase,
   players: Players,
   nodes: Nodes,
   tokens: Tokens,
+  relationships: Relationships,
 |};
 
 export type SubServerState = $Values<ServerState>;

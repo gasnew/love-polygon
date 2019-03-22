@@ -3,7 +3,12 @@
 import _ from 'lodash';
 import uniqid from 'uniqid';
 
-import type { Players, ServerState } from './networkTypes';
+import type {
+  Players,
+  Relationships,
+  RelationshipType,
+  ServerState,
+} from './networkTypes';
 
 type NewPlayerStateProps = {
   playerId: string,
@@ -46,13 +51,61 @@ export function getNewPlayerState({
   };
 }
 
-function pairs<T>(array: T[]): T[][] {
+export function pairs<T>(array: T[]): T[][] {
   if (!array.length) return [];
   return _.reduce(
     array.slice(1),
     (combos, element) => [...combos, [array[0], element]],
     []
   ).concat(pairs(array.slice(1)));
+}
+
+export const getNumberOfLovers = (numberOfPlayers: number): number => {
+  if (numberOfPlayers <= 2) return 1;
+  if (numberOfPlayers === 3) return _.random(1, 3);
+  if (numberOfPlayers === 4) return _.random(2, 4);
+  throw new Error(`${numberOfPlayers} players is not supported!`);
+};
+
+type Roles = {
+  lovers: Players,
+  wingmen: Players,
+};
+
+export function getRoles(players: Players, numberOfLovers: number): Roles {
+  const inIds = ids => player => _.includes(ids, player.id);
+
+  const loverIds = _.shuffle(_.keys(players)).slice(0, numberOfLovers);
+  const wingmenIds = _.difference(_.keys(players), loverIds);
+
+  return {
+    lovers: _.pickBy(players, inIds(loverIds)),
+    wingmen: _.pickBy(players, inIds(wingmenIds)),
+  };
+}
+export function buildRelationships(
+  sourcePlayers: Players,
+  targetPlayers: Players,
+  type: RelationshipType
+): Relationships {
+  return {
+    ..._.reduce(
+      sourcePlayers,
+      (relationships, sourcePlayer) => {
+        const relationshipId = uniqid();
+        return {
+          ...relationships,
+          [relationshipId]: {
+            id: relationshipId,
+            type,
+            fromId: sourcePlayer.id,
+            toId: _.shuffle(targetPlayers)[0].id,
+          },
+        };
+      },
+      {}
+    ),
+  };
 }
 
 type RomanceStateProps = {
@@ -136,11 +189,22 @@ export function getRomanceState({
     {}
   );
 
+  const { lovers, wingmen } = getRoles(
+    players,
+    getNumberOfLovers(_.size(players))
+  );
+  const crushRelationships = buildRelationships(lovers, players, 'crush');
+  const wingmanRelationships = buildRelationships(wingmen, lovers, 'wingman');
+
   return {
     nodes: {
       ...storageNodes,
       ...sharedNodes,
     },
     tokens,
+    relationships: {
+      ...crushRelationships,
+      ...wingmanRelationships,
+    },
   };
 }

@@ -138,6 +138,7 @@ function getSession({ id, emit }: SessionProps): Session {
       await set('players', {});
       await set('nodes', {});
       await set('tokens', {});
+      await set('relationships', {});
     },
     join: async ({ playerId, playerName }) => {
       const sessionData = await getAll();
