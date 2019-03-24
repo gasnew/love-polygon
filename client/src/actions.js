@@ -14,7 +14,7 @@ import {
   getToken,
   getTokens,
 } from './getters';
-import layout from './layout';
+import { layoutNodes } from './layout';
 import type { Phase } from '../../server/networkTypes';
 import type { Node, Nodes, NodeType, Player, Token, Tokens } from './state';
 
@@ -210,9 +210,9 @@ export default function dispatch(action: Action) {
         radius: 10,
         playerIds: action.playerIds,
       });
-      const nodeIds = _.map(getOwnNodes(), (node, id) => id);
-      const nodeLayout = layout(nodeIds);
-      _.each(nodeIds, id =>
+      const nodes = getOwnNodes();
+      const nodeLayout = layoutNodes(nodes);
+      _.each(nodes, (node, id) =>
         dispatch(setNodePosition(id, nodeLayout[id].x, nodeLayout[id].y))
       );
       _.each(getOwnTokens(), token => {
