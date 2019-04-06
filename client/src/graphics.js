@@ -55,7 +55,7 @@ export function stagifyVector(vector: number[][][]): Array<number> {
 export default function draw(command: Command) {
   return (position: Position) =>
     command({
-      ...vectorize(stagifyPosition(position)),
       ...getStageDimensions(),
+      ...vectorize(stagifyPosition(position)),
     });
 }

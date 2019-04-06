@@ -8,9 +8,11 @@
   + Name selection
 + Server provides nodes
   + This happens once every player drops token center-screen
-/ Node transfers
-  / Stress test this by causing two clients to "fight" for the same token
-- Server provides goals/relationships with nodes
++ Node transfers
+  + Stress test this by causing two clients to "fight" for the same token
+/ Server provides goals/relationships with nodes
+  / Render text to indicate shared node ownership
+  - Render text to indicate relationship
 - Button to cause round-ending timer when need is met
 - Playtest 1! (Voting will be done on paper)
 - Voting
@@ -40,6 +42,9 @@
 - Host on AWS
 
 ## Known bugs
+- Players can transfer tokens from another player's storage node
+  - Either, current token should be set to null (maybe not great)
+  - Or, transfers to another player can only occur from shared nodes
 - Multiple players of the same name can be created if both validate successfully and then join socket. I.e., no socket validation
   -  Solution: Force disconnect in this case (relies on top feature to fit in
 

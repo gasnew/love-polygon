@@ -124,8 +124,8 @@ function getSession({ id, emit }: SessionProps): Session {
     const { nodes, players, tokens } = await getAll();
     const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
     // TODO remove this temp quorum definition
-    return _.size(players) >= 1;
-    //return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
+    //return _.size(players) >= 1;
+    return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
   };
 
   return {

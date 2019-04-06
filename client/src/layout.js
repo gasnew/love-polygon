@@ -15,8 +15,13 @@ export default function layout(ids: Array<string>, y: number): Layout {
 export function layoutNodes(nodes: Nodes): Layout {
   const storageNodeIds = _.map(_.pickBy(nodes, ['type', 'storage']), 'id');
   const sharedNodeIds = _.map(_.pickBy(nodes, ['type', 'shared']), 'id');
+  const loveBucketNodeIds = _.map(
+    _.pickBy(nodes, ['type', 'loveBucket']),
+    'id'
+  );
   return {
     ...layout(storageNodeIds, 40),
     ...layout(sharedNodeIds, 20),
+    ...layout(loveBucketNodeIds, 20),
   };
 }

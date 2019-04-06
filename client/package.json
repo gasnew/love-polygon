@@ -16,7 +16,8 @@
     "socket.io-client": "^2.2.0",
     "three": "^0.100.0",
     "touches": "^1.2.2",
-    "uniqid": "^5.0.3"
+    "uniqid": "^5.0.3",
+    "vectorize-text": "^3.2.1"
   },
   "scripts": {
     "start": "react-scripts start",

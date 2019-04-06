@@ -1,6 +1,7 @@
 // @flow
 
 import _ from 'lodash';
+import vectorizeText from 'vectorize-text';
 
 import { stagifyVector } from './graphics';
 
@@ -12,6 +13,10 @@ type CircleProps = {
 type HeartProps = {
   scale: number,
   steps: number,
+};
+
+type TextProps = {
+  text: string,
 };
 
 function getMeshBuilder({ getX, getY }) {
@@ -46,4 +51,39 @@ export function buildHeartMesh({ scale, steps }: HeartProps): Array<number> {
         0.125 * Math.cos(3 * angle) +
         0.0625 * Math.cos(4 * angle)),
   })(steps);
+}
+
+export function buildTextMesh({ text }: TextProps): Array<number> {
+  const thing = vectorizeText(text, {
+    triangles: true,
+    textBaseline: 'hanging',
+    textAlign: 'center',
+    width: 50,
+    font: 'Trebuchet MS',
+  });
+  const mesh = _.reduce(
+    thing.cells,
+    (mesh, cell) => [
+      ...mesh,
+      _.reduce(
+        _.range(3),
+        (triangle, index) => {
+          const bob = [
+            ...triangle,
+            [
+              thing.positions[cell[index]][0],
+              thing.positions[cell[index]][1],
+              //thing.positions[cell[(index + 1) % 3]][0],
+            ],
+          ]
+          return bob;
+        },
+        []
+      ),
+    ],
+    []
+  );
+  console.log(thing);
+  console.log(mesh);
+  return stagifyVector(mesh);
 }
