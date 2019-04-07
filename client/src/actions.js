@@ -13,11 +13,14 @@ import {
   getOwnTokens,
   getToken,
   getTokens,
+  getCommands,
 } from './getters';
 import { layoutNodes } from './layout';
 import type { Phase } from '../../server/networkTypes';
+import type { Command } from './commands';
 import type { Node, Nodes, NodeType, Player, Token, Tokens } from './state';
 
+const ADD_COMMAND = 'addCommand';
 const ADD_PLAYER = 'addPlayer';
 const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
@@ -30,6 +33,11 @@ const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 
 type Action =
+  | {
+      type: 'addCommand',
+      id: string,
+      command: Command,
+    }
   | {
       type: 'addNode',
       id: string,
@@ -107,13 +115,20 @@ const mergeIntoTokens = (tokenId: string, token: Token) => {
   });
 };
 
+const mergeIntoCommands = (commandId: string, command: Command) => {
+  mergeIntoState('commands', {
+    ...getCommands(),
+    [commandId]: command,
+  });
+};
+
 const setNodes = (nodes: Nodes) => {
   mergeIntoState('nodes', nodes);
-}
+};
 
 const setTokens = (tokens: Tokens) => {
   mergeIntoState('tokens', tokens);
-}
+};
 
 export function setPhase(phase: Phase): Action {
   return {
@@ -129,7 +144,7 @@ export function setSocket(socket: Socket): Action {
   };
 }
 
-export function addPlayer(id: string, name: string) {
+export function addPlayer(id: string, name: string): Action {
   return {
     type: ADD_PLAYER,
     id,
@@ -137,7 +152,11 @@ export function addPlayer(id: string, name: string) {
   };
 }
 
-export function addNode(id: string, type: NodeType, playerIds: string[]) {
+export function addNode(
+  id: string,
+  type: NodeType,
+  playerIds: string[]
+): Action {
   return {
     type: ADD_NODE,
     id,
@@ -146,7 +165,7 @@ export function addNode(id: string, type: NodeType, playerIds: string[]) {
   };
 }
 
-export function addToken(id: string, nodeId: string) {
+export function addToken(id: string, nodeId: string): Action {
   return {
     type: ADD_TOKEN,
     id,
@@ -154,7 +173,15 @@ export function addToken(id: string, nodeId: string) {
   };
 }
 
-export function clearStage() {
+export function addCommand(id: string, command: Command): Action {
+  return {
+    type: ADD_COMMAND,
+    id,
+    command,
+  };
+}
+
+export function clearStage(): Action {
   return {
     type: CLEAR_STAGE,
   };
@@ -199,6 +226,9 @@ export function setCurrentTokenId(tokenId: ?string): Action {
 
 export default function dispatch(action: Action) {
   switch (action.type) {
+    case ADD_COMMAND:
+      mergeIntoCommands(action.id, action.command);
+      break;
     case ADD_NODE:
       mergeIntoNodes(action.id, {
         id: action.id,

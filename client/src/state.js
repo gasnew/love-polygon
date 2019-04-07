@@ -3,6 +3,7 @@
 import type Socket from 'socket.io-client';
 
 import type { Phase, SessionInfo } from '../../server/networkTypes';
+import type { Command } from './commands';
 
 export type Position = {|
   x: number,
@@ -47,6 +48,10 @@ export type Nodes = {
   [string]: Node,
 };
 
+export type Commands = {
+  [string]: Command,
+};
+
 export type State = {|
   phase: ?Phase,
   socket: Socket,
@@ -55,6 +60,7 @@ export type State = {|
   players: Players,
   tokens: Tokens,
   nodes: Nodes,
+  commands: Commands,
 |};
 
 export default function generateState(
@@ -69,5 +75,6 @@ export default function generateState(
     players: {},
     tokens: {},
     nodes: {},
+    commands: {},
   };
 }

@@ -3,7 +3,9 @@
 import _ from 'lodash';
 import vectorizeText from 'vectorize-text';
 
-import { stagifyVector } from './graphics';
+import { stagifyMesh } from './graphics';
+
+export type Mesh = number[][][];
 
 type CircleProps = {
   scale: number,
@@ -16,6 +18,7 @@ type HeartProps = {
 };
 
 type TextProps = {
+  scale: number,
   text: string,
 };
 
@@ -24,7 +27,7 @@ function getMeshBuilder({ getX, getY }) {
     const tau = 2 * Math.PI;
     const angleStep = (2 * Math.PI) / steps;
     const edge = angle => [getX(angle), getY(angle)];
-    return stagifyVector(
+    return stagifyMesh(
       _.map(_.range(0, tau, angleStep), angle => [
         [0, 0],
         edge(angle + angleStep),
@@ -53,37 +56,41 @@ export function buildHeartMesh({ scale, steps }: HeartProps): Array<number> {
   })(steps);
 }
 
-export function buildTextMesh({ text }: TextProps): Array<number> {
-  const thing = vectorizeText(text, {
+export function circlify(mesh: Mesh, radius: number): Mesh {
+  return _.map(mesh, triangle =>
+    _.map(triangle, ([x, y]) => {
+      const magnitude = -radius + y;
+      const angle = x / radius + Math.PI;
+      return [magnitude * Math.sin(angle), -magnitude * Math.cos(angle)];
+    })
+  );
+}
+
+export function buildTextMesh({ scale, text }: TextProps): Array<number> {
+  const vectorized = vectorizeText(text, {
     triangles: true,
-    textBaseline: 'hanging',
+    textBaseline: 'middle',
     textAlign: 'center',
-    width: 50,
+    height: scale,
     font: 'Trebuchet MS',
   });
   const mesh = _.reduce(
-    thing.cells,
+    vectorized.cells,
     (mesh, cell) => [
       ...mesh,
       _.reduce(
         _.range(3),
-        (triangle, index) => {
-          const bob = [
-            ...triangle,
-            [
-              thing.positions[cell[index]][0],
-              thing.positions[cell[index]][1],
-              //thing.positions[cell[(index + 1) % 3]][0],
-            ],
-          ]
-          return bob;
-        },
+        (triangle, index) => [
+          ...triangle,
+          [
+            vectorized.positions[cell[index]][0],
+            vectorized.positions[cell[index]][1],
+          ],
+        ],
         []
       ),
     ],
     []
   );
-  console.log(thing);
-  console.log(mesh);
-  return stagifyVector(mesh);
+  return stagifyMesh(circlify(mesh, scale + 5));
 }

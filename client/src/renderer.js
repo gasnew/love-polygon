@@ -4,11 +4,17 @@ import _ from 'lodash';
 import startRegl from 'regl';
 
 import { buildPrimitive } from './commands';
-import { getOwnNodes, getOwnTokens } from './getters';
-import draw, { toRGB } from './graphics';
+import {
+  getNode,
+  getOwnNodes,
+  getOwnTokens,
+  getPlayers,
+  getSessionInfo,
+} from './getters';
+import draw, { memoized, toRGB } from './graphics';
 import { buildCircleMesh, buildHeartMesh, buildTextMesh } from './meshes';
 
-import type { Nodes, Tokens } from './state';
+import type { Node, Nodes, Tokens } from './state';
 
 export default function render(element: HTMLDivElement) {
   const regl = startRegl(element);
@@ -27,19 +33,32 @@ export default function render(element: HTMLDivElement) {
       color: toRGB('#D6EFFF'),
     },
   });
-  const hello = buildPrimitive({
-    regl,
-    mesh: buildTextMesh({ text: 'Hello, cruel world' }),
-    uniforms: {
-      color: toRGB('#FF5E5B'),
-    },
-  });
+  const { playerId } = getSessionInfo();
+  const nameFromNode = (node: Node) => {
+    return _.find(
+      getPlayers(),
+      player => player.id !== playerId && _.includes(node.playerIds, player.id)
+    ).name;
+  }
+  const nameCommandFromNodeId = (id: string) =>
+    buildPrimitive({
+      regl,
+      mesh: buildTextMesh({
+        scale: 2,
+        text: nameFromNode(getNode(id)),
+      }),
+      uniforms: {
+        color: toRGB('#FF5E5B'),
+      },
+    });
+
   const drawToken = draw(heart);
   const drawNode = draw(circle);
-  const drawHello = draw(hello);
+  const drawName = memoized(draw, nameCommandFromNodeId);
 
   regl.frame(({ time }) => {
     const nodes: Nodes = getOwnNodes();
+    const sharedNodes = _.pickBy(nodes, ['type', 'shared']);
     const tokens: Tokens = getOwnTokens();
 
     regl.clear({
@@ -49,9 +68,6 @@ export default function render(element: HTMLDivElement) {
 
     _.each(tokens, token => drawToken(token.position));
     _.each(nodes, node => drawNode(node.position));
-    drawHello({
-      x: 20,
-      y: 25,
-    });
+    _.each(sharedNodes, node => drawName(node.id)(node.position));
   });
 }

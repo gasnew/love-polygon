@@ -6,6 +6,7 @@ import type Socket from 'socket.io-client';
 
 import type { Phase, SessionInfo } from '../../server/networkTypes';
 import type {
+  Commands,
   Dimensions,
   Node,
   Nodes,
@@ -76,4 +77,8 @@ export function getToken(tokenId: string): Token {
 export function getOwnTokens(): Tokens {
   const nodes = getOwnNodes();
   return _.pickBy(getTokens(), token => nodes[token.nodeId]);
+}
+
+export function getCommands(): Commands {
+  return getState().commands;
 }

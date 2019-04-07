@@ -2,10 +2,15 @@
 
 import _ from 'lodash';
 
-import { getStageDimensions } from './getters';
+import dispatch, { addCommand } from './actions';
+import { getCommands, getStageDimensions } from './getters';
 import type { Command } from './commands';
+import type { Mesh } from './meshes';
 import type { ShaderProps } from './shaders';
 import type { Position } from './state';
+
+type Drawer = Position => Command;
+type Draw = Command => Drawer;
 
 const screenScale = 60;
 
@@ -47,12 +52,28 @@ export function stagifyPosition(position: Position): Position {
   };
 }
 
-export function stagifyVector(vector: number[][][]): Array<number> {
+export function stagifyMesh(vector: Mesh): Array<number> {
   const { width } = getStageDimensions();
   return _.map(_.flattenDeep(vector), value => (value * width) / screenScale);
 }
 
-export default function draw(command: Command) {
+type CommandBuilder = string => Command;
+type MemoizedDrawer = string => Drawer;
+export function memoized(
+  draw: Draw,
+  commandBuilder: CommandBuilder
+): MemoizedDrawer {
+  return id => {
+    const oldCommand = getCommands()[id];
+    if (oldCommand) return draw(oldCommand);
+
+    const command = commandBuilder(id);
+    dispatch(addCommand(id, command));
+    return draw(command);
+  };
+}
+
+export default function draw(command: Command): Drawer {
   return (position: Position) =>
     command({
       ...getStageDimensions(),
