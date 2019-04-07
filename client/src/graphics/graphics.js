@@ -2,12 +2,12 @@
 
 import _ from 'lodash';
 
-import dispatch, { addCommand } from './actions';
-import { getCommands, getStageDimensions } from './getters';
+import dispatch, { addCommand } from '../state/actions';
+import { getCommands, getStageDimensions } from '../state/getters';
 import type { Command } from './commands';
 import type { Mesh } from './meshes';
 import type { ShaderProps } from './shaders';
-import type { Position } from './state';
+import type { Position } from '../state/state';
 
 type Drawer = Position => Command;
 type Draw = Command => Drawer;

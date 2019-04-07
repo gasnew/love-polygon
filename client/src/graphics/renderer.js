@@ -10,11 +10,11 @@ import {
   getOwnTokens,
   getPlayers,
   getSessionInfo,
-} from './getters';
+} from '../state/getters';
 import draw, { memoized, toRGB } from './graphics';
 import { buildCircleMesh, buildHeartMesh, buildTextMesh } from './meshes';
 
-import type { Node, Nodes, Tokens } from './state';
+import type { Node, Nodes, Tokens } from '../state/state';
 
 export default function render(element: HTMLDivElement) {
   const regl = startRegl(element);

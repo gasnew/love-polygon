@@ -10,15 +10,15 @@ import dispatch, {
   setPhase,
   setTokenNodeId,
   setTokenPosition,
-} from './actions';
+} from '../state/actions';
 import {
   getNode,
   getPhase,
   getPlayer,
   getSessionInfo,
   getToken,
-} from './getters';
-import type { ServerState } from '../../server/networkTypes';
+} from '../state/getters';
+import type { ServerState } from '../../../server/networkTypes';
 
 export function socketConnect() {
   console.log('Feel the love connection!');

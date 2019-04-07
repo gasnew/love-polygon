@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 
-import type { Nodes, Position } from './state';
+import type { Nodes, Position } from '../state/state';
 
 type Layout = { [string]: Position };
 

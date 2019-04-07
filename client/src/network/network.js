@@ -1,8 +1,8 @@
 // @flow
 
-import { getSocket } from './getters';
+import { getSocket } from '../state/getters';
 
-import type { Message } from '../../server/networkTypes';
+import type { Message } from '../../../server/networkTypes';
 
 const TRANSFER_TOKEN = 'transferToken';
 

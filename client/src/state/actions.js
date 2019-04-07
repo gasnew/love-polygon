@@ -15,9 +15,9 @@ import {
   getTokens,
   getCommands,
 } from './getters';
-import { layoutNodes } from './layout';
-import type { Phase } from '../../server/networkTypes';
-import type { Command } from './commands';
+import { layoutNodes } from '../graphics/layout';
+import type { Phase } from '../../../server/networkTypes';
+import type { Command } from '../graphics/commands';
 import type { Node, Nodes, NodeType, Player, Token, Tokens } from './state';
 
 const ADD_COMMAND = 'addCommand';

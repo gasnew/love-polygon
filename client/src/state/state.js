@@ -2,8 +2,8 @@
 
 import type Socket from 'socket.io-client';
 
-import type { Phase, SessionInfo } from '../../server/networkTypes';
-import type { Command } from './commands';
+import type { Phase, SessionInfo } from '../../../server/networkTypes';
+import type { Command } from '../graphics/commands';
 
 export type Position = {|
   x: number,
