@@ -34,23 +34,25 @@ export default function render(element: HTMLDivElement) {
     },
   });
   const { playerId } = getSessionInfo();
-  const nameFromNode = (node: Node) => {
+  const otherPlayerFromNode = (node: Node) => {
     return _.find(
       getPlayers(),
       player => player.id !== playerId && _.includes(node.playerIds, player.id)
-    ).name;
+    );
   }
-  const nameCommandFromNodeId = (id: string) =>
-    buildPrimitive({
+  const nameCommandFromNodeId = (id: string) => {
+    const { name, color } = otherPlayerFromNode(getNode(id));
+    return buildPrimitive({
       regl,
       mesh: buildTextMesh({
         scale: 2,
-        text: nameFromNode(getNode(id)),
+        text: name,
       }),
       uniforms: {
-        color: toRGB('#FF5E5B'),
+        color: toRGB(color),
       },
     });
+  }
 
   const drawToken = draw(heart);
   const drawNode = draw(circle);

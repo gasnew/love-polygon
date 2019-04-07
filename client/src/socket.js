@@ -43,7 +43,9 @@ export function updateState(serverState: ServerState) {
   const nodeIsNew = getIsNew(getNode);
 
   const newPlayers = _.filter(players, playerIsNew);
-  _.each(newPlayers, player => dispatch(addPlayer(player.id, player.name)));
+  _.each(newPlayers, player =>
+    dispatch(addPlayer(player.id, player.name, player.color))
+  );
   const newNodes = _.filter(nodes, nodeIsNew);
   _.each(newNodes, node =>
     dispatch(addNode(node.id, node.type, node.playerIds))
@@ -84,7 +86,9 @@ export function setState(serverState: ServerState) {
   const { phase, players, nodes, tokens } = serverState;
   dispatch(setPhase(phase));
   dispatch(clearStage());
-  _.each(players, (player, id) => dispatch(addPlayer(id, player.name)));
+  _.each(players, (player, id) =>
+    dispatch(addPlayer(id, player.name, player.color))
+  );
   _.each(nodes, (node, id) => dispatch(addNode(id, node.type, node.playerIds)));
   _.each(tokens, (token, id) => dispatch(addToken(id, token.nodeId)));
 }

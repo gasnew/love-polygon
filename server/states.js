@@ -1,6 +1,7 @@
 // @flow
 
 import _ from 'lodash';
+import randomColor from 'randomcolor';
 import uniqid from 'uniqid';
 
 import type {
@@ -19,6 +20,7 @@ export function getNewPlayerState({
   playerId,
   playerName,
 }: NewPlayerStateProps): $Shape<ServerState> {
+  const color = randomColor();
   const nodeId1 = uniqid();
   const nodeId2 = uniqid();
   const tokenId = uniqid();
@@ -27,6 +29,7 @@ export function getNewPlayerState({
       [playerId]: {
         id: playerId,
         name: playerName,
+        color,
         active: true,
       },
     },

@@ -64,12 +64,8 @@ export function memoized(
   commandBuilder: CommandBuilder
 ): MemoizedDrawer {
   return id => {
-    const oldCommand = getCommands()[id];
-    if (oldCommand) return draw(oldCommand);
-
-    const command = commandBuilder(id);
-    dispatch(addCommand(id, command));
-    return draw(command);
+    if (!getCommands()[id]) dispatch(addCommand(id, commandBuilder(id)));
+    return draw(getCommands()[id]);
   };
 }
 

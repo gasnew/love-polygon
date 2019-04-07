@@ -18,6 +18,7 @@ export type Dimensions = {|
 export type Player = {
   id: string,
   name: string,
+  color: string,
 };
 
 export type Players = {

@@ -48,6 +48,7 @@ type Action =
       type: 'addPlayer',
       id: string,
       name: string,
+      color: string,
     }
   | {
       type: 'addToken',
@@ -144,11 +145,12 @@ export function setSocket(socket: Socket): Action {
   };
 }
 
-export function addPlayer(id: string, name: string): Action {
+export function addPlayer(id: string, name: string, color: string): Action {
   return {
     type: ADD_PLAYER,
     id,
     name,
+    color,
   };
 }
 
@@ -255,6 +257,7 @@ export default function dispatch(action: Action) {
       mergeIntoPlayers(action.id, {
         id: action.id,
         name: action.name,
+        color: action.color,
       });
       break;
     case ADD_TOKEN:
