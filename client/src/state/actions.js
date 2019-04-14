@@ -18,7 +18,15 @@ import {
 import { layoutNodes } from '../graphics/layout';
 import type { Phase } from '../../../server/networkTypes';
 import type { Command } from '../graphics/commands';
-import type { Node, Nodes, NodeType, Player, Token, Tokens } from './state';
+import type {
+  Node,
+  Nodes,
+  NodeType,
+  Player,
+  Relationships,
+  Token,
+  Tokens,
+} from './state';
 
 const ADD_COMMAND = 'addCommand';
 const ADD_PLAYER = 'addPlayer';
@@ -26,6 +34,7 @@ const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
 const CLEAR_STAGE = 'clearStage';
 const SET_PHASE = 'setPhase';
+const SET_RELATIONSHIPS = 'setRelationships';
 const SET_SOCKET = 'setSocket';
 const SET_NODE_POSITION = 'setNodePosition';
 const SET_TOKEN_POSITION = 'setTokenPosition';
@@ -36,7 +45,7 @@ type Action =
   | {
       type: 'addCommand',
       id: string,
-      command: Command,
+      command: Command<{}>,
     }
   | {
       type: 'addNode',
@@ -61,6 +70,10 @@ type Action =
   | {
       type: 'setPhase',
       phase: Phase,
+    }
+  | {
+      type: 'setRelationships',
+      relationships: Relationships,
     }
   | {
       type: 'setSocket',
@@ -116,7 +129,7 @@ const mergeIntoTokens = (tokenId: string, token: Token) => {
   });
 };
 
-const mergeIntoCommands = (commandId: string, command: Command) => {
+const mergeIntoCommands = (commandId: string, command: Command<{}>) => {
   mergeIntoState('commands', {
     ...getCommands(),
     [commandId]: command,
@@ -175,7 +188,7 @@ export function addToken(id: string, nodeId: string): Action {
   };
 }
 
-export function addCommand(id: string, command: Command): Action {
+export function addCommand(id: string, command: Command<{}>): Action {
   return {
     type: ADD_COMMAND,
     id,
@@ -223,6 +236,13 @@ export function setCurrentTokenId(tokenId: ?string): Action {
   return {
     type: SET_CURRENT_TOKEN,
     tokenId,
+  };
+}
+
+export function setRelationships(relationships: Relationships): Action {
+  return {
+    type: SET_RELATIONSHIPS,
+    relationships,
   };
 }
 
@@ -287,6 +307,9 @@ export default function dispatch(action: Action) {
           y: action.y,
         },
       });
+      break;
+    case SET_RELATIONSHIPS:
+      mergeIntoState('relationships', action.relationships);
       break;
     case SET_TOKEN_POSITION:
       mergeIntoTokens(action.tokenId, {

@@ -20,8 +20,8 @@ export function layoutNodes(nodes: Nodes): Layout {
     'id'
   );
   return {
-    ...layout(storageNodeIds, 40),
-    ...layout(sharedNodeIds, 20),
+    ...layout(storageNodeIds, 50),
+    ...layout(sharedNodeIds, 30),
     ...layout(loveBucketNodeIds, 20),
   };
 }

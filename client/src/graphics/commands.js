@@ -6,7 +6,7 @@ import type { Regl } from 'regl';
 import { primitiveVertexShader, solidFragmentShader } from './shaders';
 import type { ShaderProps } from './shaders';
 
-export type Command = ShaderProps => any;
+export type Command<Props: {}> = ({ ...ShaderProps, ...Props }) => void;
 export type Uniforms = {
   color: Array<number>,
 };
@@ -23,7 +23,7 @@ export function buildPrimitive({
   mesh,
   fragmentShader = solidFragmentShader,
   uniforms = {},
-}: Props): Command {
+}: Props): Command<{}> {
   return regl({
     frag: solidFragmentShader,
     vert: primitiveVertexShader,

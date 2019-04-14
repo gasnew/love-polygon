@@ -1,5 +1,6 @@
 // @flow
 
+import hashObject from 'object-hash';
 import _ from 'lodash';
 
 import dispatch, { addCommand } from '../state/actions';
@@ -9,8 +10,7 @@ import type { Mesh } from './meshes';
 import type { ShaderProps } from './shaders';
 import type { Position } from '../state/state';
 
-type Drawer = Position => Command;
-type Draw = Command => Drawer;
+type Drawer<Props: {}> = (Position, ?Props) => void;
 
 const screenScale = 60;
 
@@ -57,22 +57,25 @@ export function stagifyMesh(vector: Mesh): Array<number> {
   return _.map(_.flattenDeep(vector), value => (value * width) / screenScale);
 }
 
-type CommandBuilder = string => Command;
-type MemoizedDrawer = string => Drawer;
-export function memoized(
-  draw: Draw,
-  commandBuilder: CommandBuilder
-): MemoizedDrawer {
-  return id => {
-    if (!getCommands()[id]) dispatch(addCommand(id, commandBuilder(id)));
-    return draw(getCommands()[id]);
-  };
-}
-
-export default function draw(command: Command): Drawer {
-  return (position: Position) =>
+export default function draw<Props: {}>(command: Command<Props>): Drawer<Props> {
+  return (position: Position, props: ?Props) => {
     command({
       ...getStageDimensions(),
       ...vectorize(stagifyPosition(position)),
+      ...props,
     });
+  };
+}
+
+type CommandBuilder<Props> = Props => Command<{}>;
+export function cached<Props: {}>(
+  commandBuilder: CommandBuilder<Props>
+): Command<Props> {
+  return (params: { ...ShaderProps, ...Props }) => {
+    const builderParams = _.omit(params, ['location', 'height', 'width']);
+    const hash = hashObject(builderParams);
+    if (!getCommands()[hash])
+      dispatch(addCommand(hash, commandBuilder(builderParams)));
+    getCommands()[hash](params);
+  };
 }

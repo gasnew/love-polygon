@@ -49,8 +49,20 @@ export type Nodes = {
   [string]: Node,
 };
 
+export type RelationshipType = 'crush' | 'wingman';
+export type Relationship = {|
+  id: string,
+  type: RelationshipType,
+  fromId: string,
+  toId: string,
+|};
+
+export type Relationships = {
+  [string]: Relationship,
+};
+
 export type Commands = {
-  [string]: Command,
+  [string]: Command<{}>,
 };
 
 export type State = {|
@@ -61,6 +73,7 @@ export type State = {|
   players: Players,
   tokens: Tokens,
   nodes: Nodes,
+  relationships: Relationships,
   commands: Commands,
 |};
 
@@ -76,6 +89,7 @@ export default function generateState(
     players: {},
     tokens: {},
     nodes: {},
+    relationships: {},
     commands: {},
   };
 }

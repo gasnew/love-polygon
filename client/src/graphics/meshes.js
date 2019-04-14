@@ -7,6 +7,11 @@ import { stagifyMesh } from './graphics';
 
 export type Mesh = number[][][];
 
+type RectProps = {
+  width: number,
+  height: number,
+};
+
 type CircleProps = {
   scale: number,
   steps: number,
@@ -22,7 +27,7 @@ type TextProps = {
   text: string,
 };
 
-function getMeshBuilder({ getX, getY }) {
+function getPolarMeshBuilder({ getX, getY }) {
   return steps => {
     const tau = 2 * Math.PI;
     const angleStep = (2 * Math.PI) / steps;
@@ -38,14 +43,14 @@ function getMeshBuilder({ getX, getY }) {
 }
 
 export function buildCircleMesh({ scale, steps }: CircleProps): Array<number> {
-  return getMeshBuilder({
+  return getPolarMeshBuilder({
     getX: angle => scale * Math.cos(angle),
     getY: angle => scale * Math.sin(angle),
   })(steps);
 }
 
 export function buildHeartMesh({ scale, steps }: HeartProps): Array<number> {
-  return getMeshBuilder({
+  return getPolarMeshBuilder({
     getX: angle => scale * Math.sin(angle) ** 3,
     getY: angle =>
       scale *
@@ -54,6 +59,22 @@ export function buildHeartMesh({ scale, steps }: HeartProps): Array<number> {
         0.125 * Math.cos(3 * angle) +
         0.0625 * Math.cos(4 * angle)),
   })(steps);
+}
+
+export function buildRectMesh({ width, height }: RectProps): Array<number> {
+  const halfWidth = width / 2;
+  const halfHeight = height / 2;
+  const corners = [
+    [-halfWidth, -halfHeight],
+    [-halfWidth, halfHeight],
+    [halfWidth, halfHeight],
+    [halfWidth, -halfHeight],
+  ];
+  const mesh = [
+    [corners[0], corners[1], corners[2]],
+    [corners[2], corners[3], corners[0]],
+  ]
+  return stagifyMesh(mesh);
 }
 
 export function circlify(mesh: Mesh, radius: number): Mesh {

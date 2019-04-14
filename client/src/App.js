@@ -1,7 +1,6 @@
 // @flow
 
 import React, { Component } from 'react';
-import uniqid from 'uniqid';
 
 import Game from './Game';
 import LandingPage from './LandingPage';

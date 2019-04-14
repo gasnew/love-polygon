@@ -12,6 +12,8 @@ import type {
   Nodes,
   Player,
   Players,
+  Relationship,
+  Relationships,
   State,
   Token,
   Tokens,
@@ -77,6 +79,15 @@ export function getToken(tokenId: string): Token {
 export function getOwnTokens(): Tokens {
   const nodes = getOwnNodes();
   return _.pickBy(getTokens(), token => nodes[token.nodeId]);
+}
+
+export function getRelationships(): Relationships {
+  return getState().relationships;
+}
+
+export function getOwnRelationship(): Relationship {
+  const { playerId } = getSessionInfo();
+  return _.find(getRelationships(), ['fromId', playerId]);
 }
 
 export function getCommands(): Commands {
