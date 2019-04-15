@@ -3,8 +3,6 @@
 import _ from 'lodash';
 import vectorizeText from 'vectorize-text';
 
-import { stagifyMesh } from './graphics';
-
 export type Mesh = number[][][];
 
 type RectProps = {
@@ -32,24 +30,22 @@ function getPolarMeshBuilder({ getX, getY }) {
     const tau = 2 * Math.PI;
     const angleStep = (2 * Math.PI) / steps;
     const edge = angle => [getX(angle), getY(angle)];
-    return stagifyMesh(
-      _.map(_.range(0, tau, angleStep), angle => [
-        [0, 0],
-        edge(angle + angleStep),
-        edge(angle),
-      ])
-    );
+    return _.map(_.range(0, tau, angleStep), angle => [
+      [0, 0],
+      edge(angle + angleStep),
+      edge(angle),
+    ]);
   };
 }
 
-export function buildCircleMesh({ scale, steps }: CircleProps): Array<number> {
+export function buildCircleMesh({ scale, steps }: CircleProps): Mesh {
   return getPolarMeshBuilder({
     getX: angle => scale * Math.cos(angle),
     getY: angle => scale * Math.sin(angle),
   })(steps);
 }
 
-export function buildHeartMesh({ scale, steps }: HeartProps): Array<number> {
+export function buildHeartMesh({ scale, steps }: HeartProps): Mesh {
   return getPolarMeshBuilder({
     getX: angle => scale * Math.sin(angle) ** 3,
     getY: angle =>
@@ -61,7 +57,7 @@ export function buildHeartMesh({ scale, steps }: HeartProps): Array<number> {
   })(steps);
 }
 
-export function buildRectMesh({ width, height }: RectProps): Array<number> {
+export function buildRectMesh({ width, height }: RectProps): Mesh {
   const halfWidth = width / 2;
   const halfHeight = height / 2;
   const corners = [
@@ -74,7 +70,7 @@ export function buildRectMesh({ width, height }: RectProps): Array<number> {
     [corners[0], corners[1], corners[2]],
     [corners[2], corners[3], corners[0]],
   ];
-  return stagifyMesh(mesh);
+  return mesh;
 }
 
 export function circlify(mesh: Mesh, radius: number): Mesh {
@@ -115,11 +111,9 @@ function buildUnstagifiedTextMesh({ scale, text }: TextProps): Mesh {
   );
   return mesh;
 }
-export function buildTextMesh(props: TextProps): number[] {
-  return stagifyMesh(buildUnstagifiedTextMesh(props));
+export function buildTextMesh(props: TextProps): Mesh {
+  return buildUnstagifiedTextMesh(props);
 }
-export function buildCircularTextMesh(props: TextProps): number[] {
-  return stagifyMesh(
-    circlify(buildUnstagifiedTextMesh(props), props.scale + 5)
-  );
+export function buildCircularTextMesh(props: TextProps): Mesh {
+  return circlify(buildUnstagifiedTextMesh(props), props.scale + 5);
 }

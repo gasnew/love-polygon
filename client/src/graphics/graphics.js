@@ -3,9 +3,9 @@
 import hashObject from 'object-hash';
 import _ from 'lodash';
 
-import dispatch, { addCommand } from '../state/actions';
-import { getCommands, getStageDimensions } from '../state/getters';
-import type { Command } from './commands';
+import dispatch, { addVisualObject } from '../state/actions';
+import { getVisualObjects, getStageDimensions } from '../state/getters';
+import type { VisualObject } from './visualObjects';
 import type { Mesh } from './meshes';
 import type { ShaderProps } from './shaders';
 import type { Position } from '../state/state';
@@ -57,9 +57,11 @@ export function stagifyMesh(vector: Mesh): Array<number> {
   return _.map(_.flattenDeep(vector), value => (value * width) / screenScale);
 }
 
-export default function draw<Props: {}>(command: Command<Props>): Drawer<Props> {
+export default function draw<Props: {}>(
+  visualObject: VisualObject<Props>
+): Drawer<Props> {
   return (position: Position, props: ?Props) => {
-    command({
+    visualObject.command({
       ...getStageDimensions(),
       ...vectorize(stagifyPosition(position)),
       ...props,
@@ -67,15 +69,26 @@ export default function draw<Props: {}>(command: Command<Props>): Drawer<Props> 
   };
 }
 
-export type CommandBuilder<Props> = Props => Command<{}>;
+export type VisualObjectBuilder<Props> = Props => VisualObject<{}>;
 export function cached<Props: {}>(
-  commandBuilder: CommandBuilder<Props>
-): Command<Props> {
-  return (params: { ...ShaderProps, ...Props }) => {
-    const builderParams = _.omit(params, ['location', 'height', 'width']);
-    const hash = hashObject(builderParams);
-    if (!getCommands()[hash])
-      dispatch(addCommand(hash, commandBuilder(builderParams)));
-    getCommands()[hash](params);
+  visualObjectBuilder: VisualObjectBuilder<Props>
+): $Shape<VisualObject<Props>> {
+  return {
+    command: (params: { ...ShaderProps, ...Props }) => {
+      const builderParams = _.omit(params, ['location', 'height', 'width']);
+      const hash = hashObject(builderParams);
+      if (!getVisualObjects()[hash]) {
+        const visualObject = visualObjectBuilder(builderParams);
+        dispatch(
+          addVisualObject(
+            hash,
+            visualObject.command,
+            visualObject.height,
+            visualObject.width
+          )
+        );
+      }
+      getVisualObjects()[hash].command(params);
+    },
   };
 }

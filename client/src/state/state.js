@@ -3,7 +3,7 @@
 import type Socket from 'socket.io-client';
 
 import type { Phase, SessionInfo } from '../../../server/networkTypes';
-import type { Command } from '../graphics/commands';
+import type { VisualObject } from '../graphics/visualObjects';
 
 export type Position = {|
   x: number,
@@ -61,8 +61,8 @@ export type Relationships = {
   [string]: Relationship,
 };
 
-export type Commands = {
-  [string]: Command<{}>,
+export type VisualObjects = {
+  [string]: VisualObject<{}>,
 };
 
 export type State = {|
@@ -74,7 +74,7 @@ export type State = {|
   tokens: Tokens,
   nodes: Nodes,
   relationships: Relationships,
-  commands: Commands,
+  visualObjects: VisualObjects,
 |};
 
 export default function generateState(
@@ -90,6 +90,6 @@ export default function generateState(
     tokens: {},
     nodes: {},
     relationships: {},
-    commands: {},
+    visualObjects: {},
   };
 }

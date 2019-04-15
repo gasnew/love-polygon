@@ -13,7 +13,7 @@ import {
   buildCircle,
   buildCircularText,
   buildHeart,
-} from './commands';
+} from './visualObjects';
 import { banner } from './components';
 import draw, { cached, toRGB } from './graphics';
 

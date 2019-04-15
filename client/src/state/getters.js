@@ -6,7 +6,7 @@ import type Socket from 'socket.io-client';
 
 import type { Phase, SessionInfo } from '../../../server/networkTypes';
 import type {
-  Commands,
+  VisualObjects,
   Dimensions,
   Node,
   Nodes,
@@ -90,6 +90,6 @@ export function getOwnRelationship(): Relationship {
   return _.find(getRelationships(), ['fromId', playerId]);
 }
 
-export function getCommands(): Commands {
-  return getState().commands;
+export function getVisualObjects(): VisualObjects {
+  return getState().visualObjects;
 }

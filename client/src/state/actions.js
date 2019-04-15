@@ -13,11 +13,11 @@ import {
   getOwnTokens,
   getToken,
   getTokens,
-  getCommands,
+  getVisualObjects,
 } from './getters';
 import { layoutNodes } from '../graphics/layout';
 import type { Phase } from '../../../server/networkTypes';
-import type { Command } from '../graphics/commands';
+import type { Command, VisualObject } from '../graphics/visualObjects';
 import type {
   Node,
   Nodes,
@@ -28,7 +28,7 @@ import type {
   Tokens,
 } from './state';
 
-const ADD_COMMAND = 'addCommand';
+const ADD_VISUAL_OBJECT = 'addVisualObject';
 const ADD_PLAYER = 'addPlayer';
 const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
@@ -43,9 +43,11 @@ const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 
 type Action =
   | {
-      type: 'addCommand',
+      type: 'addVisualObject',
       id: string,
       command: Command<{}>,
+      height: number,
+      width: number,
     }
   | {
       type: 'addNode',
@@ -129,10 +131,13 @@ const mergeIntoTokens = (tokenId: string, token: Token) => {
   });
 };
 
-const mergeIntoCommands = (commandId: string, command: Command<{}>) => {
-  mergeIntoState('commands', {
-    ...getCommands(),
-    [commandId]: command,
+const mergeIntoVisualObjects = (
+  visualObjectId: string,
+  visualObject: VisualObject<{}>
+) => {
+  mergeIntoState('visualObjects', {
+    ...getVisualObjects(),
+    [visualObjectId]: visualObject,
   });
 };
 
@@ -188,11 +193,18 @@ export function addToken(id: string, nodeId: string): Action {
   };
 }
 
-export function addCommand(id: string, command: Command<{}>): Action {
+export function addVisualObject(
+  id: string,
+  command: Command<{}>,
+  height: number,
+  width: number
+): Action {
   return {
-    type: ADD_COMMAND,
+    type: ADD_VISUAL_OBJECT,
     id,
     command,
+    height,
+    width,
   };
 }
 
@@ -248,8 +260,12 @@ export function setRelationships(relationships: Relationships): Action {
 
 export default function dispatch(action: Action) {
   switch (action.type) {
-    case ADD_COMMAND:
-      mergeIntoCommands(action.id, action.command);
+    case ADD_VISUAL_OBJECT:
+      mergeIntoVisualObjects(action.id, {
+        command: action.command,
+        height: action.height,
+        width: action.width,
+      });
       break;
     case ADD_NODE:
       mergeIntoNodes(action.id, {
