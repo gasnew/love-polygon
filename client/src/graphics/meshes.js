@@ -73,7 +73,7 @@ export function buildRectMesh({ width, height }: RectProps): Array<number> {
   const mesh = [
     [corners[0], corners[1], corners[2]],
     [corners[2], corners[3], corners[0]],
-  ]
+  ];
   return stagifyMesh(mesh);
 }
 
@@ -87,7 +87,7 @@ export function circlify(mesh: Mesh, radius: number): Mesh {
   );
 }
 
-export function buildTextMesh({ scale, text }: TextProps): Array<number> {
+function buildUnstagifiedTextMesh({ scale, text }: TextProps): Mesh {
   const vectorized = vectorizeText(text, {
     triangles: true,
     textBaseline: 'middle',
@@ -113,5 +113,13 @@ export function buildTextMesh({ scale, text }: TextProps): Array<number> {
     ],
     []
   );
-  return stagifyMesh(circlify(mesh, scale + 5));
+  return mesh;
+}
+export function buildTextMesh(props: TextProps): number[] {
+  return stagifyMesh(buildUnstagifiedTextMesh(props));
+}
+export function buildCircularTextMesh(props: TextProps): number[] {
+  return stagifyMesh(
+    circlify(buildUnstagifiedTextMesh(props), props.scale + 5)
+  );
 }

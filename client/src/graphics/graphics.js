@@ -67,7 +67,7 @@ export default function draw<Props: {}>(command: Command<Props>): Drawer<Props> 
   };
 }
 
-type CommandBuilder<Props> = Props => Command<{}>;
+export type CommandBuilder<Props> = Props => Command<{}>;
 export function cached<Props: {}>(
   commandBuilder: CommandBuilder<Props>
 ): Command<Props> {

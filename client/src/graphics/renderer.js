@@ -3,9 +3,13 @@
 import _ from 'lodash';
 import startRegl from 'regl';
 
-import { buildPrimitive } from './commands';
 import {
-  getNode,
+  buildCircle,
+  buildCircularText,
+  buildHeart,
+  buildText,
+} from './commands';
+import {
   getOwnNodes,
   getOwnTokens,
   getPlayers,
@@ -13,55 +17,30 @@ import {
   getSessionInfo,
 } from '../state/getters';
 import draw, { cached, toRGB } from './graphics';
-import {
-  buildCircleMesh,
-  buildHeartMesh,
-  buildRectMesh,
-  buildTextMesh,
-} from './meshes';
 
 import type { Node, Nodes, Tokens } from '../state/state';
 
 export default function render(element: HTMLDivElement) {
   const regl = startRegl(element);
 
-  const heart = buildPrimitive({
-    regl,
-    mesh: buildHeartMesh({ scale: 6, steps: 50 }),
-    uniforms: {
-      color: toRGB('#FF5E5B'),
-    },
-  });
-  const circle = buildPrimitive({
-    regl,
-    mesh: buildCircleMesh({ scale: 6, steps: 50 }),
-    uniforms: {
-      color: toRGB('#D6EFFF'),
-    },
-  });
-  const { playerId } = getSessionInfo();
   const otherPlayerFromNode = (node: Node) => {
     return _.find(
       getPlayers(),
-      player => player.id !== playerId && _.includes(node.playerIds, player.id)
+      player =>
+        player.id !== getSessionInfo().playerId &&
+        _.includes(node.playerIds, player.id)
     );
   };
-  const text = ({ text, color }: { text: string, color?: string }) => {
-    return buildPrimitive({
-      regl,
-      mesh: buildTextMesh({
-        scale: 2,
-        text,
-      }),
-      uniforms: {
-        color: toRGB(color || '#000000'),
-      },
-    });
-  };
+
+  const heart = buildHeart(regl);
+  const circle = buildCircle(regl);
+  const text = cached(buildText(regl));
+  const circularText = cached(buildCircularText(regl));
 
   const drawToken = draw(heart);
   const drawNode = draw(circle);
-  const drawText = draw(cached(text));
+  const drawText = draw(text);
+  const drawName = draw(circularText);
 
   regl.frame(({ time }) => {
     const nodes: Nodes = getOwnNodes();
@@ -81,7 +60,7 @@ export default function render(element: HTMLDivElement) {
     _.each(nodes, node => drawNode(node.position));
     _.each(sharedNodes, node => {
       const { name, color } = otherPlayerFromNode(node);
-      drawText(node.position, { text: name, color });
+      drawName(node.position, { text: name, color });
     });
   });
 }

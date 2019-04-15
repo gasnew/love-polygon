@@ -3,7 +3,16 @@
 import _ from 'lodash';
 import type { Regl } from 'regl';
 
+import { toRGB } from './graphics';
+import {
+  buildCircleMesh,
+  buildCircularTextMesh,
+  buildHeartMesh,
+  buildRectMesh,
+  buildTextMesh,
+} from './meshes';
 import { primitiveVertexShader, solidFragmentShader } from './shaders';
+import type { CommandBuilder } from './graphics';
 import type { ShaderProps } from './shaders';
 
 export type Command<Props: {}> = ({ ...ShaderProps, ...Props }) => void;
@@ -39,6 +48,60 @@ export function buildPrimitive({
       ...uniforms,
     },
 
-    count: _.flattenDeep(mesh).length / 2,
+    count: mesh.length / 2,
   });
+}
+
+export function buildHeart(regl: Regl): Command<{}> {
+  return buildPrimitive({
+    regl,
+    mesh: buildHeartMesh({ scale: 6, steps: 50 }),
+    uniforms: {
+      color: toRGB('#FF5E5B'),
+    },
+  });
+}
+
+export function buildCircle(regl: Regl): Command<{}> {
+  return buildPrimitive({
+    regl,
+    mesh: buildCircleMesh({ scale: 6, steps: 50 }),
+    uniforms: {
+      color: toRGB('#D6EFFF'),
+    },
+  });
+}
+
+type TextProps = {
+  text: string,
+  color?: string,
+};
+function buildTextBase(
+  regl: Regl,
+  buildMesh: string => number[]
+): CommandBuilder<TextProps> {
+  return ({ text, color }: TextProps) =>
+    buildPrimitive({
+      regl,
+      mesh: buildMesh(text),
+      uniforms: {
+        color: toRGB(color || '#000000'),
+      },
+    });
+}
+export function buildText(regl: Regl): CommandBuilder<TextProps> {
+  return buildTextBase(regl, text =>
+    buildTextMesh({
+      scale: 2,
+      text,
+    })
+  );
+}
+export function buildCircularText(regl: Regl): CommandBuilder<TextProps> {
+  return buildTextBase(regl, text =>
+    buildCircularTextMesh({
+      scale: 2,
+      text,
+    })
+  );
 }
