@@ -72,6 +72,16 @@ export function buildCircle(regl: Regl): Command<{}> {
   });
 }
 
+export function buildRect(regl: Regl): Command<{}> {
+  return buildPrimitive({
+    regl,
+    mesh: buildRectMesh({ width: 60, height: 15 }),
+    uniforms: {
+      color: toRGB('#555555'),
+    },
+  });
+}
+
 type TextProps = {
   text: string,
   color?: string,
