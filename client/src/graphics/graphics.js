@@ -1,10 +1,8 @@
 // @flow
 
-import hashObject from 'object-hash';
 import _ from 'lodash';
 
-import dispatch, { addVisualObject } from '../state/actions';
-import { getVisualObjects, getStageDimensions } from '../state/getters';
+import { getOrBuildVisualObject, getStageDimensions } from '../state/getters';
 import type { VisualObject } from './visualObjects';
 import type { Mesh } from './meshes';
 import type { ShaderProps } from './shaders';
@@ -76,19 +74,9 @@ export function cached<Props: {}>(
   return {
     command: (params: { ...ShaderProps, ...Props }) => {
       const builderParams = _.omit(params, ['location', 'height', 'width']);
-      const hash = hashObject(builderParams);
-      if (!getVisualObjects()[hash]) {
-        const visualObject = visualObjectBuilder(builderParams);
-        dispatch(
-          addVisualObject(
-            hash,
-            visualObject.command,
-            visualObject.height,
-            visualObject.width
-          )
-        );
-      }
-      getVisualObjects()[hash].command(params);
+      getOrBuildVisualObject(visualObjectBuilder, builderParams).command(
+        params
+      );
     },
   };
 }
