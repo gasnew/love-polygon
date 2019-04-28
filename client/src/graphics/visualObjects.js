@@ -103,33 +103,23 @@ export function buildRect(regl: Regl): VisualObject<{}> {
 type TextProps = {
   text: string,
   color?: string,
+  circular?: boolean,
 };
-function buildTextBase(
-  regl: Regl,
-  buildMesh: string => Mesh
-): VisualObjectBuilder<TextProps> {
-  return ({ text, color }: TextProps) =>
+export function buildText(regl: Regl): VisualObjectBuilder<TextProps> {
+  return ({ text, color, circular }: TextProps) =>
     buildPrimitive({
       regl,
-      mesh: buildMesh(text),
+      mesh: circular
+        ? buildCircularTextMesh({
+            scale: 2,
+            text,
+          })
+        : buildTextMesh({
+            scale: 2,
+            text,
+          }),
       uniforms: {
         color: toRGB(color || '#000000'),
       },
     });
-}
-export function buildText(regl: Regl): VisualObjectBuilder<TextProps> {
-  return buildTextBase(regl, text =>
-    buildTextMesh({
-      scale: 2,
-      text,
-    })
-  );
-}
-export function buildCircularText(regl: Regl): VisualObjectBuilder<TextProps> {
-  return buildTextBase(regl, text =>
-    buildCircularTextMesh({
-      scale: 2,
-      text,
-    })
-  );
 }

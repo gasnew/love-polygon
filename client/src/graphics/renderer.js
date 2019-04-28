@@ -11,7 +11,7 @@ import {
 } from '../state/getters';
 import {
   buildCircle,
-  buildCircularText,
+  buildText,
   buildHeart,
 } from './visualObjects';
 import { banner } from './components';
@@ -33,7 +33,7 @@ export default function render(element: HTMLDivElement) {
 
   const drawToken = draw(buildHeart(regl));
   const drawNode = draw(buildCircle(regl));
-  const drawName = draw(cached(buildCircularText(regl)));
+  const drawName = draw(cached(buildText(regl)));
   const drawBanner = banner(regl);
 
   regl.frame(({ time }) => {
@@ -48,10 +48,10 @@ export default function render(element: HTMLDivElement) {
 
     drawBanner();
     _.each(tokens, token => drawToken(token.position));
-    _.each(nodes, node => drawNode(node.position));
     _.each(sharedNodes, node => {
       const { name, color } = otherPlayerFromNode(node);
-      drawName(node.position, { text: name, color });
+      drawName(node.position, { text: name, color, circular: true });
     });
+    _.each(nodes, node => drawNode(node.position));
   });
 }
