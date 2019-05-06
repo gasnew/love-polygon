@@ -107,11 +107,11 @@ export function getOrBuildVisualObject<Props>(
   props: Props
 ): VisualObject<{}> {
   const hash = hashObject(props);
-  if (!getVisualObjects()[hash]) {
+  if (!getVisualObject(hash)) {
     const { command, height, width } = visualObjectBuilder(props);
     dispatch(addVisualObject(hash, command, height, width));
   }
-  return getVisualObjects()[hash];
+  return getVisualObject(hash);
 }
 
 export function getVisualObjectFromProps<Props>(
