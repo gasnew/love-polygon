@@ -14,7 +14,7 @@ export type Players = {|
   |},
 |};
 
-type NodeType = 'storage' | 'shared' | 'loveBucket';
+export type NodeType = 'storage' | 'shared' | 'loveBucket';
 export type Nodes = {|
   [string]: {|
     id: string,
@@ -23,10 +23,12 @@ export type Nodes = {|
   |},
 |};
 
+export type TokenType = 'heart' | 'cookie' | 'cake' | 'candy';
 export type Tokens = {|
   [string]: {|
     id: string,
     nodeId: string,
+    type: TokenType,
   |},
 |};
 

@@ -5,7 +5,7 @@ import vectorizeText from 'vectorize-text';
 
 export type Mesh = number[][][];
 
-type RectProps = {
+export type RectProps = {
   width: number,
   height: number,
 };
@@ -40,8 +40,8 @@ function getPolarMeshBuilder({ getX, getY }) {
 
 export function buildCircleMesh({ scale, steps }: CircleProps): Mesh {
   return getPolarMeshBuilder({
-    getX: angle => scale * Math.cos(angle),
-    getY: angle => scale * Math.sin(angle),
+    getX: angle => scale * Math.sin(angle),
+    getY: angle => -scale * Math.cos(angle),
   })(steps);
 }
 

@@ -16,12 +16,11 @@ import {
   getVisualObjects,
 } from './getters';
 import { layoutNodes } from '../graphics/layout';
-import type { Phase } from '../../../server/networkTypes';
+import type { NodeType, Phase, TokenType } from '../../../server/networkTypes';
 import type { Command, VisualObject } from '../graphics/visualObjects';
 import type {
   Node,
   Nodes,
-  NodeType,
   Player,
   Relationships,
   Token,
@@ -64,6 +63,7 @@ type Action =
   | {
       type: 'addToken',
       id: string,
+      tokenType: TokenType,
       nodeId: string,
     }
   | {
@@ -185,10 +185,11 @@ export function addNode(
   };
 }
 
-export function addToken(id: string, nodeId: string): Action {
+export function addToken(id: string, type: TokenType, nodeId: string): Action {
   return {
     type: ADD_TOKEN,
     id,
+    tokenType: type,
     nodeId,
   };
 }
@@ -300,6 +301,7 @@ export default function dispatch(action: Action) {
       const node = getNode(action.nodeId);
       mergeIntoTokens(action.id, {
         id: action.id,
+        type: action.tokenType,
         position: node.position,
         radius: 10,
         nodeId: action.nodeId,

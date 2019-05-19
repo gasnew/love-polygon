@@ -2,7 +2,12 @@
 
 import type Socket from 'socket.io-client';
 
-import type { Phase, SessionInfo } from '../../../server/networkTypes';
+import type {
+  NodeType,
+  Phase,
+  SessionInfo,
+  TokenType,
+} from '../../../server/networkTypes';
 import type { VisualObject } from '../graphics/visualObjects';
 
 export type Position = {|
@@ -27,6 +32,7 @@ export type Players = {
 
 export type Token = {|
   id: string,
+  type: TokenType,
   position: Position,
   radius: number,
   nodeId: string,
@@ -36,7 +42,6 @@ export type Tokens = {
   [string]: Token,
 };
 
-export type NodeType = 'storage' | 'shared' | 'loveBucket';
 export type Node = {|
   id: string,
   type: NodeType,

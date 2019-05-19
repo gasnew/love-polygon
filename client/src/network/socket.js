@@ -52,7 +52,9 @@ export function updateState(serverState: ServerState) {
     dispatch(addNode(node.id, node.type, node.playerIds))
   );
   const newTokens = _.filter(tokens, tokenIsNew);
-  _.each(newTokens, token => dispatch(addToken(token.id, token.nodeId)));
+  _.each(newTokens, token =>
+    dispatch(addToken(token.id, token.type, token.nodeId))
+  );
 
   _.each(tokens, serverToken => {
     // Update if not an internal move (node playerIds haven't changed)
@@ -91,6 +93,8 @@ export function setState(serverState: ServerState) {
     dispatch(addPlayer(id, player.name, player.color))
   );
   _.each(nodes, (node, id) => dispatch(addNode(id, node.type, node.playerIds)));
-  _.each(tokens, (token, id) => dispatch(addToken(id, token.nodeId)));
+  _.each(tokens, (token, id) =>
+    dispatch(addToken(id, token.type, token.nodeId))
+  );
   dispatch(setRelationships(relationships));
 }

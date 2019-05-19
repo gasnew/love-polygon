@@ -113,9 +113,3 @@ export function getOrBuildVisualObject<Props>(
   }
   return getVisualObject(hash);
 }
-
-export function getVisualObjectFromProps<Props>(
-  props: Props
-): VisualObject<{}> {
-  return getVisualObject(hashObject(props));
-}

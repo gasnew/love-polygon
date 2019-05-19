@@ -49,6 +49,7 @@ export function getNewPlayerState({
       [tokenId]: {
         id: tokenId,
         nodeId: nodeId1,
+        type: 'heart',
       },
     },
   };
@@ -183,6 +184,7 @@ export function getRomanceState({
             [tokenId]: {
               id: tokenId,
               nodeId: node.id,
+              type: _.sample(['cookie', 'cake', 'candy']),
             },
           };
         },

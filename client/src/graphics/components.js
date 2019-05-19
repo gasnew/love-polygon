@@ -6,7 +6,6 @@ import {
   getOrBuildVisualObject,
   getOwnRelationship,
   getPlayers,
-  getVisualObjectFromProps,
 } from '../state/getters';
 import { buildRect, buildText } from './visualObjects';
 import draw, { cached } from './graphics';
@@ -27,7 +26,7 @@ export function banner(regl: Regl): Component<void> {
 
     const relationshipProps = {
       text:
-        relationship.type == 'crush'
+        relationship.type === 'crush'
           ? 'You have a crush on'
           : 'You are a wingman for',
       color: '#FFFFFF',

@@ -11,8 +11,10 @@ import {
 } from '../state/getters';
 import {
   buildCircle,
-  buildText,
   buildHeart,
+  buildRect,
+  buildText,
+  buildTriangle,
 } from './visualObjects';
 import { banner } from './components';
 import draw, { cached, toRGB } from './graphics';
@@ -31,7 +33,13 @@ export default function render(element: HTMLDivElement) {
     );
   };
 
-  const drawToken = draw(buildHeart(regl));
+  const drawToken = {
+    heart: draw(buildHeart(regl)),
+    cookie: draw(buildTriangle(regl)),
+    cake: draw(buildRect(regl, { width: 6, height: 6, color: '#0000ff' })),
+    candy: draw(buildCircle(regl, { scale: 5, color: '#00ffff' })),
+  }
+
   const drawNode = draw(buildCircle(regl));
   const drawName = draw(cached(buildText(regl)));
   const drawBanner = banner(regl);
@@ -47,7 +55,7 @@ export default function render(element: HTMLDivElement) {
     });
 
     drawBanner();
-    _.each(tokens, token => drawToken(token.position));
+    _.each(tokens, token => drawToken[token.type](token.position));
     _.each(sharedNodes, node => {
       const { name, color } = otherPlayerFromNode(node);
       drawName(node.position, { text: name, color, circular: true });

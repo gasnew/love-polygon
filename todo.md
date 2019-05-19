@@ -13,8 +13,8 @@
 + Server provides goals/relationships with nodes
   + Render text to indicate shared node ownership
   + Render text to indicate relationship
-- Cake, cookies, and candy
-  - Add three types of tokens
+/ Cake, cookies, and candy
+  + Add three types of tokens
   - Add needs
 - Button to cause round-ending timer when need is met
 - Playtest 1! (Voting will be done on paper)
@@ -50,6 +50,7 @@
   - Or, transfers to another player can only occur from shared nodes
 - Multiple players of the same name can be created if both validate successfully and then join socket. I.e., no socket validation
   -  Solution: Force disconnect in this case (relies on top feature to fit in
+- After switching to fullscreen, I will receive state updates, even for moves I make
 
 ## Features to fit in
 - When the client disconnects, return to the landing page with session info pre-entered
