@@ -3,17 +3,17 @@
 import _ from 'lodash';
 import type { TouchEvent } from 'touches';
 
-import dispatch, { setTokenPosition, setTokenNodeId, setCurrentTokenId } from './actions';
+import dispatch, { setTokenPosition, setTokenNodeId, setCurrentTokenId } from './state/actions';
 import {
   getCurrentTokenId,
   getNode,
   getOwnNodes,
   getToken,
   getOwnTokens,
-} from './getters';
-import { unstagify, unVectorize } from './graphics';
-import announce, { transferToken } from './network';
-import type { Position } from './state';
+} from './state/getters';
+import { unstagify, unVectorize } from './graphics/graphics';
+import announce, { transferToken } from './network/network';
+import type { Position } from './state/state';
 
 function isInCircle({
   position,

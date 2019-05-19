@@ -1,16 +1,23 @@
 // @flow
 
+import hashObject from 'object-hash';
 import _ from 'lodash';
 
 import type Socket from 'socket.io-client';
 
-import type { Phase, SessionInfo } from '../../server/networkTypes';
+import dispatch, { addVisualObject } from './actions';
+import type { Phase, SessionInfo } from '../../../server/networkTypes';
+import type { VisualObjectBuilder } from '../graphics/graphics';
+import type { VisualObject } from '../graphics/visualObjects';
 import type {
+  VisualObjects,
   Dimensions,
   Node,
   Nodes,
   Player,
   Players,
+  Relationship,
+  Relationships,
   State,
   Token,
   Tokens,
@@ -76,4 +83,39 @@ export function getToken(tokenId: string): Token {
 export function getOwnTokens(): Tokens {
   const nodes = getOwnNodes();
   return _.pickBy(getTokens(), token => nodes[token.nodeId]);
+}
+
+export function getRelationships(): Relationships {
+  return getState().relationships;
+}
+
+export function getOwnRelationship(): Relationship {
+  const { playerId } = getSessionInfo();
+  return _.find(getRelationships(), ['fromId', playerId]);
+}
+
+export function getVisualObjects(): VisualObjects {
+  return getState().visualObjects;
+}
+
+export function getVisualObject(visualObjectId: string): VisualObject<{}> {
+  return getVisualObjects()[visualObjectId];
+}
+
+export function getOrBuildVisualObject<Props>(
+  visualObjectBuilder: VisualObjectBuilder<Props>,
+  props: Props
+): VisualObject<{}> {
+  const hash = hashObject(props);
+  if (!getVisualObject(hash)) {
+    const { command, height, width } = visualObjectBuilder(props);
+    dispatch(addVisualObject(hash, command, height, width));
+  }
+  return getVisualObject(hash);
+}
+
+export function getVisualObjectFromProps<Props>(
+  props: Props
+): VisualObject<{}> {
+  return getVisualObject(hashObject(props));
 }

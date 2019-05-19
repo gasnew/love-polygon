@@ -13,16 +13,28 @@ import {
   getOwnTokens,
   getToken,
   getTokens,
+  getVisualObjects,
 } from './getters';
-import layout from './layout';
-import type { Phase } from '../../server/networkTypes';
-import type { Node, Nodes, NodeType, Player, Token, Tokens } from './state';
+import { layoutNodes } from '../graphics/layout';
+import type { Phase } from '../../../server/networkTypes';
+import type { Command, VisualObject } from '../graphics/visualObjects';
+import type {
+  Node,
+  Nodes,
+  NodeType,
+  Player,
+  Relationships,
+  Token,
+  Tokens,
+} from './state';
 
+const ADD_VISUAL_OBJECT = 'addVisualObject';
 const ADD_PLAYER = 'addPlayer';
 const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
 const CLEAR_STAGE = 'clearStage';
 const SET_PHASE = 'setPhase';
+const SET_RELATIONSHIPS = 'setRelationships';
 const SET_SOCKET = 'setSocket';
 const SET_NODE_POSITION = 'setNodePosition';
 const SET_TOKEN_POSITION = 'setTokenPosition';
@@ -30,6 +42,13 @@ const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 
 type Action =
+  | {
+      type: 'addVisualObject',
+      id: string,
+      command: Command<{}>,
+      height: number,
+      width: number,
+    }
   | {
       type: 'addNode',
       id: string,
@@ -40,6 +59,7 @@ type Action =
       type: 'addPlayer',
       id: string,
       name: string,
+      color: string,
     }
   | {
       type: 'addToken',
@@ -52,6 +72,10 @@ type Action =
   | {
       type: 'setPhase',
       phase: Phase,
+    }
+  | {
+      type: 'setRelationships',
+      relationships: Relationships,
     }
   | {
       type: 'setSocket',
@@ -107,13 +131,23 @@ const mergeIntoTokens = (tokenId: string, token: Token) => {
   });
 };
 
+const mergeIntoVisualObjects = (
+  visualObjectId: string,
+  visualObject: VisualObject<{}>
+) => {
+  mergeIntoState('visualObjects', {
+    ...getVisualObjects(),
+    [visualObjectId]: visualObject,
+  });
+};
+
 const setNodes = (nodes: Nodes) => {
   mergeIntoState('nodes', nodes);
-}
+};
 
 const setTokens = (tokens: Tokens) => {
   mergeIntoState('tokens', tokens);
-}
+};
 
 export function setPhase(phase: Phase): Action {
   return {
@@ -129,15 +163,20 @@ export function setSocket(socket: Socket): Action {
   };
 }
 
-export function addPlayer(id: string, name: string) {
+export function addPlayer(id: string, name: string, color: string): Action {
   return {
     type: ADD_PLAYER,
     id,
     name,
+    color,
   };
 }
 
-export function addNode(id: string, type: NodeType, playerIds: string[]) {
+export function addNode(
+  id: string,
+  type: NodeType,
+  playerIds: string[]
+): Action {
   return {
     type: ADD_NODE,
     id,
@@ -146,7 +185,7 @@ export function addNode(id: string, type: NodeType, playerIds: string[]) {
   };
 }
 
-export function addToken(id: string, nodeId: string) {
+export function addToken(id: string, nodeId: string): Action {
   return {
     type: ADD_TOKEN,
     id,
@@ -154,7 +193,22 @@ export function addToken(id: string, nodeId: string) {
   };
 }
 
-export function clearStage() {
+export function addVisualObject(
+  id: string,
+  command: Command<{}>,
+  height: number,
+  width: number
+): Action {
+  return {
+    type: ADD_VISUAL_OBJECT,
+    id,
+    command,
+    height,
+    width,
+  };
+}
+
+export function clearStage(): Action {
   return {
     type: CLEAR_STAGE,
   };
@@ -197,8 +251,22 @@ export function setCurrentTokenId(tokenId: ?string): Action {
   };
 }
 
+export function setRelationships(relationships: Relationships): Action {
+  return {
+    type: SET_RELATIONSHIPS,
+    relationships,
+  };
+}
+
 export default function dispatch(action: Action) {
   switch (action.type) {
+    case ADD_VISUAL_OBJECT:
+      mergeIntoVisualObjects(action.id, {
+        command: action.command,
+        height: action.height,
+        width: action.width,
+      });
+      break;
     case ADD_NODE:
       mergeIntoNodes(action.id, {
         id: action.id,
@@ -210,9 +278,9 @@ export default function dispatch(action: Action) {
         radius: 10,
         playerIds: action.playerIds,
       });
-      const nodeIds = _.map(getOwnNodes(), (node, id) => id);
-      const nodeLayout = layout(nodeIds);
-      _.each(nodeIds, id =>
+      const nodes = getOwnNodes();
+      const nodeLayout = layoutNodes(nodes);
+      _.each(nodes, (node, id) =>
         dispatch(setNodePosition(id, nodeLayout[id].x, nodeLayout[id].y))
       );
       _.each(getOwnTokens(), token => {
@@ -225,6 +293,7 @@ export default function dispatch(action: Action) {
       mergeIntoPlayers(action.id, {
         id: action.id,
         name: action.name,
+        color: action.color,
       });
       break;
     case ADD_TOKEN:
@@ -254,6 +323,9 @@ export default function dispatch(action: Action) {
           y: action.y,
         },
       });
+      break;
+    case SET_RELATIONSHIPS:
+      mergeIntoState('relationships', action.relationships);
       break;
     case SET_TOKEN_POSITION:
       mergeIntoTokens(action.tokenId, {

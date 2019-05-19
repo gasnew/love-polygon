@@ -1,7 +1,6 @@
 // @flow
 
 import React, { Component } from 'react';
-import uniqid from 'uniqid';
 
 import Game from './Game';
 import LandingPage from './LandingPage';
@@ -17,11 +16,11 @@ class App extends Component<Props, State> {
   state = {
     // This is a default ONLY for testing
     sessionInfo: {
-      sessionId: '1234my sesh',
-      playerId: uniqid(),
-      playerName: 'Garrett',
+      sessionId: 'fine',
+      playerId: '2p8p4sbgsju75sbzt',
+      playerName: 'Brandy',
     },
-    sessionInfo: null
+    //sessionInfo: null
   };
 
   render() {

@@ -1,7 +1,7 @@
 [ignore]
 
 [include]
-../server
+../server/networkTypes.js
 ./src
 
 [libs]

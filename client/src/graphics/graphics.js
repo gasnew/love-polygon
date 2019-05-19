@@ -2,10 +2,13 @@
 
 import _ from 'lodash';
 
-import { getStageDimensions } from './getters';
-import type { Command } from './commands';
+import { getOrBuildVisualObject, getStageDimensions } from '../state/getters';
+import type { VisualObject } from './visualObjects';
+import type { Mesh } from './meshes';
 import type { ShaderProps } from './shaders';
-import type { Position } from './state';
+import type { Position } from '../state/state';
+
+type Drawer<Props: {}> = (Position, ?Props) => void;
 
 const screenScale = 60;
 
@@ -47,15 +50,33 @@ export function stagifyPosition(position: Position): Position {
   };
 }
 
-export function stagifyVector(vector: number[][][]): Array<number> {
+export function stagifyMesh(vector: Mesh): Array<number> {
   const { width } = getStageDimensions();
   return _.map(_.flattenDeep(vector), value => (value * width) / screenScale);
 }
 
-export default function draw(command: Command) {
-  return (position: Position) =>
-    command({
-      ...vectorize(stagifyPosition(position)),
+export default function draw<Props: {}>(
+  visualObject: VisualObject<Props>
+): Drawer<Props> {
+  return (position: Position, props: ?Props) => {
+    visualObject.command({
       ...getStageDimensions(),
+      ...vectorize(stagifyPosition(position)),
+      ...props,
     });
+  };
+}
+
+export type VisualObjectBuilder<Props> = Props => VisualObject<{}>;
+export function cached<Props: {}>(
+  visualObjectBuilder: VisualObjectBuilder<Props>
+): $Shape<VisualObject<Props>> {
+  return {
+    command: (params: { ...ShaderProps, ...Props }) => {
+      const builderParams = _.omit(params, ['location', 'height', 'width']);
+      getOrBuildVisualObject(visualObjectBuilder, builderParams).command(
+        params
+      );
+    },
+  };
 }

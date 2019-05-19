@@ -84,7 +84,7 @@ class LandingPage extends Component<Props, State> {
       error: '',
     },
     playerNameField: {
-      value: 'Garrett',
+      value: '',
       error: '',
     },
     activeStep: 0,

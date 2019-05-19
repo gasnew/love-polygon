@@ -2,7 +2,8 @@
 
 import type Socket from 'socket.io-client';
 
-import type { Phase, SessionInfo } from '../../server/networkTypes';
+import type { Phase, SessionInfo } from '../../../server/networkTypes';
+import type { VisualObject } from '../graphics/visualObjects';
 
 export type Position = {|
   x: number,
@@ -17,6 +18,7 @@ export type Dimensions = {|
 export type Player = {
   id: string,
   name: string,
+  color: string,
 };
 
 export type Players = {
@@ -47,6 +49,22 @@ export type Nodes = {
   [string]: Node,
 };
 
+export type RelationshipType = 'crush' | 'wingman';
+export type Relationship = {|
+  id: string,
+  type: RelationshipType,
+  fromId: string,
+  toId: string,
+|};
+
+export type Relationships = {
+  [string]: Relationship,
+};
+
+export type VisualObjects = {
+  [string]: VisualObject<{}>,
+};
+
 export type State = {|
   phase: ?Phase,
   socket: Socket,
@@ -55,6 +73,8 @@ export type State = {|
   players: Players,
   tokens: Tokens,
   nodes: Nodes,
+  relationships: Relationships,
+  visualObjects: VisualObjects,
 |};
 
 export default function generateState(
@@ -69,5 +89,7 @@ export default function generateState(
     players: {},
     tokens: {},
     nodes: {},
+    relationships: {},
+    visualObjects: {},
   };
 }

@@ -123,9 +123,9 @@ function getSession({ id, emit }: SessionProps): Session {
   const quorum = async (): Promise<boolean> => {
     const { nodes, players, tokens } = await getAll();
     const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
-    // TODO remove this temp quota definition
-    return _.size(players) >= 1;
-    //return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
+    // TODO remove this temp quorum definition
+    //return _.size(players) >= 1;
+    return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
   };
 
   return {
@@ -138,6 +138,7 @@ function getSession({ id, emit }: SessionProps): Session {
       await set('players', {});
       await set('nodes', {});
       await set('tokens', {});
+      await set('relationships', {});
     },
     join: async ({ playerId, playerName }) => {
       const sessionData = await getAll();

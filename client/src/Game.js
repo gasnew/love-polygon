@@ -6,16 +6,16 @@ import io from 'socket.io-client';
 import touches from 'touches';
 import Button from '@material-ui/core/Button';
 
-import dispatch, { setSocket } from './actions';
 import { beginDrag, continueDrag, endDrag } from './input';
-import render from './renderer';
+import render from './graphics/renderer';
 import {
   setState,
   socketConnect,
   socketDisconnect,
   updateState,
-} from './socket';
-import generateState from './state';
+} from './network/socket';
+import dispatch, { setSocket } from './state/actions';
+import generateState from './state/state';
 import type { SessionInfo } from '../../server/networkTypes';
 
 type Props = {|
