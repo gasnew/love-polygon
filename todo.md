@@ -10,9 +10,9 @@
   + This happens once every player drops token center-screen
 + Node transfers
   + Stress test this by causing two clients to "fight" for the same token
-/ Server provides goals/relationships with nodes
++ Server provides goals/relationships with nodes
   + Render text to indicate shared node ownership
-  / Render text to indicate relationship
+  + Render text to indicate relationship
 - Cake, cookies, and candy
   - Add three types of tokens
   - Add needs
