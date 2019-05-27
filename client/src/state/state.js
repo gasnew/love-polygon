@@ -5,6 +5,7 @@ import type Socket from 'socket.io-client';
 import type {
   NodeType,
   Phase,
+  RelationshipType,
   SessionInfo,
   TokenType,
 } from '../../../server/networkTypes';
@@ -54,7 +55,6 @@ export type Nodes = {
   [string]: Node,
 };
 
-export type RelationshipType = 'crush' | 'wingman';
 export type Relationship = {|
   id: string,
   type: RelationshipType,
@@ -64,6 +64,17 @@ export type Relationship = {|
 
 export type Relationships = {
   [string]: Relationship,
+};
+
+export type Need = {|
+  id: string,
+  playerId: string,
+  type: TokenType,
+  count: number,
+|};
+
+export type Needs = {
+  [string]: Need,
 };
 
 export type VisualObjects = {
@@ -79,6 +90,7 @@ export type State = {|
   tokens: Tokens,
   nodes: Nodes,
   relationships: Relationships,
+  needs: Needs,
   visualObjects: VisualObjects,
 |};
 
@@ -95,6 +107,7 @@ export default function generateState(
     tokens: {},
     nodes: {},
     relationships: {},
+    needs: {},
     visualObjects: {},
   };
 }

@@ -42,12 +42,22 @@ export type Relationships = {|
   |}
 |};
 
+export type Needs = {|
+  [string]: {|
+    id: string,
+    playerId: string,
+    type: TokenType,
+    count: number,
+  |}
+|};
+
 export type ServerState = {|
   phase: Phase,
   players: Players,
   nodes: Nodes,
   tokens: Tokens,
   relationships: Relationships,
+  needs: Needs,
 |};
 
 export type SubServerState = $Values<ServerState>;

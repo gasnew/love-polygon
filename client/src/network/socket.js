@@ -7,6 +7,7 @@ import dispatch, {
   addNode,
   addToken,
   clearStage,
+  setNeeds,
   setPhase,
   setRelationships,
   setTokenNodeId,
@@ -86,7 +87,7 @@ export function updateState(serverState: ServerState) {
 export function setState(serverState: ServerState) {
   console.log('state set');
   console.log(serverState);
-  const { phase, players, nodes, relationships, tokens } = serverState;
+  const { phase, players, needs, nodes, relationships, tokens } = serverState;
   dispatch(setPhase(phase));
   dispatch(clearStage());
   _.each(players, (player, id) =>
@@ -96,5 +97,6 @@ export function setState(serverState: ServerState) {
   _.each(tokens, (token, id) =>
     dispatch(addToken(id, token.type, token.nodeId))
   );
+  dispatch(setNeeds(needs));
   dispatch(setRelationships(relationships));
 }

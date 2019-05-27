@@ -12,6 +12,8 @@ import type { VisualObject } from '../graphics/visualObjects';
 import type {
   VisualObjects,
   Dimensions,
+  Need,
+  Needs,
   Node,
   Nodes,
   Player,
@@ -92,6 +94,15 @@ export function getRelationships(): Relationships {
 export function getOwnRelationship(): Relationship {
   const { playerId } = getSessionInfo();
   return _.find(getRelationships(), ['fromId', playerId]);
+}
+
+export function getNeeds(): Needs {
+  return getState().needs;
+}
+
+export function getOwnNeed(): Need {
+  const { playerId } = getSessionInfo();
+  return _.find(getNeeds(), ['playerId', playerId]);
 }
 
 export function getVisualObjects(): VisualObjects {
