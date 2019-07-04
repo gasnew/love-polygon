@@ -91,9 +91,13 @@ export function getRelationships(): Relationships {
   return getState().relationships;
 }
 
+export function getPlayerRelationship(playerId: string): Relationship {
+  return _.find(getRelationships(), ['fromId', playerId]);
+}
+
 export function getOwnRelationship(): Relationship {
   const { playerId } = getSessionInfo();
-  return _.find(getRelationships(), ['fromId', playerId]);
+  return getPlayerRelationship(playerId);
 }
 
 export function getNeeds(): Needs {

@@ -136,6 +136,7 @@ function getSession({ id, emit }: SessionProps): Session {
     init: async () => {
       await setPhaseName('lobby');
       await set('players', {});
+      await set('needs', {});
       await set('nodes', {});
       await set('tokens', {});
       await set('relationships', {});

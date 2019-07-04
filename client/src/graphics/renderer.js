@@ -54,7 +54,7 @@ export default function render(element: HTMLDivElement) {
       depth: 1,
     });
 
-    drawBanner();
+    drawBanner(drawToken);
     _.each(tokens, token => drawToken[token.type](token.position));
     _.each(sharedNodes, node => {
       const { name, color } = otherPlayerFromNode(node);

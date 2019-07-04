@@ -68,7 +68,7 @@ export const getNumberOfLovers = (numberOfPlayers: number): number => {
   if (numberOfPlayers <= 2) return 1;
   if (numberOfPlayers === 3) return _.random(1, 3);
   if (numberOfPlayers === 4) return _.random(2, 4);
-  throw new Error(`${numberOfPlayers} players is not supported!`);
+  return _.random(Math.round(numberOfPlayers * 0.3), numberOfPlayers);
 };
 
 type Roles = {
@@ -211,6 +211,7 @@ export function getRomanceState({
         ...needs,
         [needId]: {
           id: needId,
+          playerId: player.id,
           type: _.sample(TOKEN_TYPES),
           count: 4,
         },

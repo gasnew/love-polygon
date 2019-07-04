@@ -86,7 +86,10 @@ export default class Game extends Component<Props, State> {
             Activate maximum overdrive!
           </Button>
         )}
-        <div ref={element => (this.element = element)} />
+        <div
+          ref={element => (this.element = element)}
+          style={{ height: '770px' }}
+        />
       </div>
     );
   }
