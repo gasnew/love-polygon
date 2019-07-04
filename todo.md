@@ -48,6 +48,7 @@
 - Players can transfer tokens from another player's storage node
   - Either, current token should be set to null (maybe not great)
   - Or, transfers to another player can only occur from shared nodes
+- Someone can be a wingman for a person who has a crush on them
 - Multiple players of the same name can be created if both validate successfully and then join socket. I.e., no socket validation
   -  Solution: Force disconnect in this case (relies on top feature to fit in
 - After switching to fullscreen, I will receive state updates, even for moves I make
