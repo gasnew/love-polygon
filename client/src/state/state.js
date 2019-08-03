@@ -2,7 +2,13 @@
 
 import type Socket from 'socket.io-client';
 
-import type { Phase, SessionInfo } from '../../../server/networkTypes';
+import type {
+  NodeType,
+  Phase,
+  RelationshipType,
+  SessionInfo,
+  TokenType,
+} from '../../../server/networkTypes';
 import type { VisualObject } from '../graphics/visualObjects';
 
 export type Position = {|
@@ -27,6 +33,7 @@ export type Players = {
 
 export type Token = {|
   id: string,
+  type: TokenType,
   position: Position,
   radius: number,
   nodeId: string,
@@ -36,7 +43,6 @@ export type Tokens = {
   [string]: Token,
 };
 
-export type NodeType = 'storage' | 'shared' | 'loveBucket';
 export type Node = {|
   id: string,
   type: NodeType,
@@ -49,7 +55,6 @@ export type Nodes = {
   [string]: Node,
 };
 
-export type RelationshipType = 'crush' | 'wingman';
 export type Relationship = {|
   id: string,
   type: RelationshipType,
@@ -59,6 +64,17 @@ export type Relationship = {|
 
 export type Relationships = {
   [string]: Relationship,
+};
+
+export type Need = {|
+  id: string,
+  playerId: string,
+  type: TokenType,
+  count: number,
+|};
+
+export type Needs = {
+  [string]: Need,
 };
 
 export type VisualObjects = {
@@ -74,6 +90,7 @@ export type State = {|
   tokens: Tokens,
   nodes: Nodes,
   relationships: Relationships,
+  needs: Needs,
   visualObjects: VisualObjects,
 |};
 
@@ -90,6 +107,7 @@ export default function generateState(
     tokens: {},
     nodes: {},
     relationships: {},
+    needs: {},
     visualObjects: {},
   };
 }

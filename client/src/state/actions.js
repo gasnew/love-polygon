@@ -16,12 +16,12 @@ import {
   getVisualObjects,
 } from './getters';
 import { layoutNodes } from '../graphics/layout';
-import type { Phase } from '../../../server/networkTypes';
+import type { NodeType, Phase, TokenType } from '../../../server/networkTypes';
 import type { Command, VisualObject } from '../graphics/visualObjects';
 import type {
+  Needs,
   Node,
   Nodes,
-  NodeType,
   Player,
   Relationships,
   Token,
@@ -35,6 +35,7 @@ const ADD_TOKEN = 'addToken';
 const CLEAR_STAGE = 'clearStage';
 const SET_PHASE = 'setPhase';
 const SET_RELATIONSHIPS = 'setRelationships';
+const SET_NEEDS = 'setNeeds';
 const SET_SOCKET = 'setSocket';
 const SET_NODE_POSITION = 'setNodePosition';
 const SET_TOKEN_POSITION = 'setTokenPosition';
@@ -64,6 +65,7 @@ type Action =
   | {
       type: 'addToken',
       id: string,
+      tokenType: TokenType,
       nodeId: string,
     }
   | {
@@ -76,6 +78,10 @@ type Action =
   | {
       type: 'setRelationships',
       relationships: Relationships,
+    }
+  | {
+      type: 'setNeeds',
+      needs: Needs,
     }
   | {
       type: 'setSocket',
@@ -185,10 +191,11 @@ export function addNode(
   };
 }
 
-export function addToken(id: string, nodeId: string): Action {
+export function addToken(id: string, type: TokenType, nodeId: string): Action {
   return {
     type: ADD_TOKEN,
     id,
+    tokenType: type,
     nodeId,
   };
 }
@@ -258,6 +265,13 @@ export function setRelationships(relationships: Relationships): Action {
   };
 }
 
+export function setNeeds(needs: Needs): Action {
+  return {
+    type: SET_NEEDS,
+    needs,
+  };
+}
+
 export default function dispatch(action: Action) {
   switch (action.type) {
     case ADD_VISUAL_OBJECT:
@@ -300,6 +314,7 @@ export default function dispatch(action: Action) {
       const node = getNode(action.nodeId);
       mergeIntoTokens(action.id, {
         id: action.id,
+        type: action.tokenType,
         position: node.position,
         radius: 10,
         nodeId: action.nodeId,
@@ -326,6 +341,9 @@ export default function dispatch(action: Action) {
       break;
     case SET_RELATIONSHIPS:
       mergeIntoState('relationships', action.relationships);
+      break;
+    case SET_NEEDS:
+      mergeIntoState('needs', action.needs);
       break;
     case SET_TOKEN_POSITION:
       mergeIntoTokens(action.tokenId, {

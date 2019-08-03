@@ -3,7 +3,11 @@
 import _ from 'lodash';
 import type { TouchEvent } from 'touches';
 
-import dispatch, { setTokenPosition, setTokenNodeId, setCurrentTokenId } from './state/actions';
+import dispatch, {
+  setTokenPosition,
+  setTokenNodeId,
+  setCurrentTokenId,
+} from './state/actions';
 import {
   getCurrentTokenId,
   getNode,
@@ -15,6 +19,13 @@ import { unstagify, unVectorize } from './graphics/graphics';
 import announce, { transferToken } from './network/network';
 import type { Position } from './state/state';
 
+function dist2(position1, position2) {
+  return (
+    Math.pow(position2.x - position1.x, 2) +
+    Math.pow(position2.y - position1.y, 2)
+  );
+}
+
 function isInCircle({
   position,
   center,
@@ -24,9 +35,6 @@ function isInCircle({
   center: Position,
   radius: number,
 }) {
-  const dist2 = (position1, position2) =>
-    Math.pow(position2.x - position1.x, 2) +
-    Math.pow(position2.y - position1.y, 2);
   return dist2(position, center) < Math.pow(radius, 2);
 }
 
@@ -58,21 +66,21 @@ export function endDrag(event: TouchEvent, mousePosition: Array<number>) {
   if (!tokenId) return;
 
   const position = unstagify(unVectorize(mousePosition));
-  const newNodeId: ?string = _.findKey(getOwnNodes(), node =>
-    isInCircle({
-      position,
-      center: node.position,
-      radius: node.radius,
-    })
+  const closestNode = _.minBy(_.values(getOwnNodes()), node =>
+    dist2(position, node.position)
   );
   const token = getToken(tokenId);
-  const nodeId = newNodeId || token.nodeId;
+  const newNodeId = isInCircle({
+    position,
+    center: closestNode.position,
+    radius: closestNode.radius,
+  }) && closestNode.id;
 
-  const node = getNode(nodeId);
+  const node = getNode(newNodeId || token.nodeId);
   dispatch(setTokenPosition(tokenId, node.position.x, node.position.y));
-  if (nodeId !== token.nodeId)
-    announce(transferToken(tokenId, token.nodeId, nodeId));
-  dispatch(setTokenNodeId(tokenId, nodeId));
+  if (node.id !== token.nodeId)
+    announce(transferToken(tokenId, token.nodeId, node.id));
+  dispatch(setTokenNodeId(tokenId, node.id));
 
   dispatch(setCurrentTokenId(null));
 }

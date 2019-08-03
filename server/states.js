@@ -49,6 +49,7 @@ export function getNewPlayerState({
       [tokenId]: {
         id: tokenId,
         nodeId: nodeId1,
+        type: 'heart',
       },
     },
   };
@@ -67,7 +68,7 @@ export const getNumberOfLovers = (numberOfPlayers: number): number => {
   if (numberOfPlayers <= 2) return 1;
   if (numberOfPlayers === 3) return _.random(1, 3);
   if (numberOfPlayers === 4) return _.random(2, 4);
-  throw new Error(`${numberOfPlayers} players is not supported!`);
+  return _.random(Math.round(numberOfPlayers * 0.3), numberOfPlayers);
 };
 
 type Roles = {
@@ -118,6 +119,8 @@ type RomanceStateProps = {
 export function getRomanceState({
   players,
 }: RomanceStateProps): $Shape<ServerState> {
+  const TOKEN_TYPES = ['cookie', 'cake', 'candy'];
+
   const storageNodes = _.reduce(
     players,
     (storageNodes, player, playerId) => {
@@ -183,6 +186,7 @@ export function getRomanceState({
             [tokenId]: {
               id: tokenId,
               nodeId: node.id,
+              type: _.sample(TOKEN_TYPES),
             },
           };
         },
@@ -199,6 +203,23 @@ export function getRomanceState({
   const crushRelationships = buildRelationships(lovers, players, 'crush');
   const wingmanRelationships = buildRelationships(wingmen, lovers, 'wingman');
 
+  const needs = _.reduce(
+    players,
+    (needs, player) => {
+      const needId = uniqid();
+      return {
+        ...needs,
+        [needId]: {
+          id: needId,
+          playerId: player.id,
+          type: _.sample(TOKEN_TYPES),
+          count: 4,
+        },
+      };
+    },
+    {}
+  );
+
   return {
     nodes: {
       ...storageNodes,
@@ -209,5 +230,6 @@ export function getRomanceState({
       ...crushRelationships,
       ...wingmanRelationships,
     },
+    needs,
   };
 }

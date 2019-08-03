@@ -80,22 +80,49 @@ export function buildHeart(regl: Regl): VisualObject<{}> {
   });
 }
 
-export function buildCircle(regl: Regl): VisualObject<{}> {
+type CircleProps = {
+  scale: number,
+  color: string,
+};
+export function buildCircle(
+  regl: Regl,
+  props: CircleProps = { scale: 6, color: '#D6EFFF' }
+): VisualObject<{}> {
+  const { scale, color } = props;
   return buildPrimitive({
     regl,
-    mesh: buildCircleMesh({ scale: 6, steps: 50 }),
+    mesh: buildCircleMesh({ scale, steps: 50 }),
     uniforms: {
-      color: toRGB('#D6EFFF'),
+      color: toRGB(color),
     },
   });
 }
 
-export function buildRect(regl: Regl): VisualObject<{}> {
+type RectProps = {
+  width: number,
+  height: number,
+  color: string,
+};
+export function buildRect(
+  regl: Regl,
+  props: RectProps = { width: 60, height: 15, color: '#555555' }
+): VisualObject<{}> {
+  const { width, height, color } = props;
   return buildPrimitive({
     regl,
-    mesh: buildRectMesh({ width: 60, height: 15 }),
+    mesh: buildRectMesh({ width, height }),
     uniforms: {
-      color: toRGB('#555555'),
+      color: toRGB(color),
+    },
+  });
+}
+
+export function buildTriangle(regl: Regl): VisualObject<{}> {
+  return buildPrimitive({
+    regl,
+    mesh: buildCircleMesh({ scale: 6, steps: 3 }),
+    uniforms: {
+      color: toRGB('#00ff00'),
     },
   });
 }
