@@ -7,10 +7,10 @@ function Circle({ radius }) {
 function CollectionOfShapes({ numberOfSquares }) {
   // do initial calculations based on props
 
-  return ({ registerObject, render }) => {
+  return ({ getObject, render }) => {
     // set up objects
-    const circle = registerObject(Circle({ radius: 5 }), { x: 1, y: 3});
-    const circle2 = registerObject(Circle({ radius: 5 }), { x: circle.x + 1, y: 3});
+    const circle = getObject(Circle({ radius: 5 }), { x: 1, y: 3});
+    const circle2 = getObject(Circle({ radius: 5 }), { x: circle.x + 1, y: 3});
 
     // render objects
     return render(
@@ -25,7 +25,7 @@ function renderContext(regl) {
     getPrimitive: ({ mesh }) => {
       return buildPrimitive(regl, mesh);
     },
-    registerObject: (object, transformation) => {
+    getObject: (object, transformation) => {
       // hash and cache here? Should be able to make a hash based on
       // children hashes and parameters? If either changed, call object
       // function

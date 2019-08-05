@@ -1,16 +1,7 @@
-function getPrimitiveObject(type, meshBuilder, props) {
-  const hash = hashObject(type, props);
-  if (!getVisualObject(hash)) {
-    const { command, height, width } = visualObjectBuilder(props);
-    dispatch(addVisualObject(hash, command, height, width));
-  }
-  return getVisualObject(hash);
-}
-
 function Circle({ radius }) {
-  return ({ getPrimitiveObject, render }) => {
+  return ({ buildPrimitiveComponent, getObject, render }) => {
     return render(
-      getPrimitiveObject('Circle', circleMesh, { radius });
+      getObject(buildPrimitiveComponent('Circle', circleMeshBuilder, { radius }));
     );
   };
 }
@@ -36,10 +27,29 @@ function renderContext(regl, baseTransformation) {
     getObject: (object, transformation) => {
       return object(renderContext(regl, transform(baseTransformation, transformation)));
     },
+    buildPrimitiveComponent: (type, meshBuilder, props) => {
+      // need to cache height and witdh, actually
+      const hash = hashObject(type, props);
+      if (!getCommand(hash)) {
+        dispatch(addCommand(hash, buildCommand(regl, buildMesh())));
+      }
+      const command = getCommand(hash);
+
+      return (renderContext) => ({
+        children: [],
+        transformation: baseTransformation,
+        render: () => command({
+          ...getStageDimensions(),
+          ...vectorize(stagifyPosition(position)),
+          ...props,
+        }),
+      });
+    },
     render: (...children) => {
       return {
         children,
         transformation,
+        render: _.each(children, child => child.render()),
         height: 5, //height of all children together
         width: 5, //width of all children together
       }
