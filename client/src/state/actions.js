@@ -13,11 +13,11 @@ import {
   getOwnTokens,
   getToken,
   getTokens,
-  getVisualObjects,
+  getPrimitives,
 } from './getters';
 import { layoutNodes } from '../graphics/layout';
 import type { NodeType, Phase, TokenType } from '../../../server/networkTypes';
-import type { Command, VisualObject } from '../graphics/visualObjects';
+import type { Command, Primitive } from '../graphics/buildPrimitive';
 import type {
   Needs,
   Node,
@@ -28,7 +28,7 @@ import type {
   Tokens,
 } from './state';
 
-const ADD_VISUAL_OBJECT = 'addVisualObject';
+const ADD_PRIMITIVE = 'addPrimitive';
 const ADD_PLAYER = 'addPlayer';
 const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
@@ -44,11 +44,9 @@ const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 
 type Action =
   | {
-      type: 'addVisualObject',
+      type: 'addPrimitive',
       id: string,
-      command: Command<{}>,
-      height: number,
-      width: number,
+      primitive: Primitive<{}>,
     }
   | {
       type: 'addNode',
@@ -137,13 +135,10 @@ const mergeIntoTokens = (tokenId: string, token: Token) => {
   });
 };
 
-const mergeIntoVisualObjects = (
-  visualObjectId: string,
-  visualObject: VisualObject<{}>
-) => {
-  mergeIntoState('visualObjects', {
-    ...getVisualObjects(),
-    [visualObjectId]: visualObject,
+const mergeIntoPrimitives = (primitiveId: string, primitive: Primitive<{}>) => {
+  mergeIntoState('primitives', {
+    ...getPrimitives(),
+    [primitiveId]: primitive,
   });
 };
 
@@ -200,18 +195,11 @@ export function addToken(id: string, type: TokenType, nodeId: string): Action {
   };
 }
 
-export function addVisualObject(
-  id: string,
-  command: Command<{}>,
-  height: number,
-  width: number
-): Action {
+export function addPrimitive(id: string, primitive: Primitive<{}>): Action {
   return {
-    type: ADD_VISUAL_OBJECT,
+    type: ADD_PRIMITIVE,
     id,
-    command,
-    height,
-    width,
+    primitive,
   };
 }
 
@@ -274,12 +262,8 @@ export function setNeeds(needs: Needs): Action {
 
 export default function dispatch(action: Action) {
   switch (action.type) {
-    case ADD_VISUAL_OBJECT:
-      mergeIntoVisualObjects(action.id, {
-        command: action.command,
-        height: action.height,
-        width: action.width,
-      });
+    case ADD_PRIMITIVE:
+      mergeIntoPrimitives(action.id, action.primitive);
       break;
     case ADD_NODE:
       mergeIntoNodes(action.id, {

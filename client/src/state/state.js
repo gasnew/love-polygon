@@ -9,7 +9,7 @@ import type {
   SessionInfo,
   TokenType,
 } from '../../../server/networkTypes';
-import type { VisualObject } from '../graphics/visualObjects';
+import type { Primitive } from '../graphics/buildPrimitive';
 
 export type Position = {|
   x: number,
@@ -77,8 +77,8 @@ export type Needs = {
   [string]: Need,
 };
 
-export type VisualObjects = {
-  [string]: VisualObject<{}>,
+export type Primitives = {
+  [string]: Primitive<{}>,
 };
 
 export type State = {|
@@ -91,7 +91,7 @@ export type State = {|
   nodes: Nodes,
   relationships: Relationships,
   needs: Needs,
-  visualObjects: VisualObjects,
+  primitives: Primitives,
 |};
 
 export default function generateState(
@@ -108,6 +108,6 @@ export default function generateState(
     nodes: {},
     relationships: {},
     needs: {},
-    visualObjects: {},
+    primitives: {},
   };
 }
