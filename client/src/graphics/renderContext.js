@@ -1,7 +1,6 @@
 // @flow
 
 import _ from 'lodash';
-import hashObject from 'object-hash';
 
 import { stagifyPosition, transform, vectorize } from './graphics';
 import buildPrimitive from './buildPrimitive';
@@ -46,7 +45,7 @@ export default function renderContext(
       meshProps,
       dynamicProps,
     }: PrimitiveComponentProps<MeshProps, DynamicProps>) => {
-      const hash = hashObject({ type, meshProps });
+      const hash = JSON.stringify({ type, meshProps });
       if (!getPrimitive(hash)) {
         dispatch(
           addPrimitive(

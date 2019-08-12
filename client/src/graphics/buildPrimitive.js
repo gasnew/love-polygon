@@ -6,7 +6,6 @@ import type { Regl } from 'regl';
 import { stagifyMesh } from './graphics';
 import { primitiveVertexShader, solidFragmentShader } from './shaders';
 import type { Mesh } from './meshes';
-import type { ShaderProps } from './shaders';
 
 export type Command<Props> = (Props) => void;
 export type Primitive<Props> = {|

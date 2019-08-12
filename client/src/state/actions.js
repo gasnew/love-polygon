@@ -17,7 +17,7 @@ import {
 } from './getters';
 import { layoutNodes } from '../graphics/layout';
 import type { NodeType, Phase, TokenType } from '../../../server/networkTypes';
-import type { Command, Primitive } from '../graphics/buildPrimitive';
+import type { Primitive } from '../graphics/buildPrimitive';
 import type {
   Needs,
   Node,

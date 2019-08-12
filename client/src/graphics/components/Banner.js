@@ -80,7 +80,7 @@ export default function Banner(): Component {
         x: 30 + (proportion2 * totalWidth2) / 2,
         y: 11,
       }),
-      getRenderable(tokenTypes[needType], { x: 50, y: 11 })
+      getRenderable(tokenTypes[needType](), { x: 50, y: 11 })
     );
   };
 }

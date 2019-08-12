@@ -1,11 +1,9 @@
 // @flow
 
-import hashObject from 'object-hash';
 import _ from 'lodash';
 
 import type Socket from 'socket.io-client';
 
-import dispatch, { addPrimitive } from './actions';
 import type { Phase, SessionInfo } from '../../../server/networkTypes';
 import type { Primitive } from '../graphics/buildPrimitive';
 import type {
