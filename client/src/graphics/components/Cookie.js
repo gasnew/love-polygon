@@ -11,8 +11,8 @@ export default function Cookie(): Component {
         PrimitiveComponent({
           type: 'Circle',
           buildMesh: buildCircleMesh,
-          meshProps: { scale: 6, steps: 50 },
-          dynamicProps: { color: toRGB('#D6EFFF') },
+          meshProps: { scale: 5, steps: 50 },
+          dynamicProps: { color: toRGB('#E0D7A8') },
         })
       )
     );

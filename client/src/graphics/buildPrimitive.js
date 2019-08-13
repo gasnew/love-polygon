@@ -41,7 +41,7 @@ export default function buildPrimitive({
       },
 
       uniforms: {
-        color: [1, 0, 0, 1] || regl.prop('color'),
+        color: regl.prop('color') || [1, 0, 0, 1],
         location: regl.prop('location'),
         stageWidth: regl.prop('width'),
         stageHeight: regl.prop('height'),

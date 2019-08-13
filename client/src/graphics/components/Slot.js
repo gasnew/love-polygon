@@ -7,23 +7,23 @@ import type { Component } from './index';
 import type { Player } from '../../state/state';
 
 type Props = {
-  player: Player,
+  player?: Player,
 };
 
 export default function Slot({ player }: Props): Component {
-  return ({ getRenderable, PrimitiveComponent, render }) => {
-    return render(
+  return ({ getRenderable, PrimitiveComponent, render }) =>
+    render(
       getRenderable(
         PrimitiveComponent({
           type: 'Circle',
           buildMesh: buildCircleMesh,
-          meshProps: { scale: 10, steps: 50 },
-          dynamicProps: { color: toRGB('#FF00FF') },
+          meshProps: { scale: 6, steps: 50 },
+          dynamicProps: { color: toRGB('#DCF7F3') },
         })
       ),
-      getRenderable(
-        TextBox({ text: player.name, color: player.color, circular: true })
-      )
+      player &&
+        getRenderable(
+          TextBox({ text: player.name, color: player.color, circular: true })
+        )
     );
-  };
 }

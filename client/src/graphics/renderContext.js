@@ -22,7 +22,7 @@ export type RenderContext = {
   PrimitiveComponent: <MeshProps, DynamicProps>(
     PrimitiveComponentProps<MeshProps, DynamicProps>
   ) => Component,
-  render: (...renderables: Renderable[]) => Renderable,
+  render: (...renderables: Array<?Renderable>) => Renderable,
 };
 export type RenderContextBuilder = (Regl, Position) => RenderContext;
 
@@ -73,12 +73,27 @@ export default function renderContext(
       });
     },
     render: (...children) => {
+      const realChildren = _.compact(children);
+      const findWidth = renderables =>
+        _.max(
+          _.map(renderables, ({ width, position }) => position.x + width / 2)
+        ) -
+        _.min(
+          _.map(renderables, ({ width, position }) => position.x - width / 2)
+        );
+      const findHeight = renderables =>
+        _.max(
+          _.map(renderables, ({ height, position }) => position.y + height / 2)
+        ) -
+        _.min(
+          _.map(renderables, ({ height, position }) => position.y - height / 2)
+        );
       return {
-        children,
+        children: realChildren,
         position,
-        render: () => _.each(children, child => child.render()),
-        height: 5, //height of all children together
-        width: 5, //width of all children together
+        render: () => _.each(_.reverse(realChildren), child => child.render()),
+        height: findHeight(realChildren), //height of all children together
+        width: findWidth(realChildren), //width of all children together
       };
     },
   };

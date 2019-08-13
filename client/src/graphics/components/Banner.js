@@ -5,6 +5,7 @@ import _ from 'lodash';
 import Cake from './Cake';
 import Candy from './Candy';
 import Cookie from './Cookie';
+import Rectangle from './Rectangle';
 import TextBox from './TextBox';
 import {
   getNeeds,
@@ -57,8 +58,10 @@ export default function Banner(): Component {
       ? getCrushStuff(targetPlayer)
       : getWingmanStuff(targetPlayer);
 
-  return ({ getRenderable, render }) => {
-    const { width: relationshipWidth } = getRenderable(TextBox(relationshipProps));
+  return ({ getRenderable, PrimitiveComponent, render }) => {
+    const { width: relationshipWidth } = getRenderable(
+      TextBox(relationshipProps)
+    );
     const { width: playerWidth } = getRenderable(TextBox(playerProps));
     const totalWidth = relationshipWidth + playerWidth + 1;
     const proportion = relationshipWidth / totalWidth;
@@ -68,8 +71,16 @@ export default function Banner(): Component {
     const proportion2 = needWidth / totalWidth;
 
     return render(
+      getRenderable(Rectangle({ width: 60, height: 18, color: '#9EC1C1' }), {
+        x: 30,
+        y: 9,
+      }),
       getRenderable(TextBox(relationshipProps), {
         x: 30 - ((1 - proportion) * totalWidth) / 2,
+        y: 7.5,
+      }),
+      getRenderable(TextBox(playerProps), {
+        x: 30 + (proportion * totalWidth) / 2,
         y: 7.5,
       }),
       getRenderable(TextBox(playerProps), {

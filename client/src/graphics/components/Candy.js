@@ -12,7 +12,7 @@ export default function Candy(): Component {
           type: 'Circle',
           buildMesh: buildCircleMesh,
           meshProps: { scale: 6, steps: 3 },
-          dynamicProps: { color: toRGB('#00ff00') },
+          dynamicProps: { color: toRGB('#9EC5D6') },
         })
       )
     );

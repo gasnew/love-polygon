@@ -11,7 +11,7 @@ export default function render(element: HTMLDivElement) {
 
   regl.frame(({ time }) => {
     regl.clear({
-      color: toRGB('#FEFEFF'),
+      color: toRGB('#BEE9E8'),
       depth: 1,
     });
 
