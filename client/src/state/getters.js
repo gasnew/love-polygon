@@ -1,16 +1,13 @@
 // @flow
 
-import hashObject from 'object-hash';
 import _ from 'lodash';
 
 import type Socket from 'socket.io-client';
 
-import dispatch, { addVisualObject } from './actions';
 import type { Phase, SessionInfo } from '../../../server/networkTypes';
-import type { VisualObjectBuilder } from '../graphics/graphics';
-import type { VisualObject } from '../graphics/visualObjects';
+import type { Primitive } from '../graphics/buildPrimitive';
 import type {
-  VisualObjects,
+  Primitives,
   Dimensions,
   Need,
   Needs,
@@ -109,22 +106,10 @@ export function getOwnNeed(): Need {
   return _.find(getNeeds(), ['playerId', playerId]);
 }
 
-export function getVisualObjects(): VisualObjects {
-  return getState().visualObjects;
+export function getPrimitives(): Primitives {
+  return getState().primitives;
 }
 
-export function getVisualObject(visualObjectId: string): VisualObject<{}> {
-  return getVisualObjects()[visualObjectId];
-}
-
-export function getOrBuildVisualObject<Props>(
-  visualObjectBuilder: VisualObjectBuilder<Props>,
-  props: Props
-): VisualObject<{}> {
-  const hash = hashObject(props);
-  if (!getVisualObject(hash)) {
-    const { command, height, width } = visualObjectBuilder(props);
-    dispatch(addVisualObject(hash, command, height, width));
-  }
-  return getVisualObject(hash);
+export function getPrimitive(primitiveId: string): Primitive<{}> {
+  return getPrimitives()[primitiveId];
 }

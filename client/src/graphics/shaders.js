@@ -2,6 +2,9 @@
 
 export type ShaderProps = {
   location: Array<number>,
+  height: number,
+  width: number,
+  color: string,
 };
 
 export const solidFragmentShader = `
