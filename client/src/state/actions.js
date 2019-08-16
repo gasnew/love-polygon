@@ -5,6 +5,7 @@ import _ from 'lodash';
 import type Socket from 'socket.io-client';
 
 import {
+  getButton,
   getState,
   getPlayers,
   getNode,
@@ -33,6 +34,8 @@ const ADD_PLAYER = 'addPlayer';
 const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
 const CLEAR_STAGE = 'clearStage';
+const PRESS_BUTTON = 'pressButton';
+const RELEASE_BUTTON = 'releaseButton';
 const SET_PHASE = 'setPhase';
 const SET_RELATIONSHIPS = 'setRelationships';
 const SET_NEEDS = 'setNeeds';
@@ -68,6 +71,12 @@ type Action =
     }
   | {
       type: 'clearStage',
+    }
+  | {
+      type: 'pressButton',
+    }
+  | {
+      type: 'releaseButton',
     }
   | {
       type: 'setPhase',
@@ -209,6 +218,18 @@ export function clearStage(): Action {
   };
 }
 
+export function pressButton(): Action {
+  return {
+    type: PRESS_BUTTON,
+  };
+}
+
+export function releaseButton(): Action {
+  return {
+    type: RELEASE_BUTTON,
+  };
+}
+
 export function setNodePosition(nodeId: string, x: number, y: number): Action {
   return {
     type: SET_NODE_POSITION,
@@ -307,6 +328,12 @@ export default function dispatch(action: Action) {
     case CLEAR_STAGE:
       setTokens({});
       setNodes({});
+      break;
+    case PRESS_BUTTON:
+      mergeIntoState('button', {...getButton(), state: 'down'});
+      break;
+    case RELEASE_BUTTON:
+      mergeIntoState('button', {...getButton(), state: 'up'});
       break;
     case SET_PHASE:
       mergeIntoState('phase', action.phase);

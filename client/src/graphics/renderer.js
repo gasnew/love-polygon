@@ -15,9 +15,8 @@ export default function render(element: HTMLDivElement) {
       depth: 1,
     });
 
-    const buildScene = Table();
-    const context = renderContext(regl, { x: 0, y: 0 });
-    const scene = context.getRenderable(buildScene);
-    scene.render();
+    renderContext(regl, { x: 0, y: 0 })
+      .getRenderable(Table())
+      .render();
   });
 }

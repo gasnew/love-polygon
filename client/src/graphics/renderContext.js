@@ -31,11 +31,10 @@ export default function renderContext(
   position: Position
 ): RenderContext {
   return {
-    getRenderable: (object, newPosition) => {
-      return object(
+    getRenderable: (component, newPosition) =>
+      component(
         renderContext(regl, transform(position, newPosition || { x: 0, y: 0 }))
-      );
-    },
+      ),
     // NOTE(gnewman): I think it's a flow bug, but we have to re-annotate the
     // function type here lest the generics throw a fit and get screwed up. It
     // works this way, so I'm leaving it until further notice! :)
