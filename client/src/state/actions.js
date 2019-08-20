@@ -330,13 +330,16 @@ export default function dispatch(action: Action) {
       setNodes({});
       break;
     case PRESS_BUTTON:
-      mergeIntoState('button', {...getButton(), state: 'down'});
+      mergeIntoState('button', { ...getButton(), state: 'down' });
       break;
     case RELEASE_BUTTON:
-      mergeIntoState('button', {...getButton(), state: 'up'});
+      mergeIntoState('button', { ...getButton(), state: 'up' });
       break;
     case SET_PHASE:
-      mergeIntoState('phase', action.phase);
+      mergeIntoState('phase', {
+        name: action.phase.name,
+        updatedAt: Date.now(),
+      });
       break;
     case SET_SOCKET:
       mergeIntoState('socket', action.socket);

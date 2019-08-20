@@ -22,14 +22,14 @@ import {
 import type { Node, Nodes, Tokens } from '../../state/state';
 import type { Component } from './index';
 
-function needsMet(): boolean {
+export function needsMet(): boolean {
   const nodes = getOwnNodes();
   const storedTokens = _.pickBy(
     getOwnTokens(),
     token => nodes[token.nodeId].type === 'storage'
   );
   const need = getOwnNeed() || {};
-  return _.filter(storedTokens, ['type', need.type]).length === 1;
+  return _.filter(storedTokens, ['type', need.type]).length === 1//need.count;
 }
 
 export default function Table(): Component {

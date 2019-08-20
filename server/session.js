@@ -117,8 +117,22 @@ function getSession({ id, emit }: SessionProps): Session {
     console.log('start game now');
     emit('changePhase');
   };
+  const startCountdown = async () => {
+    console.log('start countdown');
+    emit('changePhase');
+  };
+  const finishGame = async () => {
+    console.log('finish game');
+    emit('changePhase');
+  };
 
-  const followEdge = getFollowEdge({ getPhaseName, setPhaseName, startGame });
+  const followEdge = getFollowEdge({
+    getPhaseName,
+    setPhaseName,
+    startGame,
+    startCountdown,
+    finishGame,
+  });
 
   const quorum = async (): Promise<boolean> => {
     const { nodes, players, tokens } = await getAll();
@@ -177,7 +191,7 @@ function getSession({ id, emit }: SessionProps): Session {
         const need = _.find(needs, ['playerId', playerId]);
 
         return (
-          _.filter(playerTokens, ['type', need.type]).length === need.count
+          _.filter(playerTokens, ['type', need.type]).length === 1//need.count
         );
       }
 
@@ -194,6 +208,7 @@ function getSession({ id, emit }: SessionProps): Session {
         });
       } else if (message.type === 'finishRound') {
         await followEdge('finishGame');
+        setTimeout(() => followEdge('reallyFinish'), 3000);
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');

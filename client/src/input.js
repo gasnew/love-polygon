@@ -19,6 +19,7 @@ import {
   getToken,
 } from './state/getters';
 import { unstagify, unVectorize } from './graphics/graphics';
+import { needsMet } from './graphics/components/Table';
 import announce, { finishRound, transferToken } from './network/network';
 import type { Position } from './state/state';
 
@@ -129,7 +130,7 @@ function checkButtonRelease(position: Position) {
     isInRect(
       { height: button.height, width: button.width, ...button.position },
       position
-    ) && button.state === 'down'
+    ) && button.state === 'down' && needsMet()
   )
     announce(finishRound());
 

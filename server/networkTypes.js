@@ -1,8 +1,9 @@
 // @flow
 
-export type PhaseName = 'lobby' | 'romance' | 'countdown';
+export type PhaseName = 'lobby' | 'romance' | 'countdown' | 'finished';
 export type Phase = {|
   name: PhaseName,
+  updatedAt?: number,
 |};
 
 export type Players = {|
