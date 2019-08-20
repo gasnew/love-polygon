@@ -19,7 +19,7 @@ import {
   getToken,
 } from './state/getters';
 import { unstagify, unVectorize } from './graphics/graphics';
-import announce, { transferToken } from './network/network';
+import announce, { finishRound, transferToken } from './network/network';
 import type { Position } from './state/state';
 
 function dist2(position1, position2) {
@@ -124,7 +124,6 @@ function endDrag(position: Position) {
 }
 
 function checkButtonRelease(position: Position) {
-  dispatch(releaseButton());
   const button = getButton();
   if (
     isInRect(
@@ -132,5 +131,7 @@ function checkButtonRelease(position: Position) {
       position
     ) && button.state === 'down'
   )
-    console.log('PRESS MAN');
+    announce(finishRound());
+
+  dispatch(releaseButton());
 }

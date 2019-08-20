@@ -10,7 +10,7 @@ export const ROMANCE = 'romance';
 export const START_GAME = 'startGame';
 export const RESTART = 'restart';
 
-type Edge = 'startGame' | 'restart';
+type Edge = 'startGame' | 'restart' | 'finishGame';
 type Action = () => Promise<void>;
 type Transition = ((PhaseName) => void) => Promise<void>;
 
@@ -43,6 +43,7 @@ export default function getFollowEdge({
     },
     romance: {
       restart: transition('romance', startGame),
+      finishGame: transition('countdown', startCountdown),
     },
   };
 

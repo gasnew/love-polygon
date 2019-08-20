@@ -150,22 +150,38 @@ function getSession({ id, emit }: SessionProps): Session {
       }
       await updateAll(getNewPlayerState({ playerId, playerName }));
     },
-    validMessage: (
-      serverState: ServerState,
-      message: Message
-    ): boolean => {
-      if (message.type !== 'transferToken') return false;
+    validMessage: (serverState: ServerState, message: Message): boolean => {
+      if (message.type === 'transferToken') {
+        const { tokenId, fromId, toId } = message;
+        const { nodes, tokens } = serverState;
+        const token = tokens[tokenId];
+        const fromNode = nodes[fromId];
+        const toNode = nodes[toId];
+        if (!token || !fromNode || !toNode) return false;
+        if (token.nodeId !== fromId) return false;
+        if (_.some(tokens, ['nodeId', toId])) return false;
 
-      const { tokenId, fromId, toId } = message;
-      const { nodes, tokens } = serverState;
-      const token = tokens[tokenId];
-      const fromNode = nodes[fromId];
-      const toNode = nodes[toId];
-      if (!token || !fromNode || !toNode) return false;
-      if (token.nodeId !== fromId) return false;
-      if (_.some(tokens, ['nodeId', toId])) return false;
+        return true;
+      } else if (message.type === 'finishRound') {
+        const { playerId } = message;
+        const { needs, nodes, tokens } = serverState;
+        const playerNodes = _.pickBy(
+          nodes,
+          node =>
+            _.includes(node.playerIds, playerId) && node.type === 'storage'
+        );
+        const playerTokens = _.pickBy(
+          tokens,
+          token => playerNodes[token.nodeId]
+        );
+        const need = _.find(needs, ['playerId', playerId]);
 
-      return true;
+        return (
+          _.filter(playerTokens, ['type', need.type]).length === need.count
+        );
+      }
+
+      return false;
     },
     integrateMessage: async message => {
       console.log('Integrating message', message);
@@ -176,6 +192,8 @@ function getSession({ id, emit }: SessionProps): Session {
             nodeId,
           },
         });
+      } else if (message.type === 'finishRound') {
+        await followEdge('finishGame');
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');

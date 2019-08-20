@@ -1,6 +1,6 @@
 // @flow
 
-export type PhaseName = 'lobby' | 'romance';
+export type PhaseName = 'lobby' | 'romance' | 'countdown';
 export type Phase = {|
   name: PhaseName,
 |};
@@ -39,7 +39,7 @@ export type Relationships = {|
     type: RelationshipType,
     fromId: string,
     toId: string,
-  |}
+  |},
 |};
 
 export type Needs = {|
@@ -48,7 +48,7 @@ export type Needs = {|
     playerId: string,
     type: TokenType,
     count: number,
-  |}
+  |},
 |};
 
 export type ServerState = {|
@@ -63,12 +63,17 @@ export type ServerState = {|
 export type SubServerState = $Values<ServerState>;
 export type ServerStateKeys = $Keys<ServerState>;
 
-export type Message = {
-  type: 'transferToken',
-  tokenId: string,
-  fromId: string,
-  toId: string,
-};
+export type Message =
+  | {
+      type: 'transferToken',
+      tokenId: string,
+      fromId: string,
+      toId: string,
+    }
+  | {
+      type: 'finishRound',
+      playerId: string,
+    };
 
 export type SessionInfo = {|
   sessionId: string,
