@@ -49,6 +49,7 @@ export type Node = {|
   position: Position,
   radius: number,
   playerIds: string[],
+  enabled: boolean,
 |};
 
 export type Nodes = {

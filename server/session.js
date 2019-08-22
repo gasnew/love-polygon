@@ -100,7 +100,7 @@ type Session = {
   init: () => Promise<void>,
   join: ({ playerId: string, playerName: string }) => Promise<void>,
   validMessage: (ServerState, Message) => boolean,
-  integrateMessage: Message => Promise<ServerState>,
+  integrateMessage: (ServerState, Message) => Promise<ServerState>,
 };
 
 type SessionProps = BaseSessionProps & { emit: Emitter };
@@ -141,6 +141,13 @@ function getSession({ id, emit }: SessionProps): Session {
     //return _.size(players) >= 1;
     return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
   };
+  const getPlayerTokens = (nodes, tokens, playerId) => {
+    const playerNodes = _.pickBy(
+      nodes,
+      node => _.includes(node.playerIds, playerId) && node.type === 'storage'
+    );
+    return _.pickBy(tokens, token => playerNodes[token.nodeId]);
+  };
 
   return {
     getAll,
@@ -172,6 +179,7 @@ function getSession({ id, emit }: SessionProps): Session {
         const fromNode = nodes[fromId];
         const toNode = nodes[toId];
         if (!token || !fromNode || !toNode) return false;
+        if (!fromNode.enabled) return false;
         if (token.nodeId !== fromId) return false;
         if (_.some(tokens, ['nodeId', toId])) return false;
 
@@ -179,25 +187,17 @@ function getSession({ id, emit }: SessionProps): Session {
       } else if (message.type === 'finishRound') {
         const { playerId } = message;
         const { needs, nodes, tokens } = serverState;
-        const playerNodes = _.pickBy(
-          nodes,
-          node =>
-            _.includes(node.playerIds, playerId) && node.type === 'storage'
-        );
-        const playerTokens = _.pickBy(
-          tokens,
-          token => playerNodes[token.nodeId]
-        );
+        const playerTokens = getPlayerTokens(nodes, tokens, playerId);
         const need = _.find(needs, ['playerId', playerId]);
 
         return (
-          _.filter(playerTokens, ['type', need.type]).length === 1//need.count
+          _.filter(playerTokens, ['type', need.type]).length === 1 //need.count
         );
       }
 
       return false;
     },
-    integrateMessage: async message => {
+    integrateMessage: async (serverState, message) => {
       console.log('Integrating message', message);
       if (message.type === 'transferToken') {
         const { tokenId, toId: nodeId } = message;
@@ -207,6 +207,30 @@ function getSession({ id, emit }: SessionProps): Session {
           },
         });
       } else if (message.type === 'finishRound') {
+        const { playerId } = message;
+        const { needs, nodes, tokens } = serverState;
+        const need = _.find(needs, ['playerId', playerId]);
+        const nodesToDisable = _.filter(
+          nodes,
+          node =>
+            _.includes(node.playerIds, playerId) &&
+            node.type === 'storage' &&
+            (_.find(tokens, ['nodeId', node.id]) || {}).type === need.type
+        ).slice(0, need.count);
+        await update('nodes', {
+          ..._.reduce(
+            nodesToDisable,
+            (disabledNodes, node) => ({
+              ...disabledNodes,
+              [node.id]: {
+                ...node,
+                enabled: false,
+              },
+            }),
+            {}
+          ),
+        });
+
         await followEdge('finishGame');
         setTimeout(() => followEdge('reallyFinish'), 3000);
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);

@@ -21,6 +21,7 @@ export type Nodes = {|
     id: string,
     type: NodeType,
     playerIds: string[],
+    enabled: boolean,
   |},
 |};
 

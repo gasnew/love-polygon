@@ -57,7 +57,7 @@ export default function Table(): Component {
       getRenderable(Banner()),
       ..._.map(nodes, node =>
         getRenderable(
-          Slot({ player: otherPlayerFromNode(node) }),
+          Slot({ player: otherPlayerFromNode(node), enabled: node.enabled }),
           node.position
         )
       ),

@@ -50,7 +50,7 @@ export function updateState(serverState: ServerState) {
   );
   const newNodes = _.filter(nodes, nodeIsNew);
   _.each(newNodes, node =>
-    dispatch(addNode(node.id, node.type, node.playerIds))
+    dispatch(addNode(node.id, node.type, node.playerIds, node.enabled))
   );
   const newTokens = _.filter(tokens, tokenIsNew);
   _.each(newTokens, token =>
@@ -93,7 +93,9 @@ export function setState(serverState: ServerState) {
   _.each(players, (player, id) =>
     dispatch(addPlayer(id, player.name, player.color))
   );
-  _.each(nodes, (node, id) => dispatch(addNode(id, node.type, node.playerIds)));
+  _.each(nodes, (node, id) =>
+    dispatch(addNode(id, node.type, node.playerIds, node.enabled))
+  );
   _.each(tokens, (token, id) =>
     dispatch(addToken(id, token.type, token.nodeId))
   );

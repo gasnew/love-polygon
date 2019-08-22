@@ -56,6 +56,7 @@ type Action =
       id: string,
       nodeType: NodeType,
       playerIds: string[],
+      enabled: boolean,
     }
   | {
       type: 'addPlayer',
@@ -185,13 +186,15 @@ export function addPlayer(id: string, name: string, color: string): Action {
 export function addNode(
   id: string,
   type: NodeType,
-  playerIds: string[]
+  playerIds: string[],
+  enabled: boolean
 ): Action {
   return {
     type: ADD_NODE,
     id,
     nodeType: type,
     playerIds,
+    enabled,
   };
 }
 
@@ -296,6 +299,7 @@ export default function dispatch(action: Action) {
         },
         radius: 10,
         playerIds: action.playerIds,
+        enabled: action.enabled,
       });
       const nodes = getOwnNodes();
       const nodeLayout = layoutNodes(nodes);
