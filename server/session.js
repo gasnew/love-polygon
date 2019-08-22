@@ -148,6 +148,23 @@ function getSession({ id, emit }: SessionProps): Session {
     );
     return _.pickBy(tokens, token => playerNodes[token.nodeId]);
   };
+  const endGame = async () => {
+    const { nodes } = await getAll();
+    await update('nodes', {
+      ..._.reduce(
+        nodes,
+        (disabledNodes, node) => ({
+          ...disabledNodes,
+          [node.id]: {
+            ...node,
+            enabled: false,
+          },
+        }),
+        {}
+      ),
+    });
+    await followEdge('reallyFinish');
+  }
 
   return {
     getAll,
@@ -232,7 +249,7 @@ function getSession({ id, emit }: SessionProps): Session {
         });
 
         await followEdge('finishGame');
-        setTimeout(() => followEdge('reallyFinish'), 3000);
+        setTimeout(async () => await endGame(), 3000);
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');

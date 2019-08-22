@@ -52,9 +52,9 @@ export default function getFollowEdge({
     countdown: {
       reallyFinish: transition('finished', finishGame),
     },
-    finished: {
-      finishGame: transition('countdown', startCountdown),
-    },
+    //finished: {
+      //finishGame: transition('countdown', startCountdown),
+    //},
   };
 
   return async (edge: Edge) => {

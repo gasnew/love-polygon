@@ -15,6 +15,7 @@ import {
   getOwnNeed,
   getOwnNodes,
   getOwnTokens,
+  getPhase,
   getPlayers,
   getSessionInfo,
 } from '../../state/getters';
@@ -29,7 +30,7 @@ export function needsMet(): boolean {
     token => nodes[token.nodeId].type === 'storage'
   );
   const need = getOwnNeed() || {};
-  return _.filter(storedTokens, ['type', need.type]).length === 1//need.count;
+  return _.filter(storedTokens, ['type', need.type]).length === 1; //need.count;
 }
 
 export default function Table(): Component {
@@ -51,6 +52,8 @@ export default function Table(): Component {
   const nodes: Nodes = getOwnNodes();
   const tokens: Tokens = getOwnTokens();
   const button = getButton();
+  const need = getOwnNeed() || {};
+  const phase = getPhase() || {};
 
   return ({ getRenderable, render }) =>
     render(
@@ -69,10 +72,12 @@ export default function Table(): Component {
       // that would be a decent amount of work for little payoff in this
       // project. We'll just stick to having one global button state instead.
       // :)
-      (needsMet() ?
-        getRenderable(
-          FinishRoundButton({ button, need: 'cake' }),
-          button.position
-        ) : getRenderable(NeedInfo({ need: 'cake' }), button.position))
+      (_.includes(['romance', 'countdown'], phase.name) || null) &&
+        (needsMet()
+          ? getRenderable(
+              FinishRoundButton({ button, need: need.type }),
+              button.position
+            )
+          : getRenderable(NeedInfo({ need: need.type }), button.position))
     );
 }

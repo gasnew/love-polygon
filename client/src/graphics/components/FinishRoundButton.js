@@ -15,7 +15,7 @@ function ButtonText({ need }: ButtonTextProps): Component {
   return ({ getRenderable, render }) =>
     render(
       getRenderable(
-        TextBox({ text: `Lock in ${need}s and`, color: '#FFFFFF' }),
+        TextBox({ text: `Lock in ${need} and`, color: '#FFFFFF' }),
         { x: 0, y: -2 }
       ),
       getRenderable(

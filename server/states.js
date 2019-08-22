@@ -38,11 +38,13 @@ export function getNewPlayerState({
         id: nodeId1,
         playerIds: [playerId],
         type: 'storage',
+        enabled: true,
       },
       [nodeId2]: {
         id: nodeId2,
         playerIds: [playerId],
         type: 'loveBucket',
+        enabled: true,
       },
     },
     tokens: {
@@ -136,6 +138,7 @@ export function getRomanceState({
                 id: nodeId,
                 playerIds: [playerId],
                 type: 'storage',
+                enabled: true,
               },
             };
           },
@@ -157,6 +160,7 @@ export function getRomanceState({
           id: nodeId,
           playerIds: [id1, id2],
           type: 'shared',
+          enabled: true,
         },
       };
     },
