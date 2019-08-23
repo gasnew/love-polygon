@@ -113,7 +113,12 @@ function getSession({ id, emit }: SessionProps): Session {
   const startGame = async () => {
     await set('nodes', {});
     await set('tokens', {});
-    await updateAll(getRomanceState(await getAll()));
+    try {
+      await updateAll(getRomanceState(await getAll()));
+    } catch(error) {
+      console.log('WHOOPS! Try, try again');
+      await updateAll(getRomanceState(await getAll()));
+    }
     console.log('start game now');
     emit('changePhase');
   };
@@ -181,25 +186,11 @@ function getSession({ id, emit }: SessionProps): Session {
     },
     join: async ({ playerId, playerName }) => {
       // TODO: REMOVEME
-      const pid1 = uniqid();
-      const pid2 = uniqid();
-      await updateAll(getNewPlayerState({ playerId: pid1, playerName: pid1 }))
-      await updateAll(getNewPlayerState({ playerId: pid2, playerName: pid2 }))
-      //await update('players', {
-      //..._.reduce(
-      //[uniqid(), uniqid()],
-      //(players, id) => ({
-      //...players,
-      //[id]: {
-      //id,
-      //name: id,
-      //color: '#bababa',
-      //active: true,
-      //},
-      //}),
-      //{}
-      //),
-      //});
+      //const pid1 = uniqid();
+      //const pid2 = uniqid();
+      //await updateAll(getNewPlayerState({ playerId: pid1, playerName: pid1 }))
+      //await updateAll(getNewPlayerState({ playerId: pid2, playerName: pid2 }))
+
       const sessionData = await getAll();
       const playersData = sessionData.players;
       if (playersData[playerId]) {
@@ -228,7 +219,7 @@ function getSession({ id, emit }: SessionProps): Session {
         const need = _.find(needs, ['playerId', playerId]);
 
         return (
-          _.filter(playerTokens, ['type', need.type]).length === 1 //need.count
+          _.filter(playerTokens, ['type', need.type]).length >= need.count
         );
       }
 
@@ -269,7 +260,7 @@ function getSession({ id, emit }: SessionProps): Session {
         });
 
         await followEdge('finishGame');
-        setTimeout(async () => await endGame(), 3000);
+        setTimeout(async () => await endGame(), 15000);
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');

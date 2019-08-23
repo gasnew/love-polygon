@@ -46,15 +46,6 @@ export default function FinishRoundButton({ button, need }: Props): Component {
           },
         })
       ),
-      phase.name === 'countdown'
-        ? getRenderable(
-            TextBox({
-              text: `${Math.ceil(
-                15 - (Date.now() - (phase.updatedAt || 0)) / 1000
-              )}`,
-              color: '#FFFFFF',
-            })
-          )
-        : getRenderable(ButtonText({ need }))
+      getRenderable(ButtonText({ need }))
     );
 }

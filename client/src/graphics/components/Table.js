@@ -6,6 +6,7 @@ import Banner from './Banner';
 import Cake from './Cake';
 import Candy from './Candy';
 import Cookie from './Cookie';
+import CountdownTimer from './CountdownTimer';
 import FinishRoundButton from './FinishRoundButton';
 import Heart from './Heart';
 import NeedInfo from './NeedInfo';
@@ -30,7 +31,7 @@ export function needsMet(): boolean {
     token => nodes[token.nodeId].type === 'storage'
   );
   const need = getOwnNeed() || {};
-  return _.filter(storedTokens, ['type', need.type]).length === 1; //need.count;
+  return _.filter(storedTokens, ['type', need.type]).length >= need.count;
 }
 
 export default function Table(): Component {
@@ -67,13 +68,22 @@ export default function Table(): Component {
       ..._.map(tokens, token =>
         getRenderable(tokenTypes[token.type](), token.position)
       ),
+      (phase.name === 'countdown' || null) &&
+        getRenderable(
+          CountdownTimer({
+            seconds: Math.ceil(
+              15 - (Date.now() - (phase.updatedAt || 0)) / 1000
+            ),
+          }),
+          { x: 30, y: 30 }
+        ),
       // Ideally, we'd be able to pass in an onClick parameter to getRenderable
       // in order to manage click/touch events for this component. However,
       // that would be a decent amount of work for little payoff in this
       // project. We'll just stick to having one global button state instead.
       // :)
       (_.includes(['romance', 'countdown'], phase.name) || null) &&
-        (needsMet()
+        (needsMet() && phase.name === 'romance'
           ? getRenderable(
               FinishRoundButton({ button, need: need.type }),
               button.position
