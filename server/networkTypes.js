@@ -3,7 +3,7 @@
 export type PhaseName = 'lobby' | 'romance' | 'countdown' | 'finished';
 export type Phase = {|
   name: PhaseName,
-  updatedAt?: number,
+  countdownStartedAt?: number,
 |};
 
 export type Player = {|

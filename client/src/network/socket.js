@@ -7,13 +7,16 @@ import dispatch, {
   addNode,
   addToken,
   clearStage,
+  setCurrentTokenId,
   setNeeds,
   setPhase,
   setRelationships,
   setTokenNodeId,
   setTokenPosition,
+  startCountdown,
 } from '../state/actions';
 import {
+  getCurrentTokenId,
   getNode,
   getPhase,
   getPlayer,
@@ -80,6 +83,7 @@ export function updateState(serverState: ServerState) {
       dispatch(
         setTokenPosition(id, serverNode.position.x, serverNode.position.y)
       );
+      if (id === getCurrentTokenId()) dispatch(setCurrentTokenId(null));
     }
   });
 }
@@ -88,7 +92,9 @@ export function setState(serverState: ServerState) {
   console.log('state set');
   console.log(serverState);
   const { phase, players, needs, nodes, relationships, tokens } = serverState;
-  dispatch(setPhase(phase));
+  if (phase.name === 'countdown' && (getPhase() || {}).name !== 'countdown')
+    dispatch(startCountdown());
+  dispatch(setPhase(phase.name));
   dispatch(clearStage());
   _.each(players, (player, id) =>
     dispatch(addPlayer(id, player.name, player.color))

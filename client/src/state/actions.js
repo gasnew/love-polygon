@@ -7,6 +7,7 @@ import type Socket from 'socket.io-client';
 import {
   getButton,
   getState,
+  getPhase,
   getPlayers,
   getNode,
   getNodes,
@@ -17,7 +18,12 @@ import {
   getPrimitives,
 } from './getters';
 import { layoutNodes } from '../graphics/layout';
-import type { NodeType, Phase, TokenType } from '../../../server/networkTypes';
+import type {
+  NodeType,
+  Phase,
+  PhaseName,
+  TokenType,
+} from '../../../server/networkTypes';
 import type { Primitive } from '../graphics/buildPrimitive';
 import type {
   Needs,
@@ -44,6 +50,7 @@ const SET_NODE_POSITION = 'setNodePosition';
 const SET_TOKEN_POSITION = 'setTokenPosition';
 const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
+const START_COUNTDOWN = 'startCountdown';
 
 type Action =
   | {
@@ -115,6 +122,9 @@ type Action =
   | {
       type: 'setCurrentTokenId',
       tokenId: ?string,
+    }
+  | {
+      type: 'startCountdown',
     };
 
 const mergeIntoState = (key, subState) => {
@@ -160,10 +170,14 @@ const setTokens = (tokens: Tokens) => {
   mergeIntoState('tokens', tokens);
 };
 
-export function setPhase(phase: Phase): Action {
+export function setPhase(name: PhaseName): Action {
+  const countdownStartedAt = (getPhase() || {}).countdownStartedAt;
   return {
     type: SET_PHASE,
-    phase,
+    phase: {
+      name,
+      countdownStartedAt,
+    },
   };
 }
 
@@ -284,6 +298,12 @@ export function setNeeds(needs: Needs): Action {
   };
 }
 
+export function startCountdown(): Action {
+  return {
+    type: START_COUNTDOWN,
+  };
+}
+
 export default function dispatch(action: Action) {
   switch (action.type) {
     case ADD_PRIMITIVE:
@@ -342,7 +362,7 @@ export default function dispatch(action: Action) {
     case SET_PHASE:
       mergeIntoState('phase', {
         name: action.phase.name,
-        updatedAt: Date.now(),
+        countdownStartedAt: action.phase.countdownStartedAt,
       });
       break;
     case SET_SOCKET:
@@ -380,6 +400,12 @@ export default function dispatch(action: Action) {
       break;
     case SET_CURRENT_TOKEN:
       mergeIntoState('currentTokenId', action.tokenId);
+      break;
+    case START_COUNTDOWN:
+      mergeIntoState('phase', {
+        name: (getPhase() || {}).name,
+        countdownStartedAt: Date.now(),
+      });
       break;
     default:
       throw new Error(`Yo, action ${action.type} doesn't exist!`);

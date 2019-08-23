@@ -51,7 +51,7 @@ export function getNewPlayerState({
     tokens: {
       [tokenId]: {
         id: tokenId,
-        nodeId: nodeId2, // TODO ENDME
+        nodeId: nodeId1,
         type: 'heart',
       },
     },

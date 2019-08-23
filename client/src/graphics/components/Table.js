@@ -72,7 +72,7 @@ export default function Table(): Component {
         getRenderable(
           CountdownTimer({
             seconds: Math.ceil(
-              15 - (Date.now() - (phase.updatedAt || 0)) / 1000
+              15 - (Date.now() - (phase.countdownStartedAt || 0)) / 1000
             ),
           }),
           { x: 30, y: 30 }
