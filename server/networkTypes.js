@@ -6,13 +6,14 @@ export type Phase = {|
   updatedAt?: number,
 |};
 
+export type Player = {|
+  id: string,
+  name: string,
+  color: string,
+  active: boolean,
+|};
 export type Players = {|
-  [string]: {|
-    id: string,
-    name: string,
-    color: string,
-    active: boolean,
-  |},
+  [string]: Player,
 |};
 
 export type NodeType = 'storage' | 'shared' | 'loveBucket';

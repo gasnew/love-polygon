@@ -30,8 +30,18 @@ export async function checkSession(request: CheckRequest, response: $Response) {
 
   console.log(`${playerName} is checking to see if ${sessionId} is cool.`);
   const session = getBaseSession({ id: sessionId });
-  const players = (await session.getAll()).players;
+  const { phase, players } = await session.getAll();
   const playerId = _.findKey(players, player => player.name == playerName);
+  if (!playerId && phase && phase.name !== 'lobby') {
+    response.json({
+      error: {
+        field: 'sessionId',
+        message: `Session ${playerName} is ongoing. Please choose another
+        session.`,
+      },
+    });
+    return;
+  }
   if (playerId && players[playerId].active) {
     response.json({
       error: {

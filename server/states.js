@@ -5,6 +5,7 @@ import randomColor from 'randomcolor';
 import uniqid from 'uniqid';
 
 import type {
+  Player,
   Players,
   Relationships,
   RelationshipType,
@@ -50,7 +51,7 @@ export function getNewPlayerState({
     tokens: {
       [tokenId]: {
         id: tokenId,
-        nodeId: nodeId1,
+        nodeId: nodeId2, // TODO ENDME
         type: 'heart',
       },
     },
@@ -67,8 +68,8 @@ export function pairs<T>(array: T[]): T[][] {
 }
 
 export const getNumberOfLovers = (numberOfPlayers: number): number => {
-  if (numberOfPlayers <= 2) return 1;
-  if (numberOfPlayers === 3) return _.random(1, 3);
+  if (numberOfPlayers <= 2) throw new Error('Nah, man! Too few folks for love');
+  if (numberOfPlayers === 3) return _.random(2, 3);
   if (numberOfPlayers === 4) return _.random(2, 4);
   return _.random(Math.round(numberOfPlayers * 0.3), numberOfPlayers);
 };
@@ -92,8 +93,12 @@ export function getRoles(players: Players, numberOfLovers: number): Roles {
 export function buildRelationships(
   sourcePlayers: Players,
   targetPlayers: Players,
-  type: RelationshipType
+  type: RelationshipType,
+  filterTargets: (Player[], Player) => Player[] = (a, b) => _.values(a)
 ): Relationships {
+  console.log(sourcePlayers);
+  console.log(targetPlayers);
+  console.log(type);
   return {
     ..._.reduce(
       sourcePlayers,
@@ -105,7 +110,12 @@ export function buildRelationships(
             id: relationshipId,
             type,
             fromId: sourcePlayer.id,
-            toId: _.shuffle(targetPlayers)[0].id,
+            toId: _.shuffle(
+              filterTargets(
+                _.reject(targetPlayers, ['id', sourcePlayer.id]),
+                sourcePlayer
+              )
+            )[0].id,
           },
         };
       },
@@ -205,7 +215,18 @@ export function getRomanceState({
     getNumberOfLovers(_.size(players))
   );
   const crushRelationships = buildRelationships(lovers, players, 'crush');
-  const wingmanRelationships = buildRelationships(wingmen, lovers, 'wingman');
+  const wingmanRelationships = buildRelationships(
+    wingmen,
+    lovers,
+    'wingman',
+    (lovers, wingman) =>
+      _.reject(lovers, lover =>
+        _.some(
+          crushRelationships,
+          crush => crush.fromId === lover.id && crush.toId === wingman.id
+        )
+      )
+  );
 
   const needs = _.reduce(
     players,

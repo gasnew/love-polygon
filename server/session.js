@@ -139,7 +139,7 @@ function getSession({ id, emit }: SessionProps): Session {
     const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
     // TODO remove this temp quorum definition
     //return _.size(players) >= 1;
-    return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
+    return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 3;
   };
   const getPlayerTokens = (nodes, tokens, playerId) => {
     const playerNodes = _.pickBy(
@@ -164,7 +164,7 @@ function getSession({ id, emit }: SessionProps): Session {
       ),
     });
     await followEdge('reallyFinish');
-  }
+  };
 
   return {
     getAll,
@@ -180,6 +180,26 @@ function getSession({ id, emit }: SessionProps): Session {
       await set('relationships', {});
     },
     join: async ({ playerId, playerName }) => {
+      // TODO: REMOVEME
+      const pid1 = uniqid();
+      const pid2 = uniqid();
+      await updateAll(getNewPlayerState({ playerId: pid1, playerName: pid1 }))
+      await updateAll(getNewPlayerState({ playerId: pid2, playerName: pid2 }))
+      //await update('players', {
+      //..._.reduce(
+      //[uniqid(), uniqid()],
+      //(players, id) => ({
+      //...players,
+      //[id]: {
+      //id,
+      //name: id,
+      //color: '#bababa',
+      //active: true,
+      //},
+      //}),
+      //{}
+      //),
+      //});
       const sessionData = await getAll();
       const playersData = sessionData.players;
       if (playersData[playerId]) {
