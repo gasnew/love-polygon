@@ -11,6 +11,7 @@ import FinishRoundButton from './FinishRoundButton';
 import Heart from './Heart';
 import NeedInfo from './NeedInfo';
 import Slot from './Slot';
+import TextBox from './TextBox';
 import {
   getButton,
   getOwnNeed,
@@ -88,6 +89,15 @@ export default function Table(): Component {
               FinishRoundButton({ button, need: need.type }),
               button.position
             )
-          : getRenderable(NeedInfo({ need: need.type }), button.position))
+          : getRenderable(NeedInfo({ need: need.type }), button.position)),
+      (phase.name !== 'lobby' || null) &&
+        getRenderable(
+          TextBox({
+            text: getPlayers()[getSessionInfo().playerId].name,
+            scale: 5,
+            color: getPlayers()[getSessionInfo().playerId].color,
+          }),
+          { x: 30, y: 80 }
+        )
     );
 }
