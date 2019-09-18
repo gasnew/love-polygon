@@ -49,6 +49,7 @@ export type Node = {|
   position: Position,
   radius: number,
   playerIds: string[],
+  enabled: boolean,
 |};
 
 export type Nodes = {
@@ -77,6 +78,13 @@ export type Needs = {
   [string]: Need,
 };
 
+export type Button = {
+  state: 'up' | 'down',
+  position: Position,
+  height: number,
+  width: number,
+};
+
 export type Primitives = {
   [string]: Primitive<{}>,
 };
@@ -91,6 +99,7 @@ export type State = {|
   nodes: Nodes,
   relationships: Relationships,
   needs: Needs,
+  button: Button,
   primitives: Primitives,
 |};
 
@@ -108,6 +117,12 @@ export default function generateState(
     nodes: {},
     relationships: {},
     needs: {},
+    button: {
+      state: 'up',
+      position: { x: 30, y: 65 },
+      width: 28,
+      height: 10,
+    },
     primitives: {},
   };
 }

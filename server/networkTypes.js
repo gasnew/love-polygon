@@ -1,17 +1,19 @@
 // @flow
 
-export type PhaseName = 'lobby' | 'romance';
+export type PhaseName = 'lobby' | 'romance' | 'countdown' | 'finished';
 export type Phase = {|
   name: PhaseName,
+  countdownStartedAt?: number,
 |};
 
+export type Player = {|
+  id: string,
+  name: string,
+  color: string,
+  active: boolean,
+|};
 export type Players = {|
-  [string]: {|
-    id: string,
-    name: string,
-    color: string,
-    active: boolean,
-  |},
+  [string]: Player,
 |};
 
 export type NodeType = 'storage' | 'shared' | 'loveBucket';
@@ -20,6 +22,7 @@ export type Nodes = {|
     id: string,
     type: NodeType,
     playerIds: string[],
+    enabled: boolean,
   |},
 |};
 
@@ -39,7 +42,7 @@ export type Relationships = {|
     type: RelationshipType,
     fromId: string,
     toId: string,
-  |}
+  |},
 |};
 
 export type Needs = {|
@@ -48,7 +51,7 @@ export type Needs = {|
     playerId: string,
     type: TokenType,
     count: number,
-  |}
+  |},
 |};
 
 export type ServerState = {|
@@ -63,12 +66,17 @@ export type ServerState = {|
 export type SubServerState = $Values<ServerState>;
 export type ServerStateKeys = $Keys<ServerState>;
 
-export type Message = {
-  type: 'transferToken',
-  tokenId: string,
-  fromId: string,
-  toId: string,
-};
+export type Message =
+  | {
+      type: 'transferToken',
+      tokenId: string,
+      fromId: string,
+      toId: string,
+    }
+  | {
+      type: 'finishRound',
+      playerId: string,
+    };
 
 export type SessionInfo = {|
   sessionId: string,

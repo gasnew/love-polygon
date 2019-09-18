@@ -5,6 +5,7 @@ import randomColor from 'randomcolor';
 import uniqid from 'uniqid';
 
 import type {
+  Player,
   Players,
   Relationships,
   RelationshipType,
@@ -38,11 +39,13 @@ export function getNewPlayerState({
         id: nodeId1,
         playerIds: [playerId],
         type: 'storage',
+        enabled: true,
       },
       [nodeId2]: {
         id: nodeId2,
         playerIds: [playerId],
         type: 'loveBucket',
+        enabled: true,
       },
     },
     tokens: {
@@ -65,8 +68,8 @@ export function pairs<T>(array: T[]): T[][] {
 }
 
 export const getNumberOfLovers = (numberOfPlayers: number): number => {
-  if (numberOfPlayers <= 2) return 1;
-  if (numberOfPlayers === 3) return _.random(1, 3);
+  if (numberOfPlayers <= 2) throw new Error('Nah, man! Too few folks for love');
+  if (numberOfPlayers === 3) return _.random(2, 3);
   if (numberOfPlayers === 4) return _.random(2, 4);
   return _.random(Math.round(numberOfPlayers * 0.3), numberOfPlayers);
 };
@@ -90,8 +93,12 @@ export function getRoles(players: Players, numberOfLovers: number): Roles {
 export function buildRelationships(
   sourcePlayers: Players,
   targetPlayers: Players,
-  type: RelationshipType
+  type: RelationshipType,
+  filterTargets: (Player[], Player) => Player[] = (a, b) => _.values(a)
 ): Relationships {
+  //console.log(sourcePlayers);
+  //console.log(targetPlayers);
+  //console.log(type);
   return {
     ..._.reduce(
       sourcePlayers,
@@ -103,7 +110,12 @@ export function buildRelationships(
             id: relationshipId,
             type,
             fromId: sourcePlayer.id,
-            toId: _.shuffle(targetPlayers)[0].id,
+            toId: _.shuffle(
+              filterTargets(
+                _.reject(targetPlayers, ['id', sourcePlayer.id]),
+                sourcePlayer
+              )
+            )[0].id,
           },
         };
       },
@@ -127,7 +139,7 @@ export function getRomanceState({
       return {
         ...storageNodes,
         ..._.reduce(
-          _.range(4),
+          _.range(5),
           nodes => {
             const nodeId = uniqid();
             return {
@@ -136,6 +148,7 @@ export function getRomanceState({
                 id: nodeId,
                 playerIds: [playerId],
                 type: 'storage',
+                enabled: true,
               },
             };
           },
@@ -157,6 +170,24 @@ export function getRomanceState({
           id: nodeId,
           playerIds: [id1, id2],
           type: 'shared',
+          enabled: true,
+        },
+      };
+    },
+    {}
+  );
+
+  const needs = _.reduce(
+    players,
+    (needs, player) => {
+      const needId = uniqid();
+      return {
+        ...needs,
+        [needId]: {
+          id: needId,
+          playerId: player.id,
+          type: _.sample(TOKEN_TYPES),
+          count: 3,
         },
       };
     },
@@ -173,26 +204,37 @@ export function getRomanceState({
     }),
     {}
   );
+
+  const typesOfTokens = _.shuffle([
+    ..._.reduce(
+      needs,
+      (needTypes, need) => [
+        ...needTypes,
+        ..._.map(_.range(3), () => need.type),
+      ],
+      []
+    ),
+    ..._.map(players, () => _.sample(TOKEN_TYPES)),
+  ]);
+  const typesWithNodes = _.zip(
+    typesOfTokens,
+    _.flatMap(nodesByPlayer, playerNodes => playerNodes.slice(0, -1))
+  );
+
   const tokens = _.reduce(
-    nodesByPlayer,
-    (allTokens, nodes) => ({
-      ...allTokens,
-      ..._.reduce(
-        nodes.slice(0, -1),
-        (playerTokens, node) => {
-          const tokenId = uniqid();
-          return {
-            ...playerTokens,
-            [tokenId]: {
-              id: tokenId,
-              nodeId: node.id,
-              type: _.sample(TOKEN_TYPES),
-            },
-          };
+    typesWithNodes,
+    (playerTokens, [type, node]) => {
+      const tokenId = uniqid();
+      console.log(type);
+      return {
+        ...playerTokens,
+        [tokenId]: {
+          id: tokenId,
+          nodeId: node.id,
+          type,
         },
-        {}
-      ),
-    }),
+      };
+    },
     {}
   );
 
@@ -201,23 +243,17 @@ export function getRomanceState({
     getNumberOfLovers(_.size(players))
   );
   const crushRelationships = buildRelationships(lovers, players, 'crush');
-  const wingmanRelationships = buildRelationships(wingmen, lovers, 'wingman');
-
-  const needs = _.reduce(
-    players,
-    (needs, player) => {
-      const needId = uniqid();
-      return {
-        ...needs,
-        [needId]: {
-          id: needId,
-          playerId: player.id,
-          type: _.sample(TOKEN_TYPES),
-          count: 4,
-        },
-      };
-    },
-    {}
+  const wingmanRelationships = buildRelationships(
+    wingmen,
+    lovers,
+    'wingman',
+    (lovers, wingman) =>
+      _.reject(lovers, lover =>
+        _.some(
+          crushRelationships,
+          crush => crush.fromId === lover.id && crush.toId === wingman.id
+        )
+      )
   );
 
   return {

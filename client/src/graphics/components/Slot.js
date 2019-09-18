@@ -7,10 +7,11 @@ import type { Component } from './index';
 import type { Player } from '../../state/state';
 
 type Props = {
-  player?: Player,
+  player: Player,
+  enabled: boolean,
 };
 
-export default function Slot({ player }: Props): Component {
+export default function Slot({ player, enabled }: Props): Component {
   return ({ getRenderable, PrimitiveComponent, render }) =>
     render(
       getRenderable(
@@ -18,7 +19,9 @@ export default function Slot({ player }: Props): Component {
           type: 'Circle',
           buildMesh: buildCircleMesh,
           meshProps: { scale: 6, steps: 50 },
-          dynamicProps: { color: toRGB('#DCF7F3') },
+          dynamicProps: {
+            color: enabled ? toRGB('#DCF7F3') : toRGB('#9CC1BE'),
+          },
         })
       ),
       player &&

@@ -10,7 +10,7 @@ export const ROMANCE = 'romance';
 export const START_GAME = 'startGame';
 export const RESTART = 'restart';
 
-type Edge = 'startGame' | 'restart';
+type Edge = 'startGame' | 'restart' | 'finishGame' | 'reallyFinish';
 type Action = () => Promise<void>;
 type Transition = ((PhaseName) => void) => Promise<void>;
 
@@ -31,11 +31,15 @@ type Props = {
   getPhaseName: () => Promise<PhaseName>,
   setPhaseName: PhaseName => void,
   startGame: Action,
+  startCountdown: Action,
+  finishGame: Action,
 };
 export default function getFollowEdge({
   getPhaseName,
   setPhaseName,
   startGame,
+  startCountdown,
+  finishGame,
 }: Props) {
   const graph: Graph = {
     lobby: {
@@ -43,7 +47,14 @@ export default function getFollowEdge({
     },
     romance: {
       restart: transition('romance', startGame),
+      finishGame: transition('countdown', startCountdown),
     },
+    countdown: {
+      reallyFinish: transition('finished', finishGame),
+    },
+    //finished: {
+      //finishGame: transition('countdown', startCountdown),
+    //},
   };
 
   return async (edge: Edge) => {

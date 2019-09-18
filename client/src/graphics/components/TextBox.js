@@ -7,12 +7,14 @@ import type { Component } from './index';
 type Props = {
   text: string,
   color: string,
+  scale?: number,
   circular?: boolean,
 };
 
 export default function TextBox({
   text,
   color,
+  scale = 2,
   circular = false,
 }: Props): Component {
   return ({ getRenderable, PrimitiveComponent, render }) =>
@@ -21,7 +23,7 @@ export default function TextBox({
         PrimitiveComponent({
           type: circular ? 'CircularTextBox' : 'TextBox',
           buildMesh: circular ? buildCircularTextMesh : buildTextMesh,
-          meshProps: { scale: 2, text },
+          meshProps: { scale, text },
           dynamicProps: { color: toRGB(color) },
         })
       )

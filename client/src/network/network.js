@@ -1,10 +1,20 @@
 // @flow
 
-import { getSocket } from '../state/getters';
+import _ from 'lodash';
+
+import { getSessionInfo, getSocket } from '../state/getters';
 
 import type { Message } from '../../../server/networkTypes';
 
+const FINISH_ROUND = 'finishRound';
 const TRANSFER_TOKEN = 'transferToken';
+
+export function finishRound(): Message {
+  return {
+    type: FINISH_ROUND,
+    playerId: getSessionInfo().playerId,
+  };
+}
 
 export function transferToken(
   tokenId: string,
@@ -20,13 +30,9 @@ export function transferToken(
 }
 
 export default function announce(message: Message) {
-  switch (message.type) {
-    case TRANSFER_TOKEN:
-      console.log(message);
-      const socket = getSocket();
-      if (socket) socket.emit('newMessage', message);
-      break;
-    default:
-      throw new Error(`Yo, message ${message.type} doesn't exist!`);
-  }
+  if (!_.includes([TRANSFER_TOKEN, FINISH_ROUND], message.type))
+    throw new Error(`Yo, message ${message.type} doesn't exist!`);
+
+  const socket = getSocket();
+  if (socket) socket.emit('newMessage', message);
 }

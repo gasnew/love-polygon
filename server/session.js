@@ -100,7 +100,7 @@ type Session = {
   init: () => Promise<void>,
   join: ({ playerId: string, playerName: string }) => Promise<void>,
   validMessage: (ServerState, Message) => boolean,
-  integrateMessage: Message => Promise<ServerState>,
+  integrateMessage: (ServerState, Message) => Promise<ServerState>,
 };
 
 type SessionProps = BaseSessionProps & { emit: Emitter };
@@ -113,19 +113,62 @@ function getSession({ id, emit }: SessionProps): Session {
   const startGame = async () => {
     await set('nodes', {});
     await set('tokens', {});
-    await updateAll(getRomanceState(await getAll()));
+    try {
+      await updateAll(getRomanceState(await getAll()));
+    } catch(error) {
+      console.log('WHOOPS! Try, try again');
+      await updateAll(getRomanceState(await getAll()));
+    }
     console.log('start game now');
     emit('changePhase');
   };
+  const startCountdown = async () => {
+    console.log('start countdown');
+    emit('changePhase');
+  };
+  const finishGame = async () => {
+    console.log('finish game');
+    emit('changePhase');
+  };
 
-  const followEdge = getFollowEdge({ getPhaseName, setPhaseName, startGame });
+  const followEdge = getFollowEdge({
+    getPhaseName,
+    setPhaseName,
+    startGame,
+    startCountdown,
+    finishGame,
+  });
 
   const quorum = async (): Promise<boolean> => {
     const { nodes, players, tokens } = await getAll();
     const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
     // TODO remove this temp quorum definition
     //return _.size(players) >= 1;
-    return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 2;
+    return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 3;
+  };
+  const getPlayerTokens = (nodes, tokens, playerId) => {
+    const playerNodes = _.pickBy(
+      nodes,
+      node => _.includes(node.playerIds, playerId) && node.type === 'storage'
+    );
+    return _.pickBy(tokens, token => playerNodes[token.nodeId]);
+  };
+  const endGame = async () => {
+    const { nodes } = await getAll();
+    await update('nodes', {
+      ..._.reduce(
+        nodes,
+        (disabledNodes, node) => ({
+          ...disabledNodes,
+          [node.id]: {
+            ...node,
+            enabled: false,
+          },
+        }),
+        {}
+      ),
+    });
+    await followEdge('reallyFinish');
   };
 
   return {
@@ -142,6 +185,12 @@ function getSession({ id, emit }: SessionProps): Session {
       await set('relationships', {});
     },
     join: async ({ playerId, playerName }) => {
+      // TODO: REMOVEME
+      //const pid1 = uniqid();
+      //const pid2 = uniqid();
+      //await updateAll(getNewPlayerState({ playerId: pid1, playerName: pid1 }))
+      //await updateAll(getNewPlayerState({ playerId: pid2, playerName: pid2 }))
+
       const sessionData = await getAll();
       const playersData = sessionData.players;
       if (playersData[playerId]) {
@@ -150,24 +199,33 @@ function getSession({ id, emit }: SessionProps): Session {
       }
       await updateAll(getNewPlayerState({ playerId, playerName }));
     },
-    validMessage: (
-      serverState: ServerState,
-      message: Message
-    ): boolean => {
-      if (message.type !== 'transferToken') return false;
+    validMessage: (serverState: ServerState, message: Message): boolean => {
+      if (message.type === 'transferToken') {
+        const { tokenId, fromId, toId } = message;
+        const { nodes, tokens } = serverState;
+        const token = tokens[tokenId];
+        const fromNode = nodes[fromId];
+        const toNode = nodes[toId];
+        if (!token || !fromNode || !toNode) return false;
+        if (!fromNode.enabled) return false;
+        if (token.nodeId !== fromId) return false;
+        if (_.some(tokens, ['nodeId', toId])) return false;
 
-      const { tokenId, fromId, toId } = message;
-      const { nodes, tokens } = serverState;
-      const token = tokens[tokenId];
-      const fromNode = nodes[fromId];
-      const toNode = nodes[toId];
-      if (!token || !fromNode || !toNode) return false;
-      if (token.nodeId !== fromId) return false;
-      if (_.some(tokens, ['nodeId', toId])) return false;
+        return true;
+      } else if (message.type === 'finishRound') {
+        const { playerId } = message;
+        const { needs, nodes, tokens } = serverState;
+        const playerTokens = getPlayerTokens(nodes, tokens, playerId);
+        const need = _.find(needs, ['playerId', playerId]);
 
-      return true;
+        return (
+          _.filter(playerTokens, ['type', need.type]).length >= need.count
+        );
+      }
+
+      return false;
     },
-    integrateMessage: async message => {
+    integrateMessage: async (serverState, message) => {
       console.log('Integrating message', message);
       if (message.type === 'transferToken') {
         const { tokenId, toId: nodeId } = message;
@@ -176,6 +234,33 @@ function getSession({ id, emit }: SessionProps): Session {
             nodeId,
           },
         });
+      } else if (message.type === 'finishRound') {
+        const { playerId } = message;
+        const { needs, nodes, tokens } = serverState;
+        const need = _.find(needs, ['playerId', playerId]);
+        const nodesToDisable = _.filter(
+          nodes,
+          node =>
+            _.includes(node.playerIds, playerId) &&
+            node.type === 'storage' &&
+            (_.find(tokens, ['nodeId', node.id]) || {}).type === need.type
+        ).slice(0, need.count);
+        await update('nodes', {
+          ..._.reduce(
+            nodesToDisable,
+            (disabledNodes, node) => ({
+              ...disabledNodes,
+              [node.id]: {
+                ...node,
+                enabled: false,
+              },
+            }),
+            {}
+          ),
+        });
+
+        await followEdge('finishGame');
+        setTimeout(async () => await endGame(), 15000);
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');

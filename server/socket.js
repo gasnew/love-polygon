@@ -38,7 +38,7 @@ export async function handleConnection(socket: Socket, io: IO) {
     if (session.validMessage(serverState, message)) {
       socket
         .to(sessionId)
-        .emit('updateState', await session.integrateMessage(message));
+        .emit('updateState', await session.integrateMessage(serverState, message));
     } else socket.emit('setState', serverState);
   });
 }
