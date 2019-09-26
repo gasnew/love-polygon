@@ -1,7 +1,9 @@
 // @flow
 
+import { useEffect, useState } from 'react';
 import type Socket from 'socket.io-client';
 
+import { getState } from './getters';
 import type {
   NodeType,
   Phase,
@@ -46,8 +48,6 @@ export type Tokens = {
 export type Node = {|
   id: string,
   type: NodeType,
-  position: Position,
-  radius: number,
   playerIds: string[],
   enabled: boolean,
 |};
@@ -91,7 +91,7 @@ export type Primitives = {
 
 export type State = {|
   phase: ?Phase,
-  socket: Socket,
+  socket?: Socket,
   sessionInfo: SessionInfo,
   currentTokenId: ?string,
   players: Players,
@@ -105,16 +105,21 @@ export type State = {|
 
 export default function generateState(
   sessionInfo: SessionInfo,
-  socket: Socket
 ): State {
   return {
     sessionInfo,
     phase: null,
-    socket,
     currentTokenId: null,
     players: {},
     tokens: {},
-    nodes: {},
+    nodes: {
+      abc: {
+        id: 'abc',
+        type: 'storage',
+        playerIds: [],
+        enabled: true,
+      },
+    },
     relationships: {},
     needs: {},
     button: {
@@ -125,4 +130,22 @@ export default function generateState(
     },
     primitives: {},
   };
+}
+
+export const GAME_STATE_UPDATED = 'gameStateUpdated';
+
+export function useGameState() {
+  const [gameState, setGameState] = useState(getState());
+
+  const handleGameStateUpdated = event => {
+    setGameState(getState());
+  }
+  useEffect(() => {
+    window.addEventListener(GAME_STATE_UPDATED, handleGameStateUpdated);
+    return () => {
+      window.removeEventListener(GAME_STATE_UPDATED, handleGameStateUpdated);
+    }
+  });
+
+  return gameState;
 }

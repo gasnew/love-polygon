@@ -17,6 +17,7 @@ import {
   getTokens,
   getPrimitives,
 } from './getters';
+import { GAME_STATE_UPDATED } from './state';
 import { layoutNodes } from '../graphics/layout';
 import type {
   NodeType,
@@ -304,6 +305,7 @@ export function startCountdown(): Action {
   };
 }
 
+const event = new Event(GAME_STATE_UPDATED);
 export default function dispatch(action: Action) {
   switch (action.type) {
     case ADD_PRIMITIVE:
@@ -410,4 +412,7 @@ export default function dispatch(action: Action) {
     default:
       throw new Error(`Yo, action ${action.type} doesn't exist!`);
   }
+
+  console.log('DISPATCH');
+  window.dispatchEvent(event);
 }

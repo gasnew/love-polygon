@@ -1,32 +1,47 @@
 // @flow
 
+import _ from 'lodash';
+import React from 'react';
+
 import { toRGB } from '../graphics';
 import { buildCircleMesh } from '../meshes';
 import TextBox from './TextBox';
+import {
+  getButton,
+  getOwnNeed,
+  getOwnNodes,
+  getOwnTokens,
+  getPhase,
+  getPlayers,
+  getSessionInfo,
+} from '../../state/getters';
 import type { Component } from './index';
-import type { Player } from '../../state/state';
+import type { Node } from '../../state/state';
 
 type Props = {
-  player: Player,
-  enabled: boolean,
+  node: Node,
 };
 
-export default function Slot({ player, enabled }: Props): Component {
-  return ({ getRenderable, PrimitiveComponent, render }) =>
-    render(
-      getRenderable(
-        PrimitiveComponent({
-          type: 'Circle',
-          buildMesh: buildCircleMesh,
-          meshProps: { scale: 6, steps: 50 },
-          dynamicProps: {
-            color: enabled ? toRGB('#DCF7F3') : toRGB('#9CC1BE'),
-          },
-        })
-      ),
-      player &&
-        getRenderable(
-          TextBox({ text: player.name, color: player.color, circular: true })
-        )
+export default function Slot({ node }: Props) {
+  const otherPlayerFromNode = (node: Node) => {
+    return _.find(
+      getPlayers(),
+      player =>
+        player.id !== getSessionInfo().playerId &&
+        _.includes(node.playerIds, player.id)
     );
+  };
+
+  return (
+    <div
+      style={{
+        width: '100px',
+        height: '100px',
+        margin: 'auto',
+      }}
+      key={node.id}
+    >
+      I am div
+    </div>
+  );
 }
