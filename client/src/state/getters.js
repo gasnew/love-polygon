@@ -80,6 +80,10 @@ export function getToken(tokenId: string): Token {
   return getTokens()[tokenId];
 }
 
+export function getNodeToken(nodeId: string): ?Token {
+  return _.find(getTokens(), ['nodeId', nodeId]);
+}
+
 export function getOwnTokens(): Tokens {
   const nodes = getOwnNodes();
   return _.pickBy(getTokens(), token => nodes[token.nodeId]);

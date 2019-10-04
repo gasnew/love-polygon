@@ -22,7 +22,6 @@ type Props = {|
 |};
 
 export default function Game({ sessionInfo, exitSession }: Props) {
-  //setInterval(() => dispatch(setSocket(socket)), 1000);
   window.state = generateState(sessionInfo);
 
   useEffect(() => {

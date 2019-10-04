@@ -3,28 +3,16 @@
 import _ from 'lodash';
 import React from 'react';
 
-import Banner from './Banner';
-import Cake from './Cake';
-import Candy from './Candy';
-import Cookie from './Cookie';
-import CountdownTimer from './CountdownTimer';
-import FinishRoundButton from './FinishRoundButton';
-import Heart from './Heart';
-import NeedInfo from './NeedInfo';
-import Slot from './Slot';
-import TextBox from './TextBox';
+import DraggedItem from './DraggedItem';
+import SlotList from './SlotList';
 import {
-  getButton,
   getOwnNeed,
   getOwnNodes,
   getOwnTokens,
-  getPhase,
-  getPlayers,
-  getSessionInfo,
 } from '../../state/getters';
 import { useGameState } from '../../state/state';
 
-import type { Node, Nodes, Tokens } from '../../state/state';
+import type { Nodes } from '../../state/state';
 
 export function needsMet(): boolean {
   const nodes = getOwnNodes();
@@ -38,31 +26,13 @@ export function needsMet(): boolean {
 
 export default function Table() {
   const gameState = useGameState();
-  const tokenTypes = {
-    heart: Heart,
-    cookie: Cookie,
-    cake: Cake,
-    candy: Candy,
-  };
 
   const nodes: Nodes = getOwnNodes();
-  const tokens: Tokens = getOwnTokens();
-  const button = getButton();
-  const need = getOwnNeed() || {};
-  const phase = getPhase() || {};
-
-  const slots = _.map(nodes, node => <Slot node={node} />);
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-      }}
-    >
-      {slots}
-      Hello I am div
+    <div>
+      <SlotList nodes={nodes} />
+      <DraggedItem />
     </div>
   );
 }
