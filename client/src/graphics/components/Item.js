@@ -6,7 +6,7 @@ import { useDrag, useDragLayer } from 'react-dnd';
 import type { Token } from '../../state/state';
 
 const TOKEN_DIMENSIONS = { width: '90px', height: '90px' };
-const TOKEN = 'token';
+export const TOKEN = 'token';
 
 type Props = {
   token: Token,

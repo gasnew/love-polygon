@@ -2,9 +2,17 @@
 
 import _ from 'lodash';
 import React from 'react';
+import { useDrop } from 'react-dnd';
 
-import Item from './Item';
-import { getNodeToken, getPlayers, getSessionInfo } from '../../state/getters';
+import Item, { TOKEN } from './Item';
+import announce, { transferToken } from '../../network/network';
+import dispatch, { setTokenNodeId } from '../../state/actions';
+import {
+  getNodeToken,
+  getPlayers,
+  getSessionInfo,
+  getToken,
+} from '../../state/getters';
 import type { Node } from '../../state/state';
 
 const SLOT_DIMENSIONS = { width: '200px', height: '200px' };
@@ -14,6 +22,19 @@ type Props = {
 };
 
 export default function Slot({ node }: Props) {
+  const [collectedProps, drop] = useDrop({
+    accept: TOKEN,
+    drop: item => {
+      const token = getToken(item.id);
+      if (token.nodeId === node.id) return;
+      announce(transferToken(token.id, token.nodeId, node.id));
+      dispatch(setTokenNodeId(token.id, node.id));
+    },
+    collect: monitor => ({
+      isOver: !!monitor.isOver(),
+    }),
+  });
+
   const otherPlayerFromNode = (node: Node) => {
     return _.find(
       getPlayers(),
@@ -27,6 +48,7 @@ export default function Slot({ node }: Props) {
   return (
     <div>
       <img
+        ref={drop}
         style={{
           ...SLOT_DIMENSIONS,
         }}

@@ -18,13 +18,14 @@ export default function DragLayerComponent() {
     isDragging: !!monitor.isDragging(),
   }));
   return (
-    isDragging && (
+    isDragging && currentOffset && (
       <Item
         token={getToken(item.id)}
         style={{
           position: 'absolute',
           left: currentOffset.x,
           top: currentOffset.y,
+          pointerEvents: 'none',
         }}
       />
     )

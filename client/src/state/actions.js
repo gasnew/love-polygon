@@ -413,6 +413,5 @@ export default function dispatch(action: Action) {
       throw new Error(`Yo, action ${action.type} doesn't exist!`);
   }
 
-  console.log('DISPATCH');
   window.dispatchEvent(event);
 }
