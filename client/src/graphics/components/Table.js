@@ -3,12 +3,15 @@
 import _ from 'lodash';
 import React from 'react';
 
+import Lobby from './Lobby';
+import Romance from './Romance';
 import DraggedItem from './DraggedItem';
 import SlotList from './SlotList';
 import {
   getOwnNeed,
   getOwnNodes,
   getOwnTokens,
+  getPhase,
 } from '../../state/getters';
 import { useGameState } from '../../state/state';
 
@@ -24,15 +27,27 @@ export function needsMet(): boolean {
   return _.filter(storedTokens, ['type', need.type]).length >= need.count;
 }
 
+const Scene = ({ phaseName }: { phaseName: string }) => {
+  const slotLists = {
+    lobby: <Lobby />,
+    romance: <Romance />,
+  };
+  if (slotLists[phaseName])
+    return (
+      <div style={{ height: '770px' }}>
+        <p>{phaseName}</p>
+        {slotLists[phaseName]}
+        <DraggedItem />
+      </div>
+    );
+  return <p>No scene defined for {phaseName}</p>;
+};
+
 export default function Table() {
-  const gameState = useGameState();
+  useGameState();
 
-  const nodes: Nodes = getOwnNodes();
+  const phase = getPhase();
+  if (!phase) return <div>Loading, my dudes...</div>;
 
-  return (
-    <div>
-      <SlotList nodes={nodes} />
-      <DraggedItem />
-    </div>
-  );
+  return <Scene phaseName={phase.name} />;
 }

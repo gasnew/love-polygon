@@ -35,14 +35,6 @@ export default function Slot({ node }: Props) {
     }),
   });
 
-  const otherPlayerFromNode = (node: Node) => {
-    return _.find(
-      getPlayers(),
-      player =>
-        player.id !== getSessionInfo().playerId &&
-        _.includes(node.playerIds, player.id)
-    );
-  };
   const token = getNodeToken(node.id);
 
   return (

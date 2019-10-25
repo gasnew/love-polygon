@@ -39,7 +39,7 @@ export default function Game({ sessionInfo, exitSession }: Props) {
 
   return (
     <DndProvider backend={TouchBackend}>
-      <Table style={{ height: '770px' }} />
+      <Table  />
     </DndProvider>
   );
 }
