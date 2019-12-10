@@ -16,31 +16,24 @@ import {
 import { useGameState } from '../../state/state';
 
 import type { Nodes } from '../../state/state';
+import type { Phase } from '../../../../server/networkTypes';
 
-export function needsMet(): boolean {
-  const nodes = getOwnNodes();
-  const storedTokens = _.pickBy(
-    getOwnTokens(),
-    token => nodes[token.nodeId].type === 'storage'
-  );
-  const need = getOwnNeed() || {};
-  return _.filter(storedTokens, ['type', need.type]).length >= need.count;
-}
-
-const Scene = ({ phaseName }: { phaseName: string }) => {
+const Scene = ({ phase }: { phase: Phase }) => {
   const slotLists = {
     lobby: <Lobby />,
-    romance: <Romance />,
+    romance: <Romance phase={phase}/>,
+    countdown: <Romance phase={phase}/>,
+    finished: <div>:og-shrug:</div>,
   };
-  if (slotLists[phaseName])
+  if (slotLists[phase.name])
     return (
       <div style={{ height: '770px' }}>
-        <p>{phaseName}</p>
-        {slotLists[phaseName]}
+        <p>{phase.name}</p>
+        {slotLists[phase.name]}
         <DraggedItem />
       </div>
     );
-  return <p>No scene defined for {phaseName}</p>;
+  return <p>No scene defined for {phase.name}</p>;
 };
 
 export default function Table() {
@@ -49,5 +42,5 @@ export default function Table() {
   const phase = getPhase();
   if (!phase) return <div>Loading, my dudes...</div>;
 
-  return <Scene phaseName={phase.name} />;
+  return <Scene phase={phase} />;
 }

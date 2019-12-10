@@ -43,6 +43,7 @@ export default function Slot({ node }: Props) {
         ref={drop}
         style={{
           ...SLOT_DIMENSIONS,
+          ...(node.enabled ? {} : { filter: 'brightness(0.7)' }),
         }}
         src="https://image.shutterstock.com/image-vector/white-dish-plate-isolated-on-260nw-1054819865.jpg"
       />

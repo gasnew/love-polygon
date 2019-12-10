@@ -36,7 +36,7 @@ export async function checkSession(request: CheckRequest, response: $Response) {
     response.json({
       error: {
         field: 'sessionId',
-        message: `Session ${playerName} is ongoing. Please choose another
+        message: `Session ${sessionId} is ongoing. Please choose another
         session.`,
       },
     });
