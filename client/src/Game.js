@@ -1,5 +1,7 @@
 // @flow
 
+import axios from 'axios';
+import copy from 'copy-to-clipboard';
 import React, { useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import MultiBackend from 'react-dnd-multi-backend';
@@ -40,7 +42,25 @@ export default function Game({ sessionInfo, exitSession }: Props) {
 
   return (
     <DndProvider backend={MultiBackend} options={HTML5toTouch}>
-      <Table  />
+      <Table />
+      <button
+        onClick={() =>
+          axios
+            .post('api/get-server-state', { sessionId: sessionInfo.sessionId })
+            .then(response => copy(JSON.stringify(response.data)))
+        }
+      >
+        Server state -> clipboard
+      </button>
+      <button
+        onClick={() =>
+          axios.post('api/load-session-from-cache', {
+            sessionId: sessionInfo.sessionId,
+          })
+        }
+      >
+        Load session from cache
+      </button>
     </DndProvider>
   );
 }

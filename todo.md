@@ -63,7 +63,7 @@
 - Host on AWS
 
 ## Known bugs
-- Websocket connection is often flaky
+- Websocket connection is often flaky (could this be the Chrome same-host connection limit?)
 - Players can transfer tokens from another player's storage node
   - Either, current token should be set to null (maybe not great)
   - Or, transfers to another player can only occur from shared nodes

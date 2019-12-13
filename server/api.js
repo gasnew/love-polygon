@@ -1,5 +1,6 @@
 // @flow
 
+import fs from 'fs';
 import _ from 'lodash';
 import generateName from 'sillyname';
 import uniqid from 'uniqid';
@@ -54,4 +55,46 @@ export async function checkSession(request: CheckRequest, response: $Response) {
   }
 
   response.json({ playerId: playerId || uniqid() });
+}
+
+type GetState = {
+  sessionId: string,
+};
+type GetStateRequest = {
+  ...$Request,
+  body: GetState,
+};
+export async function getServerState(
+  request: GetStateRequest,
+  response: $Response
+) {
+  const { sessionId: id }: GetState = request.body;
+
+  console.log(`Fetching current session state for session ${id}`);
+
+  response.json(await (await getBaseSession({ id })).getAll());
+}
+
+type LoadSession = {
+  sessionId: string,
+};
+type LoadSessionRequest = {
+  ...$Request,
+  body: LoadSession,
+};
+export async function loadSessionFromCache(
+  request: LoadSessionRequest,
+  response: $Response
+) {
+  const { sessionId: id }: GetState = request.body;
+
+  console.log(`Loading session ${id} from session state cache...`);
+
+  const session = await getBaseSession({ id });
+  _.each(
+    JSON.parse(fs.readFileSync('debugSessionStateCache.json')),
+    async (value, key) => await session.set(key, value)
+  );
+
+  response.json({ success: true });
 }
