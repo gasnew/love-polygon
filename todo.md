@@ -33,34 +33,34 @@
   - Finally displays table of all scores and lets lead person initiate next round
 - Playtest 2!!
 - Visual upgrades
+  - Standardize on material design?
+  - Think about page formatting for once
   - Hover animation
   - Drop animation
   - Take animation (w/ gloved hand)
   - Deliver animation (w/ gloved hand)
   - Scrolling background with food/heart symbols?
   - Scene transitions
-- Animations
-  - e.g.
-     ```
-     animate(data, delta); // data must have id
-     animate(data, delta) {
-       const tweens = getTweens(data.id);
-       const newData = reduce(tweens,
-         (result, tween) => tween(delta)(result),
-         data
-       )
-       setTweens(data.id, filter(tweens, done));
-       return newData;
-     }
-     ```
-- Gift graph
-- Close session loop
+- Improve lobby screen
+  - Add practice mode
+  - Be able to see how many people are in the lobby
+- Playtest 3!!
+- Host on the cloud for all to see
+  - AWS CDK?
+  - Configure app environment (i.e., redis URL)
+  - Dockerize the server and client
+- Make actual landing page
+- Open-source the project
+
+## Pipe dreams
+- Technical refactors
+  - Use something other than socket.io for pubsub?
+- Compose music for the lobby
+- Close session loop?
   - Three different types of round
     1. ???
     2. ???
     3. True love (bonus points if you guess who)
-- Playtest 2!!
-- Host on AWS
 
 ## Known bugs
 - Websocket connection is often flaky (could this be the Chrome same-host connection limit?)
