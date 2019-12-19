@@ -12,7 +12,6 @@ import dispatch, {
   setPhase,
   setRelationships,
   setTokenNodeId,
-  setTokenPosition,
   startCountdown,
 } from '../state/actions';
 import {
@@ -80,9 +79,6 @@ export function updateState(serverState: ServerState) {
       }
       dispatch(setTokenNodeId(id, serverNodeId));
       const serverNode = getNode(serverNodeId);
-      dispatch(
-        setTokenPosition(id, serverNode.position.x, serverNode.position.y)
-      );
       if (id === getCurrentTokenId()) dispatch(setCurrentTokenId(null));
     }
   });

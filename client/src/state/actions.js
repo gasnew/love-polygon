@@ -2,10 +2,9 @@
 
 import _ from 'lodash';
 
-import type Socket from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 
 import {
-  getButton,
   getState,
   getPhase,
   getPlayers,
@@ -15,17 +14,14 @@ import {
   getOwnTokens,
   getToken,
   getTokens,
-  getPrimitives,
 } from './getters';
 import { GAME_STATE_UPDATED } from './state';
-import { layoutNodes } from '../graphics/layout';
 import type {
   NodeType,
   Phase,
   PhaseName,
   TokenType,
 } from '../../../server/networkTypes';
-import type { Primitive } from '../graphics/buildPrimitive';
 import type {
   Needs,
   Node,
@@ -36,29 +32,19 @@ import type {
   Tokens,
 } from './state';
 
-const ADD_PRIMITIVE = 'addPrimitive';
 const ADD_PLAYER = 'addPlayer';
 const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
 const CLEAR_STAGE = 'clearStage';
-const PRESS_BUTTON = 'pressButton';
-const RELEASE_BUTTON = 'releaseButton';
 const SET_PHASE = 'setPhase';
 const SET_RELATIONSHIPS = 'setRelationships';
 const SET_NEEDS = 'setNeeds';
 const SET_SOCKET = 'setSocket';
-const SET_NODE_POSITION = 'setNodePosition';
-const SET_TOKEN_POSITION = 'setTokenPosition';
 const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 const START_COUNTDOWN = 'startCountdown';
 
 type Action =
-  | {
-      type: 'addPrimitive',
-      id: string,
-      primitive: Primitive<{}>,
-    }
   | {
       type: 'addNode',
       id: string,
@@ -82,12 +68,6 @@ type Action =
       type: 'clearStage',
     }
   | {
-      type: 'pressButton',
-    }
-  | {
-      type: 'releaseButton',
-    }
-  | {
       type: 'setPhase',
       phase: Phase,
     }
@@ -102,18 +82,6 @@ type Action =
   | {
       type: 'setSocket',
       socket: Socket,
-    }
-  | {
-      type: 'setNodePosition',
-      nodeId: string,
-      x: number,
-      y: number,
-    }
-  | {
-      type: 'setTokenPosition',
-      tokenId: string,
-      x: number,
-      y: number,
     }
   | {
       type: 'setTokenNodeId',
@@ -153,13 +121,6 @@ const mergeIntoTokens = (tokenId: string, token: Token) => {
   mergeIntoState('tokens', {
     ...getTokens(),
     [tokenId]: token,
-  });
-};
-
-const mergeIntoPrimitives = (primitiveId: string, primitive: Primitive<{}>) => {
-  mergeIntoState('primitives', {
-    ...getPrimitives(),
-    [primitiveId]: primitive,
   });
 };
 
@@ -222,51 +183,9 @@ export function addToken(id: string, type: TokenType, nodeId: string): Action {
   };
 }
 
-export function addPrimitive(id: string, primitive: Primitive<{}>): Action {
-  return {
-    type: ADD_PRIMITIVE,
-    id,
-    primitive,
-  };
-}
-
 export function clearStage(): Action {
   return {
     type: CLEAR_STAGE,
-  };
-}
-
-export function pressButton(): Action {
-  return {
-    type: PRESS_BUTTON,
-  };
-}
-
-export function releaseButton(): Action {
-  return {
-    type: RELEASE_BUTTON,
-  };
-}
-
-export function setNodePosition(nodeId: string, x: number, y: number): Action {
-  return {
-    type: SET_NODE_POSITION,
-    nodeId,
-    x,
-    y,
-  };
-}
-
-export function setTokenPosition(
-  tokenId: string,
-  x: number,
-  y: number
-): Action {
-  return {
-    type: SET_TOKEN_POSITION,
-    tokenId,
-    x,
-    y,
   };
 }
 
@@ -308,30 +227,12 @@ export function startCountdown(): Action {
 const event = new Event(GAME_STATE_UPDATED);
 export default function dispatch(action: Action) {
   switch (action.type) {
-    case ADD_PRIMITIVE:
-      mergeIntoPrimitives(action.id, action.primitive);
-      break;
     case ADD_NODE:
       mergeIntoNodes(action.id, {
         id: action.id,
         type: action.nodeType,
-        position: {
-          x: 0,
-          y: 0,
-        },
-        radius: 10,
         playerIds: action.playerIds,
         enabled: action.enabled,
-      });
-      const nodes = getOwnNodes();
-      const nodeLayout = layoutNodes(nodes);
-      _.each(nodes, (node, id) =>
-        dispatch(setNodePosition(id, nodeLayout[id].x, nodeLayout[id].y))
-      );
-      _.each(getOwnTokens(), token => {
-        dispatch(setTokenNodeId(token.id, token.nodeId));
-        const node = getNode(token.nodeId);
-        dispatch(setTokenPosition(token.id, node.position.x, node.position.y));
       });
       break;
     case ADD_PLAYER:
@@ -346,20 +247,12 @@ export default function dispatch(action: Action) {
       mergeIntoTokens(action.id, {
         id: action.id,
         type: action.tokenType,
-        position: node.position,
-        radius: 10,
         nodeId: action.nodeId,
       });
       break;
     case CLEAR_STAGE:
       setTokens({});
       setNodes({});
-      break;
-    case PRESS_BUTTON:
-      mergeIntoState('button', { ...getButton(), state: 'down' });
-      break;
-    case RELEASE_BUTTON:
-      mergeIntoState('button', { ...getButton(), state: 'up' });
       break;
     case SET_PHASE:
       mergeIntoState('phase', {
@@ -370,29 +263,11 @@ export default function dispatch(action: Action) {
     case SET_SOCKET:
       mergeIntoState('socket', action.socket);
       break;
-    case SET_NODE_POSITION:
-      mergeIntoNodes(action.nodeId, {
-        ...getNode(action.nodeId),
-        position: {
-          x: action.x,
-          y: action.y,
-        },
-      });
-      break;
     case SET_RELATIONSHIPS:
       mergeIntoState('relationships', action.relationships);
       break;
     case SET_NEEDS:
       mergeIntoState('needs', action.needs);
-      break;
-    case SET_TOKEN_POSITION:
-      mergeIntoTokens(action.tokenId, {
-        ...getToken(action.tokenId),
-        position: {
-          x: action.x,
-          y: action.y,
-        },
-      });
       break;
     case SET_TOKEN_NODE_ID:
       mergeIntoTokens(action.tokenId, {

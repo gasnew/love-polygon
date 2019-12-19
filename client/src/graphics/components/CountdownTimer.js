@@ -2,9 +2,6 @@
 
 import React from 'react';
 
-import TextBox from './TextBox';
-import type { Component } from './index';
-
 type Props = {
   seconds: number,
 };

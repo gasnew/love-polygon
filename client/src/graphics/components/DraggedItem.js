@@ -6,8 +6,6 @@ import { DragPreviewImage, useDrag, useDragLayer } from 'react-dnd';
 import Item from './Item';
 import { getToken } from '../../state/getters';
 import { toRGB } from '../graphics';
-import { buildCircleMesh } from '../meshes';
-import type { Component } from './index';
 import type { Token } from '../../state/state';
 
 export default function DragLayerComponent() {
