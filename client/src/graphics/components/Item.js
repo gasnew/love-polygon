@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react';
-import { useDrag, useDragLayer } from 'react-dnd';
+import { useDrag } from 'react-dnd';
 
 import type { Token } from '../../state/state';
 
@@ -33,6 +33,7 @@ export default function Item({ token, style }: Props) {
     !isDragging && (
       <img
         ref={drag}
+        alt="I am a delicious food"
         style={{
           ...TOKEN_DIMENSIONS,
           ...style,

@@ -1,21 +1,15 @@
 // @flow
 
-import _ from 'lodash';
 import React from 'react';
 
 import Lobby from './Lobby';
 import Romance from './Romance';
 import DraggedItem from './DraggedItem';
-import SlotList from './SlotList';
 import {
-  getOwnNeed,
-  getOwnNodes,
-  getOwnTokens,
   getPhase,
 } from '../../state/getters';
 import { useGameState } from '../../state/state';
 
-import type { Nodes } from '../../state/state';
 import type { Phase } from '../../../../server/networkTypes';
 
 const Scene = ({ phase }: { phase: Phase }) => {

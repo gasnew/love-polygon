@@ -1,12 +1,10 @@
 // @flow
 
 import React from 'react';
-import { DragPreviewImage, useDrag, useDragLayer } from 'react-dnd';
+import { useDragLayer } from 'react-dnd';
 
 import Item from './Item';
 import { getToken } from '../../state/getters';
-import { toRGB } from '../graphics';
-import type { Token } from '../../state/state';
 
 export default function DragLayerComponent() {
   const { currentOffset, isDragging, item } = useDragLayer(monitor => ({

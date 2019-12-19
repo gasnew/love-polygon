@@ -5,12 +5,10 @@ import React from 'react';
 
 import Slot from './Slot';
 import {
-  getNodeToken,
   getPlayers,
   getSessionInfo,
-  getToken,
 } from '../../state/getters';
-import type { Node, Nodes, Player } from '../../state/state';
+import type { Node, Nodes } from '../../state/state';
 
 type Props = {
   nodes: Nodes,

@@ -78,7 +78,6 @@ export function updateState(serverState: ServerState) {
         return;
       }
       dispatch(setTokenNodeId(id, serverNodeId));
-      const serverNode = getNode(serverNodeId);
       if (id === getCurrentTokenId()) dispatch(setCurrentTokenId(null));
     }
   });

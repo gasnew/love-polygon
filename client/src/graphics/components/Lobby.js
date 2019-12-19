@@ -6,8 +6,6 @@ import React from 'react';
 import SlotList from './SlotList';
 import { getOwnNodes } from '../../state/getters';
 
-import type { Nodes } from '../../state/state';
-
 export default function Lobby() {
   const nodes = getOwnNodes();
   const loveBucket = _.pickBy(nodes, ['type', 'loveBucket']);

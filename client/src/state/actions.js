@@ -1,17 +1,12 @@
 // @flow
 
-import _ from 'lodash';
-
 import type { Socket } from 'socket.io-client';
 
 import {
   getState,
   getPhase,
   getPlayers,
-  getNode,
   getNodes,
-  getOwnNodes,
-  getOwnTokens,
   getToken,
   getTokens,
 } from './getters';
@@ -243,7 +238,6 @@ export default function dispatch(action: Action) {
       });
       break;
     case ADD_TOKEN:
-      const node = getNode(action.nodeId);
       mergeIntoTokens(action.id, {
         id: action.id,
         type: action.tokenType,
