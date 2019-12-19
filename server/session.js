@@ -260,6 +260,7 @@ function getSession({ id, emit }: SessionProps): Session {
         });
 
         await followEdge('finishGame');
+        // TODO(gnewman): Reimplement this countdown timer to be more robust
         setTimeout(async () => await endGame(), 15000);
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 

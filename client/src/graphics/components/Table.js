@@ -1,103 +1,46 @@
 // @flow
 
 import _ from 'lodash';
+import React from 'react';
 
-import Banner from './Banner';
-import Cake from './Cake';
-import Candy from './Candy';
-import Cookie from './Cookie';
-import CountdownTimer from './CountdownTimer';
-import FinishRoundButton from './FinishRoundButton';
-import Heart from './Heart';
-import NeedInfo from './NeedInfo';
-import Slot from './Slot';
-import TextBox from './TextBox';
+import Lobby from './Lobby';
+import Romance from './Romance';
+import DraggedItem from './DraggedItem';
+import SlotList from './SlotList';
 import {
-  getButton,
   getOwnNeed,
   getOwnNodes,
   getOwnTokens,
   getPhase,
-  getPlayers,
-  getSessionInfo,
 } from '../../state/getters';
+import { useGameState } from '../../state/state';
 
-import type { Node, Nodes, Tokens } from '../../state/state';
-import type { Component } from './index';
+import type { Nodes } from '../../state/state';
+import type { Phase } from '../../../../server/networkTypes';
 
-export function needsMet(): boolean {
-  const nodes = getOwnNodes();
-  const storedTokens = _.pickBy(
-    getOwnTokens(),
-    token => nodes[token.nodeId].type === 'storage'
-  );
-  const need = getOwnNeed() || {};
-  return _.filter(storedTokens, ['type', need.type]).length >= need.count;
-}
-
-export default function Table(): Component {
-  const otherPlayerFromNode = (node: Node) => {
-    return _.find(
-      getPlayers(),
-      player =>
-        player.id !== getSessionInfo().playerId &&
-        _.includes(node.playerIds, player.id)
-    );
+const Scene = ({ phase }: { phase: Phase }) => {
+  const slotLists = {
+    lobby: <Lobby />,
+    romance: <Romance phase={phase}/>,
+    countdown: <Romance phase={phase}/>,
+    finished: <div>:og-shrug:</div>,
   };
-  const tokenTypes = {
-    heart: Heart,
-    cookie: Cookie,
-    cake: Cake,
-    candy: Candy,
-  };
-
-  const nodes: Nodes = getOwnNodes();
-  const tokens: Tokens = getOwnTokens();
-  const button = getButton();
-  const need = getOwnNeed() || {};
-  const phase = getPhase() || {};
-
-  return ({ getRenderable, render }) =>
-    render(
-      getRenderable(Banner()),
-      ..._.map(nodes, node =>
-        getRenderable(
-          Slot({ player: otherPlayerFromNode(node), enabled: node.enabled }),
-          node.position
-        )
-      ),
-      ..._.map(tokens, token =>
-        getRenderable(tokenTypes[token.type](), token.position)
-      ),
-      (phase.name === 'countdown' || null) &&
-        getRenderable(
-          CountdownTimer({
-            seconds: Math.ceil(
-              15 - (Date.now() - (phase.countdownStartedAt || 0)) / 1000
-            ),
-          }),
-          { x: 30, y: 30 }
-        ),
-      // Ideally, we'd be able to pass in an onClick parameter to getRenderable
-      // in order to manage click/touch events for this component. However,
-      // that would be a decent amount of work for little payoff in this
-      // project. We'll just stick to having one global button state instead.
-      // :)
-      (_.includes(['romance', 'countdown'], phase.name) || null) &&
-        (needsMet() && phase.name === 'romance'
-          ? getRenderable(
-              FinishRoundButton({ button, need: need.type }),
-              button.position
-            )
-          : getRenderable(NeedInfo({ need: need.type }), button.position)),
-      (phase.name !== 'lobby' || null) &&
-        getRenderable(
-          TextBox({
-            text: getPlayers()[getSessionInfo().playerId].name,
-            scale: 5,
-            color: getPlayers()[getSessionInfo().playerId].color,
-          }),
-          { x: 30, y: 80 }
-        )
+  if (slotLists[phase.name])
+    return (
+      <div style={{ height: '770px' }}>
+        <p>{phase.name}</p>
+        {slotLists[phase.name]}
+        <DraggedItem />
+      </div>
     );
+  return <p>No scene defined for {phase.name}</p>;
+};
+
+export default function Table() {
+  useGameState();
+
+  const phase = getPhase();
+  if (!phase) return <div>Loading, my dudes...</div>;
+
+  return <Scene phase={phase} />;
 }

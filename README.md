@@ -19,12 +19,12 @@ information. Points are awarded as follows:
 
 **1 point** for getting your needs met
 
-**2 points** for meeting the needs of your `crush` or the crush of the person
-for whom you are a `wingman`. You will not receive these points if the object
-of affection guesses all of the people who have a crush on them exactly
-
-**3 points** for guessing all of the people who have a crush on you exactly. It
+**2 points** for guessing all of the people who have a crush on you exactly. It
 could be zero people :(
+
+**3 points** for meeting the needs of your `crush` or the crush of the person
+for whom you are a `wingman`. You will not receive these points if the object
+of affection guesses all of the people who have a crush on them exactly.
 
 ### Round Format
 A game round proceeds in three phases:
