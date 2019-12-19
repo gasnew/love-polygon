@@ -1,7 +1,7 @@
 // @flow
 
 import { useEffect, useState } from 'react';
-import type Socket from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 
 import { getState } from './getters';
 import type {
@@ -11,12 +11,6 @@ import type {
   SessionInfo,
   TokenType,
 } from '../../../server/networkTypes';
-import type { Primitive } from '../graphics/buildPrimitive';
-
-export type Position = {|
-  x: number,
-  y: number,
-|};
 
 export type Dimensions = {|
   width: number,
@@ -36,8 +30,6 @@ export type Players = {
 export type Token = {|
   id: string,
   type: TokenType,
-  position: Position,
-  radius: number,
   nodeId: string,
 |};
 
@@ -78,17 +70,6 @@ export type Needs = {
   [string]: Need,
 };
 
-export type Button = {
-  state: 'up' | 'down',
-  position: Position,
-  height: number,
-  width: number,
-};
-
-export type Primitives = {
-  [string]: Primitive<{}>,
-};
-
 export type State = {|
   phase: ?Phase,
   socket?: Socket,
@@ -99,8 +80,6 @@ export type State = {|
   nodes: Nodes,
   relationships: Relationships,
   needs: Needs,
-  button: Button,
-  primitives: Primitives,
 |};
 
 export default function generateState(
@@ -122,13 +101,6 @@ export default function generateState(
     },
     relationships: {},
     needs: {},
-    button: {
-      state: 'up',
-      position: { x: 30, y: 65 },
-      width: 28,
-      height: 10,
-    },
-    primitives: {},
   };
 }
 

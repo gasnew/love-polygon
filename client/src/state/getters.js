@@ -2,12 +2,10 @@
 
 import _ from 'lodash';
 
-import type Socket from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 
 import type { Phase, SessionInfo } from '../../../server/networkTypes';
-import type { Primitive } from '../graphics/buildPrimitive';
 import type {
-  Button,
   Dimensions,
   Need,
   Needs,
@@ -15,7 +13,6 @@ import type {
   Nodes,
   Player,
   Players,
-  Primitives,
   Relationship,
   Relationships,
   State,
@@ -109,16 +106,4 @@ export function getNeeds(): Needs {
 export function getOwnNeed(): Need {
   const { playerId } = getSessionInfo();
   return _.find(getNeeds(), ['playerId', playerId]);
-}
-
-export function getButton(): Button {
-  return getState().button;
-}
-
-export function getPrimitives(): Primitives {
-  return getState().primitives;
-}
-
-export function getPrimitive(primitiveId: string): Primitive<{}> {
-  return getPrimitives()[primitiveId];
 }

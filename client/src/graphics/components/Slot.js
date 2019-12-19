@@ -1,6 +1,5 @@
 // @flow
 
-import _ from 'lodash';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 
@@ -9,8 +8,6 @@ import announce, { transferToken } from '../../network/network';
 import dispatch, { setTokenNodeId } from '../../state/actions';
 import {
   getNodeToken,
-  getPlayers,
-  getSessionInfo,
   getToken,
 } from '../../state/getters';
 import type { Node } from '../../state/state';
@@ -22,7 +19,7 @@ type Props = {
 };
 
 export default function Slot({ node }: Props) {
-  const [collectedProps, drop] = useDrop({
+  const [, drop] = useDrop({
     accept: TOKEN,
     drop: item => {
       const token = getToken(item.id);
@@ -41,6 +38,7 @@ export default function Slot({ node }: Props) {
     <div>
       <img
         ref={drop}
+        alt="I'm a plate"
         style={{
           ...SLOT_DIMENSIONS,
           ...(node.enabled ? {} : { filter: 'brightness(0.7)' }),
