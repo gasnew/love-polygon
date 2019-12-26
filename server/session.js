@@ -115,7 +115,7 @@ function getSession({ id, emit }: SessionProps): Session {
     await set('tokens', {});
     try {
       await updateAll(getRomanceState(await getAll()));
-    } catch(error) {
+    } catch (error) {
       console.log('WHOOPS! Try, try again');
       await updateAll(getRomanceState(await getAll()));
     }
@@ -129,14 +129,31 @@ function getSession({ id, emit }: SessionProps): Session {
   const finishGame = async () => {
     console.log('finish game');
     emit('changePhase');
+    setTimeout(() => followEdge('startVoting'), 3000);
+  };
+  const startVoting = async () => {
+    console.log('start voting');
+    emit('changePhase');
   };
 
   const followEdge = getFollowEdge({
     getPhaseName,
     setPhaseName,
-    startGame,
-    startCountdown,
-    finishGame,
+    buildGraph: transition => ({
+      lobby: {
+        startGame: transition('romance', startGame),
+      },
+      romance: {
+        restart: transition('romance', startGame),
+        finishGame: transition('countdown', startCountdown),
+      },
+      countdown: {
+        reallyFinish: transition('finished', finishGame),
+      },
+      finished: {
+        startVoting: transition('voting', startVoting),
+      },
+    }),
   });
 
   const quorum = async (): Promise<boolean> => {
@@ -218,9 +235,7 @@ function getSession({ id, emit }: SessionProps): Session {
         const playerTokens = getPlayerTokens(nodes, tokens, playerId);
         const need = _.find(needs, ['playerId', playerId]);
 
-        return (
-          _.filter(playerTokens, ['type', need.type]).length >= need.count
-        );
+        return _.filter(playerTokens, ['type', need.type]).length >= need.count;
       }
 
       return false;
@@ -261,7 +276,7 @@ function getSession({ id, emit }: SessionProps): Session {
 
         await followEdge('finishGame');
         // TODO(gnewman): Reimplement this countdown timer to be more robust
-        setTimeout(async () => await endGame(), 15000);
+        setTimeout(async () => await endGame(), 3000);
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');
