@@ -66,6 +66,10 @@ export type ServerState = {|
   tokens: Tokens,
   relationships: Relationships,
   needs: Needs,
+  votingOrder: string[],
+  currentVoter: ?string,
+  selectedPlayers: string[],
+  roundEnder: ?string,
 |};
 
 export type SubServerState = $Values<ServerState>;
@@ -80,6 +84,18 @@ export type Message =
     }
   | {
       type: 'finishRound',
+      playerId: string,
+    }
+  | {
+      type: 'selectPlayer',
+      playerId: string,
+    }
+  | {
+      type: 'submitVotes',
+      currentVoterId: string,
+    }
+  | {
+      type: 'deselectPlayer',
       playerId: string,
     };
 

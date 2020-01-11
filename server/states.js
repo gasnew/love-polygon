@@ -69,7 +69,7 @@ export function pairs<T>(array: T[]): T[][] {
 
 export const getNumberOfLovers = (numberOfPlayers: number): number => {
   if (numberOfPlayers <= 2) throw new Error('Nah, man! Too few folks for love');
-  if (numberOfPlayers === 3) return _.random(2, 3);
+  if (numberOfPlayers === 3) 3;
   if (numberOfPlayers === 4) return _.random(2, 4);
   return _.random(Math.round(numberOfPlayers * 0.3), numberOfPlayers);
 };
@@ -267,5 +267,9 @@ export function getRomanceState({
       ...wingmanRelationships,
     },
     needs,
+    votingOrder: [],
+    currentVoter: null,
+    selectedPlayers: [],
+    roundEnder: null,
   };
 }

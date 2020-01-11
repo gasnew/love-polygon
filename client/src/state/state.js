@@ -80,11 +80,12 @@ export type State = {|
   nodes: Nodes,
   relationships: Relationships,
   needs: Needs,
+  votingOrder: string[],
+  currentVoter: ?string,
+  selectedPlayers: string[],
 |};
 
-export default function generateState(
-  sessionInfo: SessionInfo,
-): State {
+export default function generateState(sessionInfo: SessionInfo): State {
   return {
     sessionInfo,
     phase: null,
@@ -101,6 +102,9 @@ export default function generateState(
     },
     relationships: {},
     needs: {},
+    votingOrder: [],
+    currentVoter: null,
+    selectedPlayers: [],
   };
 }
 
@@ -111,12 +115,12 @@ export function useGameState() {
 
   const handleGameStateUpdated = event => {
     setGameState(getState());
-  }
+  };
   useEffect(() => {
     window.addEventListener(GAME_STATE_UPDATED, handleGameStateUpdated);
     return () => {
       window.removeEventListener(GAME_STATE_UPDATED, handleGameStateUpdated);
-    }
+    };
   });
 
   return gameState;

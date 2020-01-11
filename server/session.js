@@ -124,12 +124,25 @@ function getSession({ id, emit }: SessionProps): Session {
   };
   const startCountdown = async () => {
     console.log('start countdown');
+    // TODO(gnewman): Reimplement this countdown timer to be more robust
+    setTimeout(async () => await endGame(), 1000);
     emit('changePhase');
   };
   const finishGame = async () => {
     console.log('finish game');
     emit('changePhase');
-    setTimeout(() => followEdge('startVoting'), 3000);
+    setTimeout(async () => {
+      await setVotingOrder();
+      await followEdge('startVoting');
+    }, 1000);
+  };
+  const setVotingOrder = async () => {
+    const { players, roundEnder: roundEnderOrNone } = await getAll();
+    const roundEnder = roundEnderOrNone || _.sample(players);
+    const otherPlayers = _.reject(players, ['id', roundEnder]);
+    const votingOrder = [..._.shuffle(_.map(otherPlayers, 'id')), roundEnder];
+    await set('votingOrder', votingOrder);
+    await set('currentVoter', votingOrder[0]);
   };
   const startVoting = async () => {
     console.log('start voting');
@@ -145,7 +158,7 @@ function getSession({ id, emit }: SessionProps): Session {
       },
       romance: {
         restart: transition('romance', startGame),
-        finishGame: transition('countdown', startCountdown),
+        startCountdown: transition('countdown', startCountdown),
       },
       countdown: {
         reallyFinish: transition('finished', finishGame),
@@ -231,11 +244,19 @@ function getSession({ id, emit }: SessionProps): Session {
         return true;
       } else if (message.type === 'finishRound') {
         const { playerId } = message;
-        const { needs, nodes, tokens } = serverState;
+        const { needs, nodes, tokens, roundEnder } = serverState;
         const playerTokens = getPlayerTokens(nodes, tokens, playerId);
         const need = _.find(needs, ['playerId', playerId]);
 
+        if (roundEnder) return false;
+
         return _.filter(playerTokens, ['type', need.type]).length >= need.count;
+      } else if (message.type === 'selectPlayer') {
+        return !_.includes(serverState.selectedPlayers, message.playerId);
+      } else if (message.type === 'deselectPlayer') {
+        return _.includes(serverState.selectedPlayers, message.playerId);
+      } else if (message.type === 'submitVotes') {
+        return serverState.currentVoter === message.currentVoterId;
       }
 
       return false;
@@ -260,6 +281,7 @@ function getSession({ id, emit }: SessionProps): Session {
             node.type === 'storage' &&
             (_.find(tokens, ['nodeId', node.id]) || {}).type === need.type
         ).slice(0, need.count);
+        await set('roundEnder', playerId);
         await update('nodes', {
           ..._.reduce(
             nodesToDisable,
@@ -274,9 +296,24 @@ function getSession({ id, emit }: SessionProps): Session {
           ),
         });
 
-        await followEdge('finishGame');
-        // TODO(gnewman): Reimplement this countdown timer to be more robust
-        setTimeout(async () => await endGame(), 3000);
+        await followEdge('startCountdown');
+      } else if (message.type === 'selectPlayer') {
+        await set('selectedPlayers', [
+          ...serverState.selectedPlayers,
+          message.playerId,
+        ]);
+      } else if (message.type === 'deselectPlayer') {
+        await set(
+          'selectedPlayers',
+          _.difference(serverState.selectedPlayers, [message.playerId])
+        );
+      } else if (message.type === 'submitVotes') {
+        await set('selectedPlayers', []);
+        const votingOrder = serverState.votingOrder;
+        await set(
+          'currentVoter',
+          votingOrder[votingOrder.indexOf(message.currentVoterId) + 1]
+        );
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');

@@ -32,20 +32,16 @@ export function getSessionInfo(): SessionInfo {
   return getState().sessionInfo;
 }
 
-export function getStageDimensions(): Dimensions {
-  // NOTE: This one is secretly not in state. Shhhh
-  return {
-    width: window.innerWidth,
-    height: window.innerHeight,
-  };
-}
-
 export function getSocket(): ?Socket {
   return getState().socket;
 }
 
 export function getCurrentTokenId(): ?string {
   return getState().currentTokenId;
+}
+
+export function getCurrentVoter(): ?string {
+  return getState().currentVoter;
 }
 
 export function getPlayers(): Players {
@@ -106,4 +102,12 @@ export function getNeeds(): Needs {
 export function getOwnNeed(): Need {
   const { playerId } = getSessionInfo();
   return _.find(getNeeds(), ['playerId', playerId]);
+}
+
+export function getSelectedPlayers(): string[] {
+  return getState().selectedPlayers;
+}
+
+export function getVotingOrder(): string[] {
+  return getState().votingOrder;
 }

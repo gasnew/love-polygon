@@ -4,10 +4,9 @@ import React from 'react';
 
 import Lobby from './Lobby';
 import Romance from './Romance';
+import VotingBallot from './VotingBallot';
 import DraggedItem from './DraggedItem';
-import {
-  getPhase,
-} from '../../state/getters';
+import { getPhase } from '../../state/getters';
 import { useGameState } from '../../state/state';
 
 import type { Phase } from '../../../../server/networkTypes';
@@ -15,9 +14,10 @@ import type { Phase } from '../../../../server/networkTypes';
 const Scene = ({ phase }: { phase: Phase }) => {
   const slotLists = {
     lobby: <Lobby />,
-    romance: <Romance phase={phase}/>,
-    countdown: <Romance phase={phase}/>,
-    finished: <div>:og-shrug:</div>,
+    romance: <Romance phase={phase} />,
+    countdown: <Romance phase={phase} />,
+    finished: <Romance phase={phase} />,
+    voting: <VotingBallot />,
   };
   if (slotLists[phase.name])
     return (

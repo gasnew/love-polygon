@@ -34,9 +34,12 @@ const CLEAR_STAGE = 'clearStage';
 const SET_PHASE = 'setPhase';
 const SET_RELATIONSHIPS = 'setRelationships';
 const SET_NEEDS = 'setNeeds';
+const SET_SELECTED_PLAYERS = 'setSelectedPlayers';
 const SET_SOCKET = 'setSocket';
 const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
+const SET_CURRENT_VOTER = 'setCurrentVoter';
+const SET_VOTING_ORDER = 'setVotingOrder';
 const START_COUNTDOWN = 'startCountdown';
 
 type Action =
@@ -75,8 +78,16 @@ type Action =
       needs: Needs,
     }
   | {
+      type: 'setSelectedPlayers',
+      selectedPlayers: string[],
+    }
+  | {
       type: 'setSocket',
       socket: Socket,
+    }
+  | {
+      type: 'setVotingOrder',
+      votingOrder: string[],
     }
   | {
       type: 'setTokenNodeId',
@@ -86,6 +97,10 @@ type Action =
   | {
       type: 'setCurrentTokenId',
       tokenId: ?string,
+    }
+  | {
+      type: 'setCurrentVoter',
+      currentVoter: ?string,
     }
   | {
       type: 'startCountdown',
@@ -145,6 +160,20 @@ export function setSocket(socket: Socket): Action {
   };
 }
 
+export function setSelectedPlayers(selectedPlayers: string[]): Action {
+  return {
+    type: SET_SELECTED_PLAYERS,
+    selectedPlayers,
+  };
+}
+
+export function setVotingOrder(votingOrder: string[]): Action {
+  return {
+    type: SET_VOTING_ORDER,
+    votingOrder,
+  };
+}
+
 export function addPlayer(id: string, name: string, color: string): Action {
   return {
     type: ADD_PLAYER,
@@ -196,6 +225,13 @@ export function setCurrentTokenId(tokenId: ?string): Action {
   return {
     type: SET_CURRENT_TOKEN,
     tokenId,
+  };
+}
+
+export function setCurrentVoter(currentVoter: ?string): Action {
+  return {
+    type: SET_CURRENT_VOTER,
+    currentVoter,
   };
 }
 
@@ -254,6 +290,9 @@ export default function dispatch(action: Action) {
         countdownStartedAt: action.phase.countdownStartedAt,
       });
       break;
+    case SET_SELECTED_PLAYERS:
+      mergeIntoState('selectedPlayers', action.selectedPlayers);
+      break;
     case SET_SOCKET:
       mergeIntoState('socket', action.socket);
       break;
@@ -271,6 +310,12 @@ export default function dispatch(action: Action) {
       break;
     case SET_CURRENT_TOKEN:
       mergeIntoState('currentTokenId', action.tokenId);
+      break;
+    case SET_CURRENT_VOTER:
+      mergeIntoState('currentVoter', action.currentVoter);
+      break;
+    case SET_VOTING_ORDER:
+      mergeIntoState('votingOrder', action.votingOrder);
       break;
     case START_COUNTDOWN:
       mergeIntoState('phase', {

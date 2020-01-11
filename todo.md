@@ -20,10 +20,10 @@
 + Playtest 1! (Voting will be done on paper)
 + Rewrite the UI in React because not everyone's phone can deal with WebGL
 - Voting
-  - Rotate through players (ending with person who ended the round)
-    - When your turn, screen says, "Tell everyone which of these people had a crush on you. So-and-so is taking notes."
-    - Next person in the rotation takes notes. This is the only person who can make inputs
-    - Everyone else can see names being selected
+  / Rotate through players (ending with person who ended the round)
+    + When your turn, screen says, "Tell everyone which of these people had a crush on you. So-and-so is taking notes."
+    + Next person in the rotation takes notes. This is the only person who can make inputs
+    + Everyone else can see names being selected
   - When selections are confirmed and submitted, all screens indicate whether this is correct then move on to next player
 - Final screen
   - Rotates through all players tallying up scores
@@ -67,10 +67,12 @@
 - Players can transfer tokens from another player's storage node
   - Either, current token should be set to null (maybe not great)
   - Or, transfers to another player can only occur from shared nodes
+- Relationship generation can fail
 + Someone can be a wingman for a person who has a crush on them
 - Multiple players of the same name can be created if both validate successfully and then join socket. I.e., no socket validation
   -  Solution: Force disconnect in this case (relies on top feature to fit in
 - After switching to fullscreen, I will receive state updates, even for moves I make
+- Timers (used for countdown and timing before voting) can be broken by restarting the server
 
 ## Features to fit in
 - When the client disconnects, drop back into game in refresh
