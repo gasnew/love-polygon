@@ -256,6 +256,22 @@ export function getRomanceState({
       )
   );
 
+  const crushSelections = _.reduce(
+    players,
+    (crushSelections, player) => {
+      const id = uniqid();
+      return {
+        ...crushSelections,
+        [id]: {
+          id,
+          playerId: player.id,
+          playerIds: [],
+        },
+      };
+    },
+    {}
+  );
+
   return {
     nodes: {
       ...storageNodes,
@@ -269,7 +285,7 @@ export function getRomanceState({
     needs,
     votingOrder: [],
     currentVoter: null,
-    selectedPlayers: [],
     roundEnder: null,
+    crushSelections,
   };
 }

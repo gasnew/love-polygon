@@ -7,12 +7,12 @@ import dispatch, {
   addNode,
   addToken,
   clearStage,
+  setCrushSelections,
   setCurrentTokenId,
   setCurrentVoter,
   setNeeds,
   setPhase,
   setRelationships,
-  setSelectedPlayers,
   setTokenNodeId,
   setVotingOrder,
   startCountdown,
@@ -44,9 +44,9 @@ export function updateState(serverState: ServerState) {
   console.log('serverState', serverState);
 
   const {
+    crushSelections,
     players,
     nodes,
-    selectedPlayers,
     tokens,
     currentVoter,
     votingOrder,
@@ -94,20 +94,20 @@ export function updateState(serverState: ServerState) {
 
   dispatch(setVotingOrder(votingOrder));
   dispatch(setCurrentVoter(currentVoter));
-  dispatch(setSelectedPlayers(selectedPlayers));
+  dispatch(setCrushSelections(crushSelections));
 }
 
 export function setState(serverState: ServerState) {
   console.log('state set');
   console.log(serverState);
   const {
+    crushSelections,
     currentVoter,
     phase,
     players,
     needs,
     nodes,
     relationships,
-    selectedPlayers,
     tokens,
     votingOrder,
   } = serverState;
@@ -128,5 +128,5 @@ export function setState(serverState: ServerState) {
   dispatch(setRelationships(relationships));
   dispatch(setVotingOrder(votingOrder));
   dispatch(setCurrentVoter(currentVoter));
-  dispatch(setSelectedPlayers(selectedPlayers));
+  dispatch(setCrushSelections(crushSelections));
 }

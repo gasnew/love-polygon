@@ -20,7 +20,7 @@ class App extends Component<Props, State> {
       playerId: 'sktwib30k4cva8i2',
       playerName: 'Jesse',
     },
-    sessionInfo: null
+    //sessionInfo: null
   };
 
   render() {

@@ -104,8 +104,8 @@ export function getOwnNeed(): Need {
   return _.find(getNeeds(), ['playerId', playerId]);
 }
 
-export function getSelectedPlayers(): string[] {
-  return getState().selectedPlayers;
+export function getPlayerCrushSelections(playerId: string): string[] {
+  return _.find(getState().crushSelections, ['playerId', playerId]);
 }
 
 export function getVotingOrder(): string[] {

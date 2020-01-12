@@ -59,6 +59,14 @@ export type Needs = {|
   |},
 |};
 
+export type CrushSelections = {
+  [string]: {|
+    id: string,
+    playerId: string,
+    playerIds: string[],
+  |},
+};
+
 export type ServerState = {|
   phase: Phase,
   players: Players,
@@ -68,8 +76,8 @@ export type ServerState = {|
   needs: Needs,
   votingOrder: string[],
   currentVoter: ?string,
-  selectedPlayers: string[],
   roundEnder: ?string,
+  crushSelections: CrushSelections,
 |};
 
 export type SubServerState = $Values<ServerState>;
@@ -88,7 +96,8 @@ export type Message =
     }
   | {
       type: 'selectPlayer',
-      playerId: string,
+      sourcePlayerId: string,
+      targetPlayerId: string
     }
   | {
       type: 'submitVotes',
@@ -96,7 +105,8 @@ export type Message =
     }
   | {
       type: 'deselectPlayer',
-      playerId: string,
+      sourcePlayerId: string,
+      targetPlayerId: string
     };
 
 export type SessionInfo = {|

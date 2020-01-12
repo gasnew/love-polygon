@@ -252,9 +252,17 @@ function getSession({ id, emit }: SessionProps): Session {
 
         return _.filter(playerTokens, ['type', need.type]).length >= need.count;
       } else if (message.type === 'selectPlayer') {
-        return !_.includes(serverState.selectedPlayers, message.playerId);
+        if (serverState.currentVoter !== message.sourcePlayerId) return false;
+
+        const crushSelections =
+          serverState.players[message.sourcePlayerId].crushSelections;
+        return !_.includes(crushSelections, message.targetPlayerId);
       } else if (message.type === 'deselectPlayer') {
-        return _.includes(serverState.selectedPlayers, message.playerId);
+        if (serverState.currentVoter !== message.sourcePlayerId) return false;
+
+        const crushSelections =
+          serverState.players[message.sourcePlayerId].crushSelections;
+        return _.includes(crushSelections, message.targetPlayerId);
       } else if (message.type === 'submitVotes') {
         return serverState.currentVoter === message.currentVoterId;
       }
@@ -298,17 +306,24 @@ function getSession({ id, emit }: SessionProps): Session {
 
         await followEdge('startCountdown');
       } else if (message.type === 'selectPlayer') {
-        await set('selectedPlayers', [
-          ...serverState.selectedPlayers,
-          message.playerId,
-        ]);
+        const crushSelections =
+          serverState.players[message.sourcePlayerId].crushSelections;
+        await update('players', {
+          [message.sourcePlayerId]: {
+            crushSelections: [...crushSelections, message.targetPlayerId],
+          },
+        });
       } else if (message.type === 'deselectPlayer') {
-        await set(
-          'selectedPlayers',
-          _.difference(serverState.selectedPlayers, [message.playerId])
-        );
+        const crushSelections =
+          serverState.players[message.sourcePlayerId].crushSelections;
+        await update('players', {
+          [message.sourcePlayerId]: {
+            crushSelections: _.difference(crushSelections, [
+              message.targetPlayerId,
+            ]),
+          },
+        });
       } else if (message.type === 'submitVotes') {
-        await set('selectedPlayers', []);
         const votingOrder = serverState.votingOrder;
         await set(
           'currentVoter',

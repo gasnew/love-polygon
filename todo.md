@@ -20,7 +20,7 @@
 + Playtest 1! (Voting will be done on paper)
 + Rewrite the UI in React because not everyone's phone can deal with WebGL
 - Voting
-  / Rotate through players (ending with person who ended the round)
+  + Rotate through players (ending with person who ended the round)
     + When your turn, screen says, "Tell everyone which of these people had a crush on you. So-and-so is taking notes."
     + Next person in the rotation takes notes. This is the only person who can make inputs
     + Everyone else can see names being selected
@@ -41,6 +41,7 @@
   - Deliver animation (w/ gloved hand)
   - Scrolling background with food/heart symbols?
   - Scene transitions
+  - Heart/Broken heart/tissue box stamp for guessing crushes correctly?
 - Improve lobby screen
   - Add practice mode
   - Be able to see how many people are in the lobby

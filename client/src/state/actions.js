@@ -12,6 +12,7 @@ import {
 } from './getters';
 import { GAME_STATE_UPDATED } from './state';
 import type {
+  CrushSelections,
   NodeType,
   Phase,
   PhaseName,
@@ -34,13 +35,14 @@ const CLEAR_STAGE = 'clearStage';
 const SET_PHASE = 'setPhase';
 const SET_RELATIONSHIPS = 'setRelationships';
 const SET_NEEDS = 'setNeeds';
-const SET_SELECTED_PLAYERS = 'setSelectedPlayers';
 const SET_SOCKET = 'setSocket';
 const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 const SET_CURRENT_VOTER = 'setCurrentVoter';
 const SET_VOTING_ORDER = 'setVotingOrder';
 const START_COUNTDOWN = 'startCountdown';
+const SET_CRUSH_SELECTIONS = 'setCrushSelections';
+const SET_PLAYER_CRUSH_SELECTIONS = 'setPlayerCrushSelections';
 
 type Action =
   | {
@@ -78,8 +80,13 @@ type Action =
       needs: Needs,
     }
   | {
-      type: 'setSelectedPlayers',
-      selectedPlayers: string[],
+      type: 'setCrushSelections',
+      crushSelections: CrushSelections,
+    }
+  | {
+      type: 'setPlayerCrushSelections',
+      playerId: string,
+      crushSelections: CrushSelections,
     }
   | {
       type: 'setSocket',
@@ -160,10 +167,21 @@ export function setSocket(socket: Socket): Action {
   };
 }
 
-export function setSelectedPlayers(selectedPlayers: string[]): Action {
+export function setCrushSelections(crushSelections: CrushSelections): Action {
   return {
-    type: SET_SELECTED_PLAYERS,
-    selectedPlayers,
+    type: SET_CRUSH_SELECTIONS,
+    crushSelections,
+  };
+}
+
+export function setPlayerCrushSelections(
+  playerId: string,
+  crushSelections: CrushSelections
+): Action {
+  return {
+    type: SET_PLAYER_CRUSH_SELECTIONS,
+    playerId,
+    crushSelections,
   };
 }
 
@@ -290,8 +308,8 @@ export default function dispatch(action: Action) {
         countdownStartedAt: action.phase.countdownStartedAt,
       });
       break;
-    case SET_SELECTED_PLAYERS:
-      mergeIntoState('selectedPlayers', action.selectedPlayers);
+    case SET_CRUSH_SELECTIONS:
+      mergeIntoState('crushSelections', action.crushSelections);
       break;
     case SET_SOCKET:
       mergeIntoState('socket', action.socket);

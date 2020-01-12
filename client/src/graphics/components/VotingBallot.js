@@ -2,6 +2,16 @@
 
 import _ from 'lodash';
 import Button from '@material-ui/core/Button';
+import {
+  Avatar,
+  Card,
+  CardActions,
+  CardContent,
+  ListItemAvatar,
+  Typography,
+} from '@material-ui/core';
+import { BeachAccessIcon } from '@material-ui/icons/BeachAccess';
+import { Cancel, CheckCircle, EmojiEmotions } from '@material-ui/icons';
 import Checkbox from '@material-ui/core/Checkbox';
 import CommentIcon from '@material-ui/icons/Comment';
 import IconButton from '@material-ui/core/IconButton';
@@ -20,17 +30,54 @@ import announce, {
 } from '../../network/network';
 import dispatch, {
   setCurrentVoter,
-  setSelectedPlayers,
+  setPlayerCrushSelections,
 } from '../../state/actions';
 import {
   getCurrentVoter,
+  getPlayerCrushSelections,
   getPlayers,
-  getSelectedPlayers,
   getSessionInfo,
   getVotingOrder,
 } from '../../state/getters';
 
 import type { Player } from '../../state/state';
+
+const usePlayerCardStyles = makeStyles(theme => ({
+  root: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper,
+  },
+}));
+
+const PlayerCardList = ({
+  players,
+}: {
+  players: { name: string, status: string }[],
+}) => {
+  const { root } = usePlayerCardStyles();
+
+  return (
+    <List className={root}>
+      {_.map(players, ({ name, status }) => (
+        <ListItem key={name}>
+          <ListItemAvatar>
+            <Avatar>
+              {status === 'success' ? (
+                <CheckCircle />
+              ) : status === 'failure' ? (
+                <Cancel />
+              ) : (
+                <EmojiEmotions />
+              )}
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={name} secondary="bo, ba, bingo" />
+        </ListItem>
+      ))}
+    </List>
+  );
+};
 
 const PlayerCheckbox = ({
   player,
@@ -72,6 +119,15 @@ const useStyles = makeStyles(theme => ({
     maxWidth: 360,
     backgroundColor: theme.palette.background.paper,
   },
+  card: {
+    minWidth: 275,
+  },
+  title: {
+    fontSize: 14,
+  },
+  pos: {
+    marginBottom: 12,
+  },
 }));
 
 export default function VotingBallot() {
@@ -80,22 +136,27 @@ export default function VotingBallot() {
   const players = getPlayers();
   const currentVoter = getCurrentVoter();
   const votingOrder = getVotingOrder();
-  const selectedPlayers = getSelectedPlayers();
-  const { playerId } = getSessionInfo();
+  const crushSelections = getPlayerCrushSelections(currentVoter);
+  const { playerId: currentPlayerId } = getSessionInfo();
 
   if (!currentVoter) return <p>Loading...</p>;
-  const noteTaker =
-    players[
-      votingOrder[(votingOrder.indexOf(currentVoter) + 1) % votingOrder.length]
-    ];
+  const playerify = playerId => players[playerId];
+  const noteTaker = playerify(
+    votingOrder[(votingOrder.indexOf(currentVoter) + 1) % votingOrder.length]
+  );
 
   const handleToggle = playerId => () => {
-    if (_.includes(selectedPlayers, playerId)) {
-      dispatch(setSelectedPlayers(_.difference(selectedPlayers, [playerId])));
-      announce(deselectPlayer(playerId));
+    if (_.includes(crushSelections, playerId)) {
+      dispatch(
+        setPlayerCrushSelections(
+          currentVoter,
+          _.difference(crushSelections, [playerId])
+        )
+      );
+      announce(networkedDeselectPlayer(playerId));
     } else {
       dispatch(setSelectedPlayers([...selectedPlayers, playerId]));
-      announce(selectPlayer(playerId));
+      announce(networkedSelectPlayer(playerId));
     }
   };
 
@@ -107,35 +168,58 @@ export default function VotingBallot() {
 
   return (
     <div>
-      <p>
-        {currentVoter === playerId
-          ? `Select the players you believe had a crush on you!`
-          : `${players[currentVoter].name} is deciding who has a crush on them...`}
-      </p>
-      <p>
-        <i>{`${noteTaker.name} is taking notes.`}</i>
-      </p>
-      <List className={classes.root}>
-        {_.map(_.reject(players, ['id', currentVoter]), player => (
-          <PlayerCheckbox
-            key={player.id}
-            player={player}
-            checked={_.includes(selectedPlayers, player.id)}
-            disabled={noteTaker.id != playerId}
-            onClick={handleToggle}
-          />
-        ))}
-      </List>
-      {noteTaker.id === playerId && (
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={handleSubmitVotesClick}
-        >
-          Submit Votes
-        </Button>
-      )}
+      <PlayerCardList
+        players={_.map(
+          votingOrder,
+          _.flow(
+            playerify,
+            player => ({
+              name: player.name,
+              status: 'success',
+            })
+          )
+        )}
+      />
+      <Card className={classes.card} variant="outlined">
+        <CardContent>
+          <Typography variant="h5" component="h2">
+            {currentVoter === currentPlayerId ? (
+              `Select the players you believe had a crush on you!`
+            ) : (
+              <span>
+                <b>{playerify(currentVoter).name}</b> is deciding who has a
+                crush on them...
+              </span>
+            )}
+          </Typography>
+          <Typography className={classes.pos} color="textSecondary">
+            {`${noteTaker.name} is taking notes.`}
+          </Typography>
+          <List className={classes.root}>
+            {_.map(_.reject(players, ['id', currentVoter]), player => (
+              <PlayerCheckbox
+                key={player.id}
+                player={player}
+                checked={_.includes(selectedPlayers, player.id)}
+                disabled={noteTaker.id != currentPlayerId}
+                onClick={handleToggle}
+              />
+            ))}
+          </List>
+        </CardContent>
+        <CardActions>
+          {noteTaker.id === currentPlayerId && (
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              onClick={handleSubmitVotesClick}
+            >
+              Submit Votes
+            </Button>
+          )}
+        </CardActions>
+      </Card>
     </div>
   );
 }

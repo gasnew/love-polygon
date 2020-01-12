@@ -5,6 +5,7 @@ import type { Socket } from 'socket.io-client';
 
 import { getState } from './getters';
 import type {
+  CrushSelections,
   NodeType,
   Phase,
   RelationshipType,
@@ -82,7 +83,7 @@ export type State = {|
   needs: Needs,
   votingOrder: string[],
   currentVoter: ?string,
-  selectedPlayers: string[],
+  crushSelections: CrushSelections,
 |};
 
 export default function generateState(sessionInfo: SessionInfo): State {
@@ -104,7 +105,7 @@ export default function generateState(sessionInfo: SessionInfo): State {
     needs: {},
     votingOrder: [],
     currentVoter: null,
-    selectedPlayers: [],
+    crushSelections: {},
   };
 }
 
