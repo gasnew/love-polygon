@@ -19,12 +19,12 @@
 + Button to cause round-ending timer when need is met
 + Playtest 1! (Voting will be done on paper)
 + Rewrite the UI in React because not everyone's phone can deal with WebGL
-- Voting
++ Voting
   + Rotate through players (ending with person who ended the round)
     + When your turn, screen says, "Tell everyone which of these people had a crush on you. So-and-so is taking notes."
     + Next person in the rotation takes notes. This is the only person who can make inputs
     + Everyone else can see names being selected
-  - When selections are confirmed and submitted, all screens indicate whether this is correct then move on to next player
+  + When selections are confirmed and submitted, all screens indicate whether this is correct then move on to next player
 - Final screen
   - Rotates through all players tallying up scores
     - Needs met?
@@ -55,6 +55,7 @@
 
 ## Pipe dreams
 - Technical refactors
+  - Use socket.io-redis to support multiple hosts on one Redis cluster?
   - Use something other than socket.io for pubsub?
 - Compose music for the lobby
 - Close session loop?

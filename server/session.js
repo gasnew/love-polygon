@@ -252,17 +252,21 @@ function getSession({ id, emit }: SessionProps): Session {
 
         return _.filter(playerTokens, ['type', need.type]).length >= need.count;
       } else if (message.type === 'selectPlayer') {
-        if (serverState.currentVoter !== message.sourcePlayerId) return false;
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { currentVoter, crushSelections } = serverState;
+        if (currentVoter !== sourcePlayerId) return false;
 
-        const crushSelections =
-          serverState.players[message.sourcePlayerId].crushSelections;
-        return !_.includes(crushSelections, message.targetPlayerId);
+        const crushSelection =
+          _.find(crushSelections, ['playerId', sourcePlayerId]);
+        return !_.includes(crushSelection.playerIds, targetPlayerId);
       } else if (message.type === 'deselectPlayer') {
-        if (serverState.currentVoter !== message.sourcePlayerId) return false;
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { currentVoter, crushSelections } = serverState;
+        if (currentVoter !== sourcePlayerId) return false;
 
-        const crushSelections =
-          serverState.players[message.sourcePlayerId].crushSelections;
-        return _.includes(crushSelections, message.targetPlayerId);
+        const crushSelection =
+          _.find(crushSelections, ['playerId', sourcePlayerId]);
+        return _.includes(crushSelection.playerIds, message.targetPlayerId);
       } else if (message.type === 'submitVotes') {
         return serverState.currentVoter === message.currentVoterId;
       }
@@ -306,20 +310,28 @@ function getSession({ id, emit }: SessionProps): Session {
 
         await followEdge('startCountdown');
       } else if (message.type === 'selectPlayer') {
-        const crushSelections =
-          serverState.players[message.sourcePlayerId].crushSelections;
-        await update('players', {
-          [message.sourcePlayerId]: {
-            crushSelections: [...crushSelections, message.targetPlayerId],
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { crushSelections } = serverState;
+
+        const crushSelection =
+          _.find(crushSelections, ['playerId', sourcePlayerId]);
+        await update('crushSelections', {
+          [crushSelection.id]: {
+            ...crushSelection,
+            playerIds: [...crushSelection.playerIds, targetPlayerId],
           },
         });
       } else if (message.type === 'deselectPlayer') {
-        const crushSelections =
-          serverState.players[message.sourcePlayerId].crushSelections;
-        await update('players', {
-          [message.sourcePlayerId]: {
-            crushSelections: _.difference(crushSelections, [
-              message.targetPlayerId,
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { crushSelections } = serverState;
+
+        const crushSelection =
+          _.find(crushSelections, ['playerId', sourcePlayerId]);
+        await update('crushSelections', {
+          [crushSelection.id]: {
+            ...crushSelection,
+            playerIds: _.difference(crushSelection.playerIds, [
+              targetPlayerId,
             ]),
           },
         });

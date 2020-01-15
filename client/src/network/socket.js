@@ -93,8 +93,8 @@ export function updateState(serverState: ServerState) {
   });
 
   dispatch(setVotingOrder(votingOrder));
-  dispatch(setCurrentVoter(currentVoter));
   dispatch(setCrushSelections(crushSelections));
+  dispatch(setCurrentVoter(currentVoter));
 }
 
 export function setState(serverState: ServerState) {
@@ -127,6 +127,6 @@ export function setState(serverState: ServerState) {
   dispatch(setNeeds(needs));
   dispatch(setRelationships(relationships));
   dispatch(setVotingOrder(votingOrder));
-  dispatch(setCurrentVoter(currentVoter));
   dispatch(setCrushSelections(crushSelections));
+  dispatch(setCurrentVoter(currentVoter));
 }

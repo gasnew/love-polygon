@@ -59,12 +59,13 @@ export type Needs = {|
   |},
 |};
 
+export type CrushSelection = {|
+  id: string,
+  playerId: string,
+  playerIds: string[],
+|};
 export type CrushSelections = {
-  [string]: {|
-    id: string,
-    playerId: string,
-    playerIds: string[],
-  |},
+  [string]: CrushSelection,
 };
 
 export type ServerState = {|
@@ -97,7 +98,7 @@ export type Message =
   | {
       type: 'selectPlayer',
       sourcePlayerId: string,
-      targetPlayerId: string
+      targetPlayerId: string,
     }
   | {
       type: 'submitVotes',
@@ -106,7 +107,7 @@ export type Message =
   | {
       type: 'deselectPlayer',
       sourcePlayerId: string,
-      targetPlayerId: string
+      targetPlayerId: string,
     };
 
 export type SessionInfo = {|

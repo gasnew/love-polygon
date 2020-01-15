@@ -4,9 +4,13 @@ import _ from 'lodash';
 
 import type { Socket } from 'socket.io-client';
 
-import type { Phase, SessionInfo } from '../../../server/networkTypes';
 import type {
-  Dimensions,
+  CrushSelection,
+  CrushSelections,
+  Phase,
+  SessionInfo,
+} from '../../../server/networkTypes';
+import type {
   Need,
   Needs,
   Node,
@@ -104,10 +108,27 @@ export function getOwnNeed(): Need {
   return _.find(getNeeds(), ['playerId', playerId]);
 }
 
-export function getPlayerCrushSelections(playerId: string): string[] {
-  return _.find(getState().crushSelections, ['playerId', playerId]);
+export function getCrushSelections(): CrushSelections {
+  return getState().crushSelections;
+}
+
+export function getPlayerCrushSelection(playerId: string): CrushSelection {
+  return _.find(getCrushSelections(), ['playerId', playerId]);
 }
 
 export function getVotingOrder(): string[] {
   return getState().votingOrder;
+}
+
+export function getGuessedCrushesCorrectly(playerId: string): boolean {
+  const crushes = _.map(
+    _.filter(
+      getRelationships(),
+      ({ type, toId }) => type === 'crush' && toId === playerId
+    ),
+    'fromId'
+  );
+  const guesses = getPlayerCrushSelection(playerId).playerIds;
+
+  return _.isEqual(_.sortBy(crushes), _.sortBy(guesses));
 }

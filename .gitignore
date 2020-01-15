@@ -4,7 +4,7 @@ tags
 # Generated files
 node_modules/
 dist/
-server/debugSessionStateCache.json
+server/debugSessionStateCache.*
 
 # Logs
 *.log

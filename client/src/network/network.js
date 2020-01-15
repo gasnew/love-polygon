@@ -12,10 +12,14 @@ const SELECT_PLAYER = 'selectPlayer';
 const SUBMIT_VOTES = 'submitVotes';
 const TRANSFER_TOKEN = 'transferToken';
 
-export function deselectPlayer(playerId: string): Message {
+export function deselectPlayer(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Message {
   return {
     type: DESELECT_PLAYER,
-    playerId,
+    sourcePlayerId,
+    targetPlayerId,
   };
 }
 
@@ -26,10 +30,14 @@ export function finishRound(): Message {
   };
 }
 
-export function selectPlayer(playerId: string): Message {
+export function selectPlayer(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Message {
   return {
     type: SELECT_PLAYER,
-    playerId,
+    sourcePlayerId,
+    targetPlayerId,
   };
 }
 

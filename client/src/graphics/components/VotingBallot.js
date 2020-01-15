@@ -2,45 +2,48 @@
 
 import _ from 'lodash';
 import Button from '@material-ui/core/Button';
-import {
-  Avatar,
-  Card,
-  CardActions,
-  CardContent,
-  ListItemAvatar,
-  Typography,
-} from '@material-ui/core';
-import { BeachAccessIcon } from '@material-ui/icons/BeachAccess';
-import { Cancel, CheckCircle, EmojiEmotions } from '@material-ui/icons';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Snackbar from '@material-ui/core/Snackbar';
+import Typography from '@material-ui/core/Typography';
+import Cancel from '@material-ui/icons/Cancel';
+import CheckCircle from '@material-ui/icons/CheckCircle';
+import EmojiEmotions from '@material-ui/icons/EmojiEmotions';
 import Checkbox from '@material-ui/core/Checkbox';
-import CommentIcon from '@material-ui/icons/Comment';
-import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
+import MuiAlert from '@material-ui/lab/Alert';
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
 import announce, {
-  deselectPlayer,
-  selectPlayer,
+  deselectPlayer as networkedDeselectPlayer,
+  selectPlayer as networkedSelectPlayer,
   submitVotes,
 } from '../../network/network';
 import dispatch, {
+  deselectPlayer,
+  selectPlayer,
   setCurrentVoter,
-  setPlayerCrushSelections,
 } from '../../state/actions';
 import {
   getCurrentVoter,
-  getPlayerCrushSelections,
+  getGuessedCrushesCorrectly,
+  getPlayerCrushSelection,
   getPlayers,
   getSessionInfo,
   getVotingOrder,
 } from '../../state/getters';
 
 import type { Player } from '../../state/state';
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const usePlayerCardStyles = makeStyles(theme => ({
   root: {
@@ -50,29 +53,27 @@ const usePlayerCardStyles = makeStyles(theme => ({
   },
 }));
 
-const PlayerCardList = ({
-  players,
-}: {
-  players: { name: string, status: string }[],
-}) => {
+type PlayerCard = { name: string, selectedNames: string[], status: string };
+const PlayerCardList = ({ playerCards }: { playerCards: PlayerCard[] }) => {
   const { root } = usePlayerCardStyles();
 
   return (
     <List className={root}>
-      {_.map(players, ({ name, status }) => (
+      {_.map(playerCards, ({ name, selectedNames, status }) => (
         <ListItem key={name}>
           <ListItemAvatar>
-            <Avatar>
-              {status === 'success' ? (
-                <CheckCircle />
-              ) : status === 'failure' ? (
-                <Cancel />
-              ) : (
-                <EmojiEmotions />
-              )}
-            </Avatar>
+            {status === 'success' ? (
+              <CheckCircle style={{ color: '67ac5c' }} />
+            ) : status === 'failure' ? (
+              <Cancel style={{ color: 'e25141' }} />
+            ) : (
+              <EmojiEmotions style={{ color: '888888' }} />
+            )}
           </ListItemAvatar>
-          <ListItemText primary={name} secondary="bo, ba, bingo" />
+          <ListItemText
+            primary={name}
+            secondary={_.join(selectedNames, ', ')}
+          />
         </ListItem>
       ))}
     </List>
@@ -88,7 +89,7 @@ const PlayerCheckbox = ({
   player: Player,
   checked: boolean,
   disabled: boolean,
-  onClick: string => () => void,
+  onClick: () => void,
 }) => {
   const labelId = `checkbox-list-label-${player.id}`;
 
@@ -97,7 +98,7 @@ const PlayerCheckbox = ({
       role={undefined}
       dense
       button
-      onClick={onClick(player.id)}
+      onClick={onClick}
       disabled={disabled}
     >
       <ListItemIcon>
@@ -130,54 +131,117 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const useSnackbar = () => {
+  const [open, setOpen] = useState(false);
+
+  const activateSnackbar = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  return { open, handleClose, activateSnackbar };
+};
+
 export default function VotingBallot() {
+  const [snackbar, setSnackbar] = useState({
+    playerId: '',
+    severity: '',
+    message: '',
+  });
+  const { open, handleClose, activateSnackbar } = useSnackbar();
   const classes = useStyles();
 
   const players = getPlayers();
   const currentVoter = getCurrentVoter();
-  const votingOrder = getVotingOrder();
-  const crushSelections = getPlayerCrushSelections(currentVoter);
-  const { playerId: currentPlayerId } = getSessionInfo();
 
   if (!currentVoter) return <p>Loading...</p>;
+
+  const votingOrder = getVotingOrder();
+  const selectedPlayerIds = getPlayerCrushSelection(currentVoter).playerIds;
+  const { playerId: currentPlayerId } = getSessionInfo();
+
   const playerify = playerId => players[playerId];
   const noteTaker = playerify(
     votingOrder[(votingOrder.indexOf(currentVoter) + 1) % votingOrder.length]
   );
 
   const handleToggle = playerId => () => {
-    if (_.includes(crushSelections, playerId)) {
-      dispatch(
-        setPlayerCrushSelections(
-          currentVoter,
-          _.difference(crushSelections, [playerId])
-        )
-      );
-      announce(networkedDeselectPlayer(playerId));
+    if (_.includes(selectedPlayerIds, playerId)) {
+      dispatch(deselectPlayer(currentVoter, playerId));
+      announce(networkedDeselectPlayer(currentVoter, playerId));
     } else {
-      dispatch(setSelectedPlayers([...selectedPlayers, playerId]));
-      announce(networkedSelectPlayer(playerId));
+      dispatch(selectPlayer(currentVoter, playerId));
+      announce(networkedSelectPlayer(currentVoter, playerId));
     }
   };
 
   const handleSubmitVotesClick = () => {
-    dispatch(setSelectedPlayers([]));
     dispatch(setCurrentVoter(noteTaker.id));
     announce(submitVotes(currentVoter));
   };
 
+  const hasVoted = playerId =>
+    _.includes(
+      votingOrder.slice(0, votingOrder.indexOf(currentVoter)),
+      playerId
+    );
+  const playerCardFromPlayerId = _.flow(
+    playerify,
+    player => ({
+      name: player.name,
+      selectedNames: _.map(
+        getPlayerCrushSelection(player.id).playerIds,
+        _.flow(
+          playerify,
+          player => player.name
+        )
+      ),
+      status: hasVoted(player.id)
+        ? getGuessedCrushesCorrectly(player.id)
+          ? 'success'
+          : 'failure'
+        : 'tbd',
+    })
+  );
+
+  // Activate the snackbar whenever a new vote is in
+  if (
+    votingOrder.indexOf(currentVoter) >= 1 &&
+    snackbar.playerId !== votingOrder[votingOrder.indexOf(currentVoter) -1]
+  ) {
+    const previousVoter = votingOrder[votingOrder.indexOf(currentVoter) -1];
+    if (getGuessedCrushesCorrectly(previousVoter))
+      setSnackbar({
+        playerId: previousVoter,
+        severity: 'success',
+        message: `${
+          playerify(previousVoter).name
+        } correctly guessed the exact set of players who have a crush on them!`,
+      });
+    else
+      setSnackbar({
+        playerId: previousVoter,
+        severity: 'error',
+        message: `${
+          playerify(previousVoter).name
+        } did not correctly guess the exact set of players who have a crush on them :(`,
+      });
+    activateSnackbar();
+  }
+
   return (
     <div>
       <PlayerCardList
-        players={_.map(
-          votingOrder,
-          _.flow(
-            playerify,
-            player => ({
-              name: player.name,
-              status: 'success',
-            })
-          )
+        playerCards={_.map(
+          votingOrder.slice(0, votingOrder.indexOf(currentVoter)),
+          playerCardFromPlayerId
         )}
       />
       <Card className={classes.card} variant="outlined">
@@ -200,9 +264,9 @@ export default function VotingBallot() {
               <PlayerCheckbox
                 key={player.id}
                 player={player}
-                checked={_.includes(selectedPlayers, player.id)}
-                disabled={noteTaker.id != currentPlayerId}
-                onClick={handleToggle}
+                checked={_.includes(selectedPlayerIds, player.id)}
+                disabled={noteTaker.id !== currentPlayerId}
+                onClick={handleToggle(player.id)}
               />
             ))}
           </List>
@@ -220,6 +284,20 @@ export default function VotingBallot() {
           )}
         </CardActions>
       </Card>
+      <PlayerCardList
+        playerCards={_.map(
+          votingOrder.slice(
+            votingOrder.indexOf(currentVoter) + 1,
+            votingOrder.length
+          ),
+          playerCardFromPlayerId
+        )}
+      />
+      <Snackbar open={open} onClose={handleClose}>
+        <Alert onClose={handleClose} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

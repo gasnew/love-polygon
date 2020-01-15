@@ -1,10 +1,14 @@
 // @flow
 
+import _ from 'lodash';
+
 import type { Socket } from 'socket.io-client';
 
 import {
+  getCrushSelections,
   getState,
   getPhase,
+  getPlayerCrushSelection,
   getPlayers,
   getNodes,
   getToken,
@@ -12,6 +16,7 @@ import {
 } from './getters';
 import { GAME_STATE_UPDATED } from './state';
 import type {
+  CrushSelection,
   CrushSelections,
   NodeType,
   Phase,
@@ -24,6 +29,7 @@ import type {
   Nodes,
   Player,
   Relationships,
+  State,
   Token,
   Tokens,
 } from './state';
@@ -42,7 +48,8 @@ const SET_CURRENT_VOTER = 'setCurrentVoter';
 const SET_VOTING_ORDER = 'setVotingOrder';
 const START_COUNTDOWN = 'startCountdown';
 const SET_CRUSH_SELECTIONS = 'setCrushSelections';
-const SET_PLAYER_CRUSH_SELECTIONS = 'setPlayerCrushSelections';
+const SELECT_PLAYER = 'selectPlayer';
+const DESELECT_PLAYER = 'deselectPlayer';
 
 type Action =
   | {
@@ -84,9 +91,14 @@ type Action =
       crushSelections: CrushSelections,
     }
   | {
-      type: 'setPlayerCrushSelections',
-      playerId: string,
-      crushSelections: CrushSelections,
+      type: 'selectPlayer',
+      sourcePlayerId: string,
+      targetPlayerId: string,
+    }
+  | {
+      type: 'deselectPlayer',
+      sourcePlayerId: string,
+      targetPlayerId: string,
     }
   | {
       type: 'setSocket',
@@ -113,11 +125,21 @@ type Action =
       type: 'startCountdown',
     };
 
-const mergeIntoState = (key, subState) => {
+const mergeIntoState = (key: $Keys<State>, subState: $Values<State>) => {
   window.state = {
     ...getState(),
     [key]: subState,
   };
+};
+
+const mergeIntoCrushSelections = (
+  crushSelectionId: string,
+  crushSelection: CrushSelection
+) => {
+  mergeIntoState('crushSelections', {
+    ...getCrushSelections(),
+    [crushSelectionId]: crushSelection,
+  });
 };
 
 const mergeIntoPlayers = (playerId: string, player: Player) => {
@@ -174,14 +196,25 @@ export function setCrushSelections(crushSelections: CrushSelections): Action {
   };
 }
 
-export function setPlayerCrushSelections(
-  playerId: string,
-  crushSelections: CrushSelections
+export function selectPlayer(
+  sourcePlayerId: string,
+  targetPlayerId: string
 ): Action {
   return {
-    type: SET_PLAYER_CRUSH_SELECTIONS,
-    playerId,
-    crushSelections,
+    type: SELECT_PLAYER,
+    sourcePlayerId,
+    targetPlayerId,
+  };
+}
+
+export function deselectPlayer(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Action {
+  return {
+    type: DESELECT_PLAYER,
+    sourcePlayerId,
+    targetPlayerId,
   };
 }
 
@@ -303,13 +336,39 @@ export default function dispatch(action: Action) {
       setNodes({});
       break;
     case SET_PHASE:
-      mergeIntoState('phase', {
-        name: action.phase.name,
-        countdownStartedAt: action.phase.countdownStartedAt,
-      });
+      mergeIntoState(
+        'phase',
+        ({
+          name: action.phase.name,
+          countdownStartedAt: action.phase.countdownStartedAt,
+        }: Phase)
+      );
       break;
     case SET_CRUSH_SELECTIONS:
       mergeIntoState('crushSelections', action.crushSelections);
+      break;
+    case SELECT_PLAYER:
+      _.flow(
+        getPlayerCrushSelection,
+        crushSelection =>
+          mergeIntoCrushSelections(crushSelection.id, {
+            ...crushSelection,
+            playerIds: [...crushSelection.playerIds, action.targetPlayerId],
+          })
+      )(action.sourcePlayerId);
+      break;
+    case DESELECT_PLAYER:
+      _.flow(
+        getPlayerCrushSelection,
+        crushSelection =>
+          mergeIntoCrushSelections(crushSelection.id, {
+            ...crushSelection,
+            playerIds: _.difference(
+              getPlayerCrushSelection(action.sourcePlayerId).playerIds,
+              [action.targetPlayerId]
+            ),
+          })
+      )(action.sourcePlayerId);
       break;
     case SET_SOCKET:
       mergeIntoState('socket', action.socket);
@@ -338,7 +397,7 @@ export default function dispatch(action: Action) {
     case START_COUNTDOWN:
       mergeIntoState('phase', {
         name: (getPhase() || {}).name,
-        countdownStartedAt: Date.now(),
+        countdownStartedAt: (Date.now(): number),
       });
       break;
     default:
