@@ -16,7 +16,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import MuiAlert from '@material-ui/lab/Alert';
+import Alert from '@material-ui/lab/Alert';
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -38,12 +38,9 @@ import {
   getSessionInfo,
   getVotingOrder,
 } from '../../state/getters';
+import VotingConfirmationDialog from './VotingConfirmationDialog';
 
 import type { Player } from '../../state/state';
-
-function Alert(props) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
 
 const usePlayerCardStyles = makeStyles(theme => ({
   root: {
@@ -53,7 +50,7 @@ const usePlayerCardStyles = makeStyles(theme => ({
   },
 }));
 
-type PlayerCard = { name: string, selectedNames: string[], status: string };
+type PlayerCard = { name: string, selectedNames: string, status: string };
 const PlayerCardList = ({ playerCards }: { playerCards: PlayerCard[] }) => {
   const { root } = usePlayerCardStyles();
 
@@ -70,10 +67,7 @@ const PlayerCardList = ({ playerCards }: { playerCards: PlayerCard[] }) => {
               <EmojiEmotions style={{ color: '888888' }} />
             )}
           </ListItemAvatar>
-          <ListItemText
-            primary={name}
-            secondary={_.join(selectedNames, ', ')}
-          />
+          <ListItemText primary={name} secondary={selectedNames} />
         </ListItem>
       ))}
     </List>
@@ -150,6 +144,7 @@ const useSnackbar = () => {
 };
 
 export default function VotingBallot() {
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
     playerId: '',
     severity: '',
@@ -183,10 +178,24 @@ export default function VotingBallot() {
   };
 
   const handleSubmitVotesClick = () => {
+    setDialogOpen(false);
     dispatch(setCurrentVoter(noteTaker.id));
     announce(submitVotes(currentVoter));
   };
 
+  const selectedNamesFromPlayerId = _.flow(
+    playerId => getPlayerCrushSelection(playerId).playerIds,
+    playerIds =>
+      _.map(
+        playerIds,
+        _.flow(
+          playerify,
+          player => player.name
+        )
+      ),
+    playerNames =>
+      playerNames.length === 0 ? 'None' : _.join(playerNames, ', ')
+  );
   const hasVoted = playerId =>
     _.includes(
       votingOrder.slice(0, votingOrder.indexOf(currentVoter)),
@@ -196,13 +205,7 @@ export default function VotingBallot() {
     playerify,
     player => ({
       name: player.name,
-      selectedNames: _.map(
-        getPlayerCrushSelection(player.id).playerIds,
-        _.flow(
-          playerify,
-          player => player.name
-        )
-      ),
+      selectedNames: selectedNamesFromPlayerId(player.id),
       status: hasVoted(player.id)
         ? getGuessedCrushesCorrectly(player.id)
           ? 'success'
@@ -214,9 +217,9 @@ export default function VotingBallot() {
   // Activate the snackbar whenever a new vote is in
   if (
     votingOrder.indexOf(currentVoter) >= 1 &&
-    snackbar.playerId !== votingOrder[votingOrder.indexOf(currentVoter) -1]
+    snackbar.playerId !== votingOrder[votingOrder.indexOf(currentVoter) - 1]
   ) {
-    const previousVoter = votingOrder[votingOrder.indexOf(currentVoter) -1];
+    const previousVoter = votingOrder[votingOrder.indexOf(currentVoter) - 1];
     if (getGuessedCrushesCorrectly(previousVoter))
       setSnackbar({
         playerId: previousVoter,
@@ -257,7 +260,7 @@ export default function VotingBallot() {
             )}
           </Typography>
           <Typography className={classes.pos} color="textSecondary">
-            {`${noteTaker.name} is taking notes.`}
+            <i>{`${noteTaker.name} is taking notes.`}</i>
           </Typography>
           <List className={classes.root}>
             {_.map(_.reject(players, ['id', currentVoter]), player => (
@@ -277,7 +280,7 @@ export default function VotingBallot() {
               fullWidth
               variant="contained"
               color="primary"
-              onClick={handleSubmitVotesClick}
+              onClick={() => setDialogOpen(true)}
             >
               Submit Votes
             </Button>
@@ -293,8 +296,23 @@ export default function VotingBallot() {
           playerCardFromPlayerId
         )}
       />
+      {/* This is a hack so we get nice looking ComponentWillUnmount animations */}
+      {_.map(players, player => (
+        <VotingConfirmationDialog
+          open={dialogOpen && player.id === currentVoter}
+          onClose={() => setDialogOpen(false)}
+          onAccept={handleSubmitVotesClick}
+          playerName={player.name}
+          selectedNames={selectedNamesFromPlayerId(player.id)}
+        />
+      ))}
       <Snackbar open={open} onClose={handleClose}>
-        <Alert onClose={handleClose} severity={snackbar.severity}>
+        <Alert
+          onClose={handleClose}
+          severity={snackbar.severity}
+          elevation={6}
+          variant="filled"
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

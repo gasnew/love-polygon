@@ -19,12 +19,14 @@
 + Button to cause round-ending timer when need is met
 + Playtest 1! (Voting will be done on paper)
 + Rewrite the UI in React because not everyone's phone can deal with WebGL
-+ Voting
+/ Voting
   + Rotate through players (ending with person who ended the round)
     + When your turn, screen says, "Tell everyone which of these people had a crush on you. So-and-so is taking notes."
     + Next person in the rotation takes notes. This is the only person who can make inputs
     + Everyone else can see names being selected
   + When selections are confirmed and submitted, all screens indicate whether this is correct then move on to next player
+  + Alert dialog when submitting guess--"Make sure this is what Bobob wants!"
+  - Final "See Round 1 results" button
 - Final screen
   - Rotates through all players tallying up scores
     - Needs met?
@@ -42,6 +44,7 @@
   - Scrolling background with food/heart symbols?
   - Scene transitions
   - Heart/Broken heart/tissue box stamp for guessing crushes correctly?
+  - Use ExpansionPanel for VotingBallot
 - Improve lobby screen
   - Add practice mode
   - Be able to see how many people are in the lobby
