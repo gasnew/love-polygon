@@ -1,17 +1,24 @@
 // @flow
 
+import _ from 'lodash';
+
 import type { Socket } from 'socket.io-client';
 
 import {
+  getCrushSelections,
   getState,
   getPhase,
+  getPlayerCrushSelection,
   getPlayers,
   getNodes,
   getToken,
   getTokens,
+  getVotingOrder,
 } from './getters';
 import { GAME_STATE_UPDATED } from './state';
 import type {
+  CrushSelection,
+  CrushSelections,
   NodeType,
   Phase,
   PhaseName,
@@ -23,6 +30,7 @@ import type {
   Nodes,
   Player,
   Relationships,
+  State,
   Token,
   Tokens,
 } from './state';
@@ -37,7 +45,14 @@ const SET_NEEDS = 'setNeeds';
 const SET_SOCKET = 'setSocket';
 const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
+const SET_CURRENT_VOTER = 'setCurrentVoter';
+const SET_PARTY_LEADER = 'setPartyLeader';
+const SUBMIT_VOTES = 'submitVotes';
+const SET_VOTING_ORDER = 'setVotingOrder';
 const START_COUNTDOWN = 'startCountdown';
+const SET_CRUSH_SELECTIONS = 'setCrushSelections';
+const SELECT_PLAYER = 'selectPlayer';
+const DESELECT_PLAYER = 'deselectPlayer';
 
 type Action =
   | {
@@ -75,8 +90,26 @@ type Action =
       needs: Needs,
     }
   | {
+      type: 'setCrushSelections',
+      crushSelections: CrushSelections,
+    }
+  | {
+      type: 'selectPlayer',
+      sourcePlayerId: string,
+      targetPlayerId: string,
+    }
+  | {
+      type: 'deselectPlayer',
+      sourcePlayerId: string,
+      targetPlayerId: string,
+    }
+  | {
       type: 'setSocket',
       socket: Socket,
+    }
+  | {
+      type: 'setVotingOrder',
+      votingOrder: string[],
     }
   | {
       type: 'setTokenNodeId',
@@ -88,14 +121,36 @@ type Action =
       tokenId: ?string,
     }
   | {
+      type: 'setPartyLeader',
+      partyLeaderId: string,
+    }
+  | {
+      type: 'setCurrentVoter',
+      currentVoter: ?string,
+    }
+  | {
+      type: 'submitVotes',
+      currentVoterId: string,
+    }
+  | {
       type: 'startCountdown',
     };
 
-const mergeIntoState = (key, subState) => {
+const mergeIntoState = (key: $Keys<State>, subState: $Values<State>) => {
   window.state = {
     ...getState(),
     [key]: subState,
   };
+};
+
+const mergeIntoCrushSelections = (
+  crushSelectionId: string,
+  crushSelection: CrushSelection
+) => {
+  mergeIntoState('crushSelections', {
+    ...getCrushSelections(),
+    [crushSelectionId]: crushSelection,
+  });
 };
 
 const mergeIntoPlayers = (playerId: string, player: Player) => {
@@ -142,6 +197,49 @@ export function setSocket(socket: Socket): Action {
   return {
     type: SET_SOCKET,
     socket,
+  };
+}
+
+export function setPartyLeader(partyLeaderId: string): Action {
+  return {
+    type: SET_PARTY_LEADER,
+    partyLeaderId,
+  };
+}
+
+export function setCrushSelections(crushSelections: CrushSelections): Action {
+  return {
+    type: SET_CRUSH_SELECTIONS,
+    crushSelections,
+  };
+}
+
+export function selectPlayer(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Action {
+  return {
+    type: SELECT_PLAYER,
+    sourcePlayerId,
+    targetPlayerId,
+  };
+}
+
+export function deselectPlayer(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Action {
+  return {
+    type: DESELECT_PLAYER,
+    sourcePlayerId,
+    targetPlayerId,
+  };
+}
+
+export function setVotingOrder(votingOrder: string[]): Action {
+  return {
+    type: SET_VOTING_ORDER,
+    votingOrder,
   };
 }
 
@@ -199,6 +297,20 @@ export function setCurrentTokenId(tokenId: ?string): Action {
   };
 }
 
+export function setCurrentVoter(currentVoter: ?string): Action {
+  return {
+    type: SET_CURRENT_VOTER,
+    currentVoter,
+  };
+}
+
+export function submitVotes(currentVoterId: string): Action {
+  return {
+    type: SUBMIT_VOTES,
+    currentVoterId,
+  };
+}
+
 export function setRelationships(relationships: Relationships): Action {
   return {
     type: SET_RELATIONSHIPS,
@@ -249,10 +361,42 @@ export default function dispatch(action: Action) {
       setNodes({});
       break;
     case SET_PHASE:
-      mergeIntoState('phase', {
-        name: action.phase.name,
-        countdownStartedAt: action.phase.countdownStartedAt,
-      });
+      mergeIntoState(
+        'phase',
+        ({
+          name: action.phase.name,
+          countdownStartedAt: action.phase.countdownStartedAt,
+        }: Phase)
+      );
+      break;
+    case SET_PARTY_LEADER:
+      mergeIntoState('partyLeader', action.partyLeaderId);
+      break;
+    case SET_CRUSH_SELECTIONS:
+      mergeIntoState('crushSelections', action.crushSelections);
+      break;
+    case SELECT_PLAYER:
+      _.flow(
+        getPlayerCrushSelection,
+        crushSelection =>
+          mergeIntoCrushSelections(crushSelection.id, {
+            ...crushSelection,
+            playerIds: [...crushSelection.playerIds, action.targetPlayerId],
+          })
+      )(action.sourcePlayerId);
+      break;
+    case DESELECT_PLAYER:
+      _.flow(
+        getPlayerCrushSelection,
+        crushSelection =>
+          mergeIntoCrushSelections(crushSelection.id, {
+            ...crushSelection,
+            playerIds: _.difference(
+              getPlayerCrushSelection(action.sourcePlayerId).playerIds,
+              [action.targetPlayerId]
+            ),
+          })
+      )(action.sourcePlayerId);
       break;
     case SET_SOCKET:
       mergeIntoState('socket', action.socket);
@@ -272,10 +416,30 @@ export default function dispatch(action: Action) {
     case SET_CURRENT_TOKEN:
       mergeIntoState('currentTokenId', action.tokenId);
       break;
+    case SET_CURRENT_VOTER:
+      mergeIntoState('currentVoter', action.currentVoter);
+      break;
+    case SUBMIT_VOTES:
+      const crushSelection = getPlayerCrushSelection(action.currentVoterId);
+      mergeIntoCrushSelections(crushSelection.id, {
+        ...crushSelection,
+        finalized: true,
+      });
+
+      const votingOrder = getVotingOrder();
+      if (action.currentVoterId !== votingOrder[votingOrder.length - 1])
+        mergeIntoState(
+          'currentVoter',
+          votingOrder[votingOrder.indexOf(action.currentVoterId) + 1]
+        );
+      break;
+    case SET_VOTING_ORDER:
+      mergeIntoState('votingOrder', action.votingOrder);
+      break;
     case START_COUNTDOWN:
       mergeIntoState('phase', {
         name: (getPhase() || {}).name,
-        countdownStartedAt: Date.now(),
+        countdownStartedAt: (Date.now(): number),
       });
       break;
     default:

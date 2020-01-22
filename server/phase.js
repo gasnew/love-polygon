@@ -10,7 +10,7 @@ export const ROMANCE = 'romance';
 export const START_GAME = 'startGame';
 export const RESTART = 'restart';
 
-type Edge = 'startGame' | 'restart' | 'finishGame' | 'reallyFinish';
+type Edge = string;
 type Action = () => Promise<void>;
 type Transition = ((PhaseName) => void) => Promise<void>;
 
@@ -30,36 +30,17 @@ type Graph = {
 type Props = {
   getPhaseName: () => Promise<PhaseName>,
   setPhaseName: PhaseName => void,
-  startGame: Action,
-  startCountdown: Action,
-  finishGame: Action,
+  buildGraph: ((PhaseName, Action) => Transition) => Graph,
 };
+
 export default function getFollowEdge({
   getPhaseName,
   setPhaseName,
-  startGame,
-  startCountdown,
-  finishGame,
+  buildGraph,
 }: Props) {
-  const graph: Graph = {
-    lobby: {
-      startGame: transition('romance', startGame),
-    },
-    romance: {
-      restart: transition('romance', startGame),
-      finishGame: transition('countdown', startCountdown),
-    },
-    countdown: {
-      reallyFinish: transition('finished', finishGame),
-    },
-    //finished: {
-      //finishGame: transition('countdown', startCountdown),
-    //},
-  };
-
   return async (edge: Edge) => {
     const phaseName: PhaseName = await getPhaseName();
-    const edges = graph[phaseName];
+    const edges = buildGraph(transition)[phaseName];
     if (edges && edges[edge]) {
       await edges[edge](setPhaseName);
     } else console.log(`Cannot follow edge ${edge} on phase ${phaseName}!`);

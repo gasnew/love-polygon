@@ -17,21 +17,28 @@
   + Add three types of tokens
   + Add needs
 + Button to cause round-ending timer when need is met
-+ Playtest 1! (Voting will be done on paper)
++ Milestone 1 complete!
++ Playtest a little (Voting will be done on paper)
 + Rewrite the UI in React because not everyone's phone can deal with WebGL
-- Voting
-  - Rotate through players (ending with person who ended the round)
-    - When your turn, screen says, "Tell everyone which of these people had a crush on you. So-and-so is taking notes."
-    - Next person in the rotation takes notes. This is the only person who can make inputs
-    - Everyone else can see names being selected
-  - When selections are confirmed and submitted, all screens indicate whether this is correct then move on to next player
++ Voting
+  + Rotate through players (ending with person who ended the round)
+    + When your turn, screen says, "Tell everyone which of these people had a crush on you. So-and-so is taking notes."
+    + Next person in the rotation takes notes. This is the only person who can make inputs
+    + Everyone else can see names being selected
+  + When selections are confirmed and submitted, all screens indicate whether this is correct then move on to next player
+  + Alert dialog when submitting guess--"Make sure this is what Bobob wants!"
+  + Final "See Round 1 results" button
 - Final screen
   - Rotates through all players tallying up scores
     - Needs met?
     - Guessed all who had crush?
     - Did they succeed in their mission?
   - Finally displays table of all scores and lets lead person initiate next round
-- Playtest 2!!
+- Milestone 2 complete!!
+- Playtest a bit more
+- Gameplay upgrades
+  - Swapping!
+  - Only three plates per person
 - Visual upgrades
   - Standardize on material design?
   - Think about page formatting for once
@@ -41,10 +48,14 @@
   - Deliver animation (w/ gloved hand)
   - Scrolling background with food/heart symbols?
   - Scene transitions
+  - Heart/Broken heart/tissue box stamp for guessing crushes correctly?
+  - Use ExpansionPanel for VotingBallot
 - Improve lobby screen
   - Add practice mode
   - Be able to see how many people are in the lobby
-- Playtest 3!!
+  - Jar of hearts (with players' names!)
+- Milestone 3!!
+- Playtest, playtest, playtest!
 - Host on the cloud for all to see
   - AWS CDK?
   - Configure app environment (i.e., redis URL)
@@ -54,6 +65,7 @@
 
 ## Pipe dreams
 - Technical refactors
+  - Use socket.io-redis to support multiple hosts on one Redis cluster?
   - Use something other than socket.io for pubsub?
 - Compose music for the lobby
 - Close session loop?
@@ -67,10 +79,12 @@
 - Players can transfer tokens from another player's storage node
   - Either, current token should be set to null (maybe not great)
   - Or, transfers to another player can only occur from shared nodes
+- Relationship generation can fail
 + Someone can be a wingman for a person who has a crush on them
 - Multiple players of the same name can be created if both validate successfully and then join socket. I.e., no socket validation
   -  Solution: Force disconnect in this case (relies on top feature to fit in
 - After switching to fullscreen, I will receive state updates, even for moves I make
+- Timers (used for countdown and timing before voting) can be broken by restarting the server
 
 ## Features to fit in
 - When the client disconnects, drop back into game in refresh

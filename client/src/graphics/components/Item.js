@@ -5,7 +5,7 @@ import { useDrag } from 'react-dnd';
 
 import type { Token } from '../../state/state';
 
-const TOKEN_DIMENSIONS = { width: '90px', height: '90px' };
+const TOKEN_DIMENSIONS = { width: '60px', height: '60px' };
 export const TOKEN = 'token';
 const IMAGES_URLS = {
   heart: 'https://pixy.org/src/74/thumbs350/749699.jpg',

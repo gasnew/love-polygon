@@ -7,11 +7,15 @@ import dispatch, {
   addNode,
   addToken,
   clearStage,
+  setCrushSelections,
   setCurrentTokenId,
+  setCurrentVoter,
   setNeeds,
+  setPartyLeader,
   setPhase,
   setRelationships,
   setTokenNodeId,
+  setVotingOrder,
   startCountdown,
 } from '../state/actions';
 import {
@@ -40,7 +44,15 @@ export function updateState(serverState: ServerState) {
   console.log('update state');
   console.log('serverState', serverState);
 
-  const { players, nodes, tokens } = serverState;
+  const {
+    crushSelections,
+    partyLeader,
+    players,
+    nodes,
+    tokens,
+    currentVoter,
+    votingOrder,
+  } = serverState;
   const getIsNew = getObject => object => !getObject(object.id);
   const playerIsNew = getIsNew(getPlayer);
   const tokenIsNew = getIsNew(getToken);
@@ -81,12 +93,28 @@ export function updateState(serverState: ServerState) {
       if (id === getCurrentTokenId()) dispatch(setCurrentTokenId(null));
     }
   });
+
+  dispatch(setPartyLeader(partyLeader));
+  dispatch(setVotingOrder(votingOrder));
+  dispatch(setCrushSelections(crushSelections));
+  dispatch(setCurrentVoter(currentVoter));
 }
 
 export function setState(serverState: ServerState) {
   console.log('state set');
   console.log(serverState);
-  const { phase, players, needs, nodes, relationships, tokens } = serverState;
+  const {
+    crushSelections,
+    currentVoter,
+    partyLeader,
+    phase,
+    players,
+    needs,
+    nodes,
+    relationships,
+    tokens,
+    votingOrder,
+  } = serverState;
   if (phase.name === 'countdown' && (getPhase() || {}).name !== 'countdown')
     dispatch(startCountdown());
   dispatch(setPhase(phase.name));
@@ -102,4 +130,8 @@ export function setState(serverState: ServerState) {
   );
   dispatch(setNeeds(needs));
   dispatch(setRelationships(relationships));
+  dispatch(setPartyLeader(partyLeader));
+  dispatch(setVotingOrder(votingOrder));
+  dispatch(setCrushSelections(crushSelections));
+  dispatch(setCurrentVoter(currentVoter));
 }

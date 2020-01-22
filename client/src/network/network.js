@@ -6,13 +6,45 @@ import { getSessionInfo, getSocket } from '../state/getters';
 
 import type { Message } from '../../../server/networkTypes';
 
+const DESELECT_PLAYER = 'deselectPlayer';
 const FINISH_ROUND = 'finishRound';
+const SELECT_PLAYER = 'selectPlayer';
+const SUBMIT_VOTES = 'submitVotes';
 const TRANSFER_TOKEN = 'transferToken';
+
+export function deselectPlayer(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Message {
+  return {
+    type: DESELECT_PLAYER,
+    sourcePlayerId,
+    targetPlayerId,
+  };
+}
 
 export function finishRound(): Message {
   return {
     type: FINISH_ROUND,
     playerId: getSessionInfo().playerId,
+  };
+}
+
+export function selectPlayer(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Message {
+  return {
+    type: SELECT_PLAYER,
+    sourcePlayerId,
+    targetPlayerId,
+  };
+}
+
+export function submitVotes(currentVoterId: string): Message {
+  return {
+    type: SUBMIT_VOTES,
+    currentVoterId,
   };
 }
 
@@ -30,7 +62,18 @@ export function transferToken(
 }
 
 export default function announce(message: Message) {
-  if (!_.includes([TRANSFER_TOKEN, FINISH_ROUND], message.type))
+  if (
+    !_.includes(
+      [
+        DESELECT_PLAYER,
+        SELECT_PLAYER,
+        SUBMIT_VOTES,
+        TRANSFER_TOKEN,
+        FINISH_ROUND,
+      ],
+      message.type
+    )
+  )
     throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
   const socket = getSocket();

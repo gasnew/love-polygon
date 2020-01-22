@@ -5,6 +5,7 @@ import type { Socket } from 'socket.io-client';
 
 import { getState } from './getters';
 import type {
+  CrushSelections,
   NodeType,
   Phase,
   RelationshipType,
@@ -80,11 +81,13 @@ export type State = {|
   nodes: Nodes,
   relationships: Relationships,
   needs: Needs,
+  partyLeader: string,
+  votingOrder: string[],
+  currentVoter: ?string,
+  crushSelections: CrushSelections,
 |};
 
-export default function generateState(
-  sessionInfo: SessionInfo,
-): State {
+export default function generateState(sessionInfo: SessionInfo): State {
   return {
     sessionInfo,
     phase: null,
@@ -101,6 +104,10 @@ export default function generateState(
     },
     relationships: {},
     needs: {},
+    partyLeader: 'abc',
+    votingOrder: [],
+    currentVoter: null,
+    crushSelections: {},
   };
 }
 
@@ -111,12 +118,12 @@ export function useGameState() {
 
   const handleGameStateUpdated = event => {
     setGameState(getState());
-  }
+  };
   useEffect(() => {
     window.addEventListener(GAME_STATE_UPDATED, handleGameStateUpdated);
     return () => {
       window.removeEventListener(GAME_STATE_UPDATED, handleGameStateUpdated);
-    }
+    };
   });
 
   return gameState;

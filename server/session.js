@@ -115,7 +115,7 @@ function getSession({ id, emit }: SessionProps): Session {
     await set('tokens', {});
     try {
       await updateAll(getRomanceState(await getAll()));
-    } catch(error) {
+    } catch (error) {
       console.log('WHOOPS! Try, try again');
       await updateAll(getRomanceState(await getAll()));
     }
@@ -124,19 +124,49 @@ function getSession({ id, emit }: SessionProps): Session {
   };
   const startCountdown = async () => {
     console.log('start countdown');
+    // TODO(gnewman): Reimplement this countdown timer to be more robust
+    setTimeout(async () => await endGame(), 15000);
     emit('changePhase');
   };
   const finishGame = async () => {
     console.log('finish game');
+    emit('changePhase');
+    setTimeout(async () => {
+      await setVotingOrder();
+      await followEdge('startVoting');
+    }, 2500);
+  };
+  const setVotingOrder = async () => {
+    const { players, roundEnder: roundEnderOrNone } = await getAll();
+    const roundEnder = roundEnderOrNone || _.sample(players);
+    const otherPlayers = _.reject(players, ['id', roundEnder]);
+    const votingOrder = [..._.shuffle(_.map(otherPlayers, 'id')), roundEnder];
+    await set('votingOrder', votingOrder);
+    await set('currentVoter', votingOrder[0]);
+  };
+  const startVoting = async () => {
+    console.log('start voting');
     emit('changePhase');
   };
 
   const followEdge = getFollowEdge({
     getPhaseName,
     setPhaseName,
-    startGame,
-    startCountdown,
-    finishGame,
+    buildGraph: transition => ({
+      lobby: {
+        startGame: transition('romance', startGame),
+      },
+      romance: {
+        restart: transition('romance', startGame),
+        startCountdown: transition('countdown', startCountdown),
+      },
+      countdown: {
+        reallyFinish: transition('finished', finishGame),
+      },
+      finished: {
+        startVoting: transition('voting', startVoting),
+      },
+    }),
   });
 
   const quorum = async (): Promise<boolean> => {
@@ -176,13 +206,17 @@ function getSession({ id, emit }: SessionProps): Session {
     set,
     update,
     exists: async () => (await getAll()).phase !== undefined,
-    init: async () => {
+    init: async (playerId) => {
       await setPhaseName('lobby');
       await set('players', {});
       await set('needs', {});
       await set('nodes', {});
       await set('tokens', {});
       await set('relationships', {});
+      await set('crushSelections', {});
+      await set('partyLeader', playerId);
+      await set('roundEnder', null);
+      await set('currentVoter', null);
     },
     join: async ({ playerId, playerName }) => {
       // TODO: REMOVEME
@@ -214,13 +248,35 @@ function getSession({ id, emit }: SessionProps): Session {
         return true;
       } else if (message.type === 'finishRound') {
         const { playerId } = message;
-        const { needs, nodes, tokens } = serverState;
+        const { needs, nodes, tokens, roundEnder } = serverState;
         const playerTokens = getPlayerTokens(nodes, tokens, playerId);
         const need = _.find(needs, ['playerId', playerId]);
 
-        return (
-          _.filter(playerTokens, ['type', need.type]).length >= need.count
-        );
+        if (roundEnder) return false;
+
+        return _.filter(playerTokens, ['type', need.type]).length >= need.count;
+      } else if (message.type === 'selectPlayer') {
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { currentVoter, crushSelections } = serverState;
+        if (currentVoter !== sourcePlayerId) return false;
+
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
+        return !_.includes(crushSelection.playerIds, targetPlayerId);
+      } else if (message.type === 'deselectPlayer') {
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { currentVoter, crushSelections } = serverState;
+        if (currentVoter !== sourcePlayerId) return false;
+
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
+        return _.includes(crushSelection.playerIds, message.targetPlayerId);
+      } else if (message.type === 'submitVotes') {
+        return serverState.currentVoter === message.currentVoterId;
       }
 
       return false;
@@ -245,6 +301,7 @@ function getSession({ id, emit }: SessionProps): Session {
             node.type === 'storage' &&
             (_.find(tokens, ['nodeId', node.id]) || {}).type === need.type
         ).slice(0, need.count);
+        await set('roundEnder', playerId);
         await update('nodes', {
           ..._.reduce(
             nodesToDisable,
@@ -259,9 +316,54 @@ function getSession({ id, emit }: SessionProps): Session {
           ),
         });
 
-        await followEdge('finishGame');
-        // TODO(gnewman): Reimplement this countdown timer to be more robust
-        setTimeout(async () => await endGame(), 15000);
+        await followEdge('startCountdown');
+      } else if (message.type === 'selectPlayer') {
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { crushSelections } = serverState;
+
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
+        await update('crushSelections', {
+          [crushSelection.id]: {
+            ...crushSelection,
+            playerIds: [...crushSelection.playerIds, targetPlayerId],
+          },
+        });
+      } else if (message.type === 'deselectPlayer') {
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { crushSelections } = serverState;
+
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
+        await update('crushSelections', {
+          [crushSelection.id]: {
+            ...crushSelection,
+            playerIds: _.difference(crushSelection.playerIds, [targetPlayerId]),
+          },
+        });
+      } else if (message.type === 'submitVotes') {
+        const { currentVoterId } = message;
+        const { crushSelections, votingOrder } = serverState;
+
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          currentVoterId,
+        ]);
+        await update('crushSelections', {
+          [crushSelection.id]: {
+            ...crushSelection,
+            finalized: true,
+          },
+        });
+        if (currentVoterId !== votingOrder[votingOrder.length - 1])
+          await set(
+            'currentVoter',
+            votingOrder[votingOrder.indexOf(currentVoterId) + 1]
+          );
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');

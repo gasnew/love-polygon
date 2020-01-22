@@ -20,7 +20,7 @@ export async function handleConnection(socket: Socket, io: IO) {
     )
     .call({ id: sessionId });
 
-  if (!(await session.exists())) await session.init();
+  if (!(await session.exists())) await session.init(playerId);
   await session.join({ playerId, playerName });
   console.log(`My dudes, ${playerName} has joined session ${sessionId}`);
 

@@ -1,6 +1,11 @@
 // @flow
 
-export type PhaseName = 'lobby' | 'romance' | 'countdown' | 'finished';
+export type PhaseName =
+  | 'lobby'
+  | 'romance'
+  | 'countdown'
+  | 'finished'
+  | 'voting';
 export type Phase = {|
   name: PhaseName,
   countdownStartedAt?: number,
@@ -54,6 +59,16 @@ export type Needs = {|
   |},
 |};
 
+export type CrushSelection = {|
+  id: string,
+  playerId: string,
+  playerIds: string[],
+  finalized: boolean,
+|};
+export type CrushSelections = {
+  [string]: CrushSelection,
+};
+
 export type ServerState = {|
   phase: Phase,
   players: Players,
@@ -61,6 +76,11 @@ export type ServerState = {|
   tokens: Tokens,
   relationships: Relationships,
   needs: Needs,
+  partyLeader: string,
+  votingOrder: string[],
+  currentVoter: ?string,
+  roundEnder: ?string,
+  crushSelections: CrushSelections,
 |};
 
 export type SubServerState = $Values<ServerState>;
@@ -76,6 +96,20 @@ export type Message =
   | {
       type: 'finishRound',
       playerId: string,
+    }
+  | {
+      type: 'selectPlayer',
+      sourcePlayerId: string,
+      targetPlayerId: string,
+    }
+  | {
+      type: 'submitVotes',
+      currentVoterId: string,
+    }
+  | {
+      type: 'deselectPlayer',
+      sourcePlayerId: string,
+      targetPlayerId: string,
     };
 
 export type SessionInfo = {|

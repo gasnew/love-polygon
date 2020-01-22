@@ -69,7 +69,7 @@ export function pairs<T>(array: T[]): T[][] {
 
 export const getNumberOfLovers = (numberOfPlayers: number): number => {
   if (numberOfPlayers <= 2) throw new Error('Nah, man! Too few folks for love');
-  if (numberOfPlayers === 3) return _.random(2, 3);
+  if (numberOfPlayers === 3) return 3;
   if (numberOfPlayers === 4) return _.random(2, 4);
   return _.random(Math.round(numberOfPlayers * 0.3), numberOfPlayers);
 };
@@ -132,6 +132,7 @@ export function getRomanceState({
   players,
 }: RomanceStateProps): $Shape<ServerState> {
   const TOKEN_TYPES = ['cookie', 'cake', 'candy'];
+  const NODE_COUNT = 3;
 
   const storageNodes = _.reduce(
     players,
@@ -139,7 +140,7 @@ export function getRomanceState({
       return {
         ...storageNodes,
         ..._.reduce(
-          _.range(5),
+          _.range(NODE_COUNT),
           nodes => {
             const nodeId = uniqid();
             return {
@@ -205,7 +206,7 @@ export function getRomanceState({
     {}
   );
 
-  const typesOfTokens = _.shuffle([
+  const tokensAsTypes = _.shuffle([
     ..._.reduce(
       needs,
       (needTypes, need) => [
@@ -214,11 +215,14 @@ export function getRomanceState({
       ],
       []
     ),
-    ..._.map(players, () => _.sample(TOKEN_TYPES)),
+    //..._.map(players, () => _.sample(TOKEN_TYPES)),
   ]);
+  console.log(nodesByPlayer);
+  console.log(_.values(nodesByPlayer));
   const typesWithNodes = _.zip(
-    typesOfTokens,
-    _.flatMap(nodesByPlayer, playerNodes => playerNodes.slice(0, -1))
+    tokensAsTypes,
+    _.flatMap(_.values(nodesByPlayer))
+    //_.flatMap(nodesByPlayer, playerNodes => playerNodes.slice(0, -1))
   );
 
   const tokens = _.reduce(
@@ -256,6 +260,23 @@ export function getRomanceState({
       )
   );
 
+  const crushSelections = _.reduce(
+    players,
+    (crushSelections, player) => {
+      const id = uniqid();
+      return {
+        ...crushSelections,
+        [id]: {
+          id,
+          playerId: player.id,
+          playerIds: [],
+          finalized: false,
+        },
+      };
+    },
+    {}
+  );
+
   return {
     nodes: {
       ...storageNodes,
@@ -267,5 +288,7 @@ export function getRomanceState({
       ...wingmanRelationships,
     },
     needs,
+    votingOrder: [],
+    crushSelections,
   };
 }
