@@ -31,7 +31,6 @@ import dispatch, {
   submitVotes,
 } from '../../state/actions';
 import {
-  getCrushSelections,
   getCurrentVoter,
   getGuessedCrushesCorrectly,
   getPartyLeader,
@@ -157,7 +156,6 @@ export default function VotingBallot() {
 
   const players = getPlayers();
   const currentVoter = getCurrentVoter();
-  const crushSelections = getCrushSelections();
 
   if (!currentVoter) return <p>Loading...</p>;
 

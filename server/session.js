@@ -125,7 +125,7 @@ function getSession({ id, emit }: SessionProps): Session {
   const startCountdown = async () => {
     console.log('start countdown');
     // TODO(gnewman): Reimplement this countdown timer to be more robust
-    setTimeout(async () => await endGame(), 1000);
+    setTimeout(async () => await endGame(), 15000);
     emit('changePhase');
   };
   const finishGame = async () => {
@@ -134,7 +134,7 @@ function getSession({ id, emit }: SessionProps): Session {
     setTimeout(async () => {
       await setVotingOrder();
       await followEdge('startVoting');
-    }, 1000);
+    }, 2500);
   };
   const setVotingOrder = async () => {
     const { players, roundEnder: roundEnderOrNone } = await getAll();
@@ -215,6 +215,8 @@ function getSession({ id, emit }: SessionProps): Session {
       await set('relationships', {});
       await set('crushSelections', {});
       await set('partyLeader', playerId);
+      await set('roundEnder', null);
+      await set('currentVoter', null);
     },
     join: async ({ playerId, playerName }) => {
       // TODO: REMOVEME

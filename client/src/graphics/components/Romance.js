@@ -42,7 +42,7 @@ export default function Romance({ phase }: Props) {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        height: '100%',
+        height: '70%',
       }}
     >
       <div>

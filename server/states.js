@@ -289,8 +289,6 @@ export function getRomanceState({
     },
     needs,
     votingOrder: [],
-    currentVoter: null,
-    roundEnder: null,
     crushSelections,
   };
 }

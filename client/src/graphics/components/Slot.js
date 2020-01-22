@@ -12,7 +12,7 @@ import {
 } from '../../state/getters';
 import type { Node } from '../../state/state';
 
-const SLOT_DIMENSIONS = { width: '200px', height: '200px' };
+const SLOT_DIMENSIONS = { width: '80px', height: '80px' };
 
 type Props = {
   node: Node,
