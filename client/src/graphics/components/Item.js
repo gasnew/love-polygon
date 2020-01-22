@@ -26,7 +26,6 @@ export default function Item({ token, style }: Props) {
     item: { id: token && token.id, type: TOKEN },
     collect: monitor => ({
       isDragging: !!monitor.isDragging(),
-      currentOffset: monitor.getDifferenceFromInitialOffset(),
     }),
   });
   return (

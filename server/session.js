@@ -206,7 +206,7 @@ function getSession({ id, emit }: SessionProps): Session {
     set,
     update,
     exists: async () => (await getAll()).phase !== undefined,
-    init: async (playerId) => {
+    init: async playerId => {
       await setPhaseName('lobby');
       await set('players', {});
       await set('needs', {});
@@ -244,6 +244,19 @@ function getSession({ id, emit }: SessionProps): Session {
         if (!fromNode.enabled) return false;
         if (token.nodeId !== fromId) return false;
         if (_.some(tokens, ['nodeId', toId])) return false;
+
+        return true;
+      } else if (message.type === 'swapTokens') {
+        const { tokenId1, nodeId1, tokenId2, nodeId2 } = message;
+        const { nodes, tokens } = serverState;
+        const token1 = tokens[tokenId1];
+        const node1 = nodes[nodeId1];
+        const token2 = tokens[tokenId2];
+        const node2 = nodes[nodeId2];
+        if (!token1 || !node1 || !token2 || !node2) return false;
+        if (!node1.enabled || !node2.enabled) return false;
+        if (token1.nodeId !== nodeId1) return false;
+        if (token2.nodeId !== nodeId2) return false;
 
         return true;
       } else if (message.type === 'finishRound') {
@@ -288,6 +301,16 @@ function getSession({ id, emit }: SessionProps): Session {
         await update('tokens', {
           [tokenId]: {
             nodeId,
+          },
+        });
+      } else if (message.type === 'swapTokens') {
+        const { tokenId1, nodeId1, tokenId2, nodeId2 } = message;
+        await update('tokens', {
+          [tokenId1]: {
+            nodeId: nodeId2,
+          },
+          [tokenId2]: {
+            nodeId: nodeId1,
           },
         });
       } else if (message.type === 'finishRound') {

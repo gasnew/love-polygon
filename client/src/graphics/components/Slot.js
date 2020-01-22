@@ -4,12 +4,9 @@ import React from 'react';
 import { useDrop } from 'react-dnd';
 
 import Item, { TOKEN } from './Item';
-import announce, { transferToken } from '../../network/network';
+import announce, { swapTokens, transferToken } from '../../network/network';
 import dispatch, { setTokenNodeId } from '../../state/actions';
-import {
-  getNodeToken,
-  getToken,
-} from '../../state/getters';
+import { getNodeToken, getToken } from '../../state/getters';
 import type { Node } from '../../state/state';
 
 const SLOT_DIMENSIONS = { width: '80px', height: '80px' };
@@ -19,32 +16,41 @@ type Props = {
 };
 
 export default function Slot({ node }: Props) {
+  const token = getNodeToken(node.id);
+
   const [, drop] = useDrop({
     accept: TOKEN,
     drop: item => {
-      const token = getToken(item.id);
-      if (token.nodeId === node.id) return;
-      announce(transferToken(token.id, token.nodeId, node.id));
-      dispatch(setTokenNodeId(token.id, node.id));
+      const draggedToken = getToken(item.id);
+      if (draggedToken.nodeId === node.id) return;
+      if (token) {
+        const previousNodeId = getToken(draggedToken.id).nodeId;
+        dispatch(setTokenNodeId(draggedToken.id, node.id));
+        dispatch(setTokenNodeId(token.id, previousNodeId));
+        announce(
+          swapTokens(draggedToken.id, previousNodeId, token.id, node.id)
+        );
+      } else {
+        announce(transferToken(draggedToken.id, draggedToken.nodeId, node.id));
+        dispatch(setTokenNodeId(draggedToken.id, node.id));
+      }
     },
     collect: monitor => ({
-      isOver: !!monitor.isOver(),
+      isOver: !!monitor.isOver({ shallow: false }),
     }),
   });
 
-  const token = getNodeToken(node.id);
-
   return (
-    <div>
-      <img
-        ref={drop}
-        alt="I'm a plate"
-        style={{
-          ...SLOT_DIMENSIONS,
-          ...(node.enabled ? {} : { filter: 'brightness(0.7)' }),
-        }}
-        src="https://image.shutterstock.com/image-vector/white-dish-plate-isolated-on-260nw-1054819865.jpg"
-      />
+    <div
+      ref={drop}
+      style={{
+        ...SLOT_DIMENSIONS,
+        ...(node.enabled ? {} : { filter: 'brightness(0.7)' }),
+        backgroundImage:
+          'url(https://image.shutterstock.com/image-vector/white-dish-plate-isolated-on-260nw-1054819865.jpg)',
+        backgroundSize: 'cover',
+      }}
+    >
       {token && (
         <Item
           token={token}

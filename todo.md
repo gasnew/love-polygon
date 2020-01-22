@@ -28,6 +28,9 @@
   + When selections are confirmed and submitted, all screens indicate whether this is correct then move on to next player
   + Alert dialog when submitting guess--"Make sure this is what Bobob wants!"
   + Final "See Round 1 results" button
++ Gameplay upgrades
+  + Swapping!
+  + Only three plates per person
 - Final screen
   - Rotates through all players tallying up scores
     - Needs met?
@@ -36,9 +39,6 @@
   - Finally displays table of all scores and lets lead person initiate next round
 - Milestone 2 complete!!
 - Playtest a bit more
-- Gameplay upgrades
-  - Swapping!
-  - Only three plates per person
 - Visual upgrades
   - Standardize on material design?
   - Think about page formatting for once
