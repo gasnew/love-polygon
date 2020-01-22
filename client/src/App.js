@@ -16,9 +16,9 @@ class App extends Component<Props, State> {
   state = {
     // This is a default ONLY for testing
     sessionInfo: {
-      sessionId: 'newsesh',
-      playerId: 'sktwib30k4cva2v1',
-      playerName: 'Garrett',
+      sessionId: 'bcca',
+      playerId: 'sktwi1wjyk5omx778',
+      playerName: 'B',
     },
     //sessionInfo: null
   };

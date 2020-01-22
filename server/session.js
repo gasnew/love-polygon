@@ -213,7 +213,8 @@ function getSession({ id, emit }: SessionProps): Session {
       await set('nodes', {});
       await set('tokens', {});
       await set('relationships', {});
-      await update('partyLeader', playerId);
+      await set('crushSelections', {});
+      await set('partyLeader', playerId);
     },
     join: async ({ playerId, playerName }) => {
       // TODO: REMOVEME
