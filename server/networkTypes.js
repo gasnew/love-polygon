@@ -63,6 +63,7 @@ export type CrushSelection = {|
   id: string,
   playerId: string,
   playerIds: string[],
+  finalized: boolean,
 |};
 export type CrushSelections = {
   [string]: CrushSelection,
@@ -75,6 +76,7 @@ export type ServerState = {|
   tokens: Tokens,
   relationships: Relationships,
   needs: Needs,
+  partyLeader: string,
   votingOrder: string[],
   currentVoter: ?string,
   roundEnder: ?string,

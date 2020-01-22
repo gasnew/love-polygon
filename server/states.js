@@ -266,6 +266,7 @@ export function getRomanceState({
           id,
           playerId: player.id,
           playerIds: [],
+          finalized: false,
         },
       };
     },

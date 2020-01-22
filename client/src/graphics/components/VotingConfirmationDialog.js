@@ -31,7 +31,8 @@ export default function VotingConfirmationDialog({
       <DialogContent>
         <DialogContentText>
           Is this the exact set of people {playerName} believes have a crush on
-          them? <b>{selectedNames}</b>
+          them?
+          <b>{selectedNames}</b>
         </DialogContentText>
       </DialogContent>
       <DialogActions>

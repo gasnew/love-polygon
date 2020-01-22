@@ -206,13 +206,14 @@ function getSession({ id, emit }: SessionProps): Session {
     set,
     update,
     exists: async () => (await getAll()).phase !== undefined,
-    init: async () => {
+    init: async (playerId) => {
       await setPhaseName('lobby');
       await set('players', {});
       await set('needs', {});
       await set('nodes', {});
       await set('tokens', {});
       await set('relationships', {});
+      await update('partyLeader', playerId);
     },
     join: async ({ playerId, playerName }) => {
       // TODO: REMOVEME
@@ -256,16 +257,20 @@ function getSession({ id, emit }: SessionProps): Session {
         const { currentVoter, crushSelections } = serverState;
         if (currentVoter !== sourcePlayerId) return false;
 
-        const crushSelection =
-          _.find(crushSelections, ['playerId', sourcePlayerId]);
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
         return !_.includes(crushSelection.playerIds, targetPlayerId);
       } else if (message.type === 'deselectPlayer') {
         const { sourcePlayerId, targetPlayerId } = message;
         const { currentVoter, crushSelections } = serverState;
         if (currentVoter !== sourcePlayerId) return false;
 
-        const crushSelection =
-          _.find(crushSelections, ['playerId', sourcePlayerId]);
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
         return _.includes(crushSelection.playerIds, message.targetPlayerId);
       } else if (message.type === 'submitVotes') {
         return serverState.currentVoter === message.currentVoterId;
@@ -313,8 +318,10 @@ function getSession({ id, emit }: SessionProps): Session {
         const { sourcePlayerId, targetPlayerId } = message;
         const { crushSelections } = serverState;
 
-        const crushSelection =
-          _.find(crushSelections, ['playerId', sourcePlayerId]);
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
         await update('crushSelections', {
           [crushSelection.id]: {
             ...crushSelection,
@@ -325,22 +332,35 @@ function getSession({ id, emit }: SessionProps): Session {
         const { sourcePlayerId, targetPlayerId } = message;
         const { crushSelections } = serverState;
 
-        const crushSelection =
-          _.find(crushSelections, ['playerId', sourcePlayerId]);
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
         await update('crushSelections', {
           [crushSelection.id]: {
             ...crushSelection,
-            playerIds: _.difference(crushSelection.playerIds, [
-              targetPlayerId,
-            ]),
+            playerIds: _.difference(crushSelection.playerIds, [targetPlayerId]),
           },
         });
       } else if (message.type === 'submitVotes') {
-        const votingOrder = serverState.votingOrder;
-        await set(
-          'currentVoter',
-          votingOrder[votingOrder.indexOf(message.currentVoterId) + 1]
-        );
+        const { currentVoterId } = message;
+        const { crushSelections, votingOrder } = serverState;
+
+        const crushSelection = _.find(crushSelections, [
+          'playerId',
+          currentVoterId,
+        ]);
+        await update('crushSelections', {
+          [crushSelection.id]: {
+            ...crushSelection,
+            finalized: true,
+          },
+        });
+        if (currentVoterId !== votingOrder[votingOrder.length - 1])
+          await set(
+            'currentVoter',
+            votingOrder[votingOrder.indexOf(currentVoterId) + 1]
+          );
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');

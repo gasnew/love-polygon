@@ -23,16 +23,18 @@ import { makeStyles } from '@material-ui/core/styles';
 import announce, {
   deselectPlayer as networkedDeselectPlayer,
   selectPlayer as networkedSelectPlayer,
-  submitVotes,
+  submitVotes as networkedSubmitVotes,
 } from '../../network/network';
 import dispatch, {
   deselectPlayer,
   selectPlayer,
-  setCurrentVoter,
+  submitVotes,
 } from '../../state/actions';
 import {
+  getCrushSelections,
   getCurrentVoter,
   getGuessedCrushesCorrectly,
+  getPartyLeader,
   getPlayerCrushSelection,
   getPlayers,
   getSessionInfo,
@@ -155,6 +157,7 @@ export default function VotingBallot() {
 
   const players = getPlayers();
   const currentVoter = getCurrentVoter();
+  const crushSelections = getCrushSelections();
 
   if (!currentVoter) return <p>Loading...</p>;
 
@@ -163,9 +166,7 @@ export default function VotingBallot() {
   const { playerId: currentPlayerId } = getSessionInfo();
 
   const playerify = playerId => players[playerId];
-  const noteTaker = playerify(
-    votingOrder[(votingOrder.indexOf(currentVoter) + 1) % votingOrder.length]
-  );
+  const noteTaker = playerify(getPartyLeader());
 
   const handleToggle = playerId => () => {
     if (_.includes(selectedPlayerIds, playerId)) {
@@ -179,8 +180,14 @@ export default function VotingBallot() {
 
   const handleSubmitVotesClick = () => {
     setDialogOpen(false);
-    dispatch(setCurrentVoter(noteTaker.id));
-    announce(submitVotes(currentVoter));
+    dispatch(submitVotes(currentVoter));
+    announce(networkedSubmitVotes(currentVoter));
+  };
+
+  const handleShowFinalResults = () => {
+    //dispatch(submitVotes(currentVoter));
+    // TODO: do this
+    //announce(showFinalResults());
   };
 
   const selectedNamesFromPlayerId = _.flow(
@@ -196,11 +203,7 @@ export default function VotingBallot() {
     playerNames =>
       playerNames.length === 0 ? 'None' : _.join(playerNames, ', ')
   );
-  const hasVoted = playerId =>
-    _.includes(
-      votingOrder.slice(0, votingOrder.indexOf(currentVoter)),
-      playerId
-    );
+  const hasVoted = playerId => getPlayerCrushSelection(playerId).finalized;
   const playerCardFromPlayerId = _.flow(
     playerify,
     player => ({
@@ -215,11 +218,8 @@ export default function VotingBallot() {
   );
 
   // Activate the snackbar whenever a new vote is in
-  if (
-    votingOrder.indexOf(currentVoter) >= 1 &&
-    snackbar.playerId !== votingOrder[votingOrder.indexOf(currentVoter) - 1]
-  ) {
-    const previousVoter = votingOrder[votingOrder.indexOf(currentVoter) - 1];
+  const previousVoter = _.findLast(votingOrder, hasVoted);
+  if (previousVoter && snackbar.playerId !== previousVoter) {
     if (getGuessedCrushesCorrectly(previousVoter))
       setSnackbar({
         playerId: previousVoter,
@@ -243,62 +243,75 @@ export default function VotingBallot() {
     <div>
       <PlayerCardList
         playerCards={_.map(
-          votingOrder.slice(0, votingOrder.indexOf(currentVoter)),
+          _.filter(votingOrder, hasVoted),
           playerCardFromPlayerId
         )}
       />
-      <Card className={classes.card} variant="outlined">
-        <CardContent>
-          <Typography variant="h5" component="h2">
-            {currentVoter === currentPlayerId ? (
-              `Select the players you believe had a crush on you!`
-            ) : (
-              <span>
-                <b>{playerify(currentVoter).name}</b> is deciding who has a
-                crush on them...
-              </span>
+      {!_.every(votingOrder, hasVoted) && (
+        <Card className={classes.card} variant="outlined">
+          <CardContent>
+            <Typography variant="h5" component="h2">
+              {currentVoter === currentPlayerId ? (
+                `Select the players you believe had a crush on you!`
+              ) : (
+                <span>
+                  <b>{playerify(currentVoter).name}</b> is deciding who has a
+                  crush on them...
+                </span>
+              )}
+            </Typography>
+            <Typography className={classes.pos} color="textSecondary">
+              <i>{`${noteTaker.name} is taking notes.`}</i>
+            </Typography>
+            <List className={classes.root}>
+              {_.map(_.reject(players, ['id', currentVoter]), player => (
+                <PlayerCheckbox
+                  key={player.id}
+                  player={player}
+                  checked={_.includes(selectedPlayerIds, player.id)}
+                  disabled={noteTaker.id !== currentPlayerId}
+                  onClick={handleToggle(player.id)}
+                />
+              ))}
+            </List>
+          </CardContent>
+          <CardActions>
+            {noteTaker.id === currentPlayerId && (
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={() => setDialogOpen(true)}
+              >
+                Submit Votes
+              </Button>
             )}
-          </Typography>
-          <Typography className={classes.pos} color="textSecondary">
-            <i>{`${noteTaker.name} is taking notes.`}</i>
-          </Typography>
-          <List className={classes.root}>
-            {_.map(_.reject(players, ['id', currentVoter]), player => (
-              <PlayerCheckbox
-                key={player.id}
-                player={player}
-                checked={_.includes(selectedPlayerIds, player.id)}
-                disabled={noteTaker.id !== currentPlayerId}
-                onClick={handleToggle(player.id)}
-              />
-            ))}
-          </List>
-        </CardContent>
-        <CardActions>
-          {noteTaker.id === currentPlayerId && (
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={() => setDialogOpen(true)}
-            >
-              Submit Votes
-            </Button>
-          )}
-        </CardActions>
-      </Card>
+          </CardActions>
+        </Card>
+      )}
       <PlayerCardList
         playerCards={_.map(
-          votingOrder.slice(
-            votingOrder.indexOf(currentVoter) + 1,
-            votingOrder.length
+          _.reject(
+            votingOrder,
+            playerId => hasVoted(playerId) || currentVoter === playerId
           ),
           playerCardFromPlayerId
         )}
       />
+      {_.every(votingOrder, hasVoted) && (
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          onClick={handleShowFinalResults}
+        >
+          See Round 1 results!
+        </Button>
+      )}
       {/* This is a hack so we get nice looking ComponentWillUnmount animations */}
       {_.map(players, player => (
         <VotingConfirmationDialog
+          key={player.id}
           open={dialogOpen && player.id === currentVoter}
           onClose={() => setDialogOpen(false)}
           onAccept={handleSubmitVotesClick}

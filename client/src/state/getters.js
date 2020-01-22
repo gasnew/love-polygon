@@ -44,6 +44,10 @@ export function getCurrentTokenId(): ?string {
   return getState().currentTokenId;
 }
 
+export function getPartyLeader(): string {
+  return getState().partyLeader;
+}
+
 export function getCurrentVoter(): ?string {
   return getState().currentVoter;
 }

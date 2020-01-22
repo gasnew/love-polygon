@@ -11,6 +11,7 @@ import dispatch, {
   setCurrentTokenId,
   setCurrentVoter,
   setNeeds,
+  setPartyLeader,
   setPhase,
   setRelationships,
   setTokenNodeId,
@@ -45,6 +46,7 @@ export function updateState(serverState: ServerState) {
 
   const {
     crushSelections,
+    partyLeader,
     players,
     nodes,
     tokens,
@@ -92,6 +94,7 @@ export function updateState(serverState: ServerState) {
     }
   });
 
+  dispatch(setPartyLeader(partyLeader));
   dispatch(setVotingOrder(votingOrder));
   dispatch(setCrushSelections(crushSelections));
   dispatch(setCurrentVoter(currentVoter));
@@ -103,6 +106,7 @@ export function setState(serverState: ServerState) {
   const {
     crushSelections,
     currentVoter,
+    partyLeader,
     phase,
     players,
     needs,
@@ -126,6 +130,7 @@ export function setState(serverState: ServerState) {
   );
   dispatch(setNeeds(needs));
   dispatch(setRelationships(relationships));
+  dispatch(setPartyLeader(partyLeader));
   dispatch(setVotingOrder(votingOrder));
   dispatch(setCrushSelections(crushSelections));
   dispatch(setCurrentVoter(currentVoter));

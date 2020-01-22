@@ -13,6 +13,7 @@ import {
   getNodes,
   getToken,
   getTokens,
+  getVotingOrder,
 } from './getters';
 import { GAME_STATE_UPDATED } from './state';
 import type {
@@ -45,6 +46,8 @@ const SET_SOCKET = 'setSocket';
 const SET_TOKEN_NODE_ID = 'setTokenNodeId';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 const SET_CURRENT_VOTER = 'setCurrentVoter';
+const SET_PARTY_LEADER = 'setPartyLeader';
+const SUBMIT_VOTES = 'submitVotes';
 const SET_VOTING_ORDER = 'setVotingOrder';
 const START_COUNTDOWN = 'startCountdown';
 const SET_CRUSH_SELECTIONS = 'setCrushSelections';
@@ -118,8 +121,16 @@ type Action =
       tokenId: ?string,
     }
   | {
+      type: 'setPartyLeader',
+      partyLeaderId: string,
+    }
+  | {
       type: 'setCurrentVoter',
       currentVoter: ?string,
+    }
+  | {
+      type: 'submitVotes',
+      currentVoterId: string,
     }
   | {
       type: 'startCountdown',
@@ -186,6 +197,13 @@ export function setSocket(socket: Socket): Action {
   return {
     type: SET_SOCKET,
     socket,
+  };
+}
+
+export function setPartyLeader(partyLeaderId: string): Action {
+  return {
+    type: SET_PARTY_LEADER,
+    partyLeaderId,
   };
 }
 
@@ -286,6 +304,13 @@ export function setCurrentVoter(currentVoter: ?string): Action {
   };
 }
 
+export function submitVotes(currentVoterId: string): Action {
+  return {
+    type: SUBMIT_VOTES,
+    currentVoterId,
+  };
+}
+
 export function setRelationships(relationships: Relationships): Action {
   return {
     type: SET_RELATIONSHIPS,
@@ -344,6 +369,9 @@ export default function dispatch(action: Action) {
         }: Phase)
       );
       break;
+    case SET_PARTY_LEADER:
+      mergeIntoState('partyLeader', action.partyLeaderId);
+      break;
     case SET_CRUSH_SELECTIONS:
       mergeIntoState('crushSelections', action.crushSelections);
       break;
@@ -390,6 +418,20 @@ export default function dispatch(action: Action) {
       break;
     case SET_CURRENT_VOTER:
       mergeIntoState('currentVoter', action.currentVoter);
+      break;
+    case SUBMIT_VOTES:
+      const crushSelection = getPlayerCrushSelection(action.currentVoterId);
+      mergeIntoCrushSelections(crushSelection.id, {
+        ...crushSelection,
+        finalized: true,
+      });
+
+      const votingOrder = getVotingOrder();
+      if (action.currentVoterId !== votingOrder[votingOrder.length - 1])
+        mergeIntoState(
+          'currentVoter',
+          votingOrder[votingOrder.indexOf(action.currentVoterId) + 1]
+        );
       break;
     case SET_VOTING_ORDER:
       mergeIntoState('votingOrder', action.votingOrder);

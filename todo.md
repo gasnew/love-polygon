@@ -17,7 +17,8 @@
   + Add three types of tokens
   + Add needs
 + Button to cause round-ending timer when need is met
-+ Playtest 1! (Voting will be done on paper)
++ Milestone 1 complete!
++ Playtest a little (Voting will be done on paper)
 + Rewrite the UI in React because not everyone's phone can deal with WebGL
 / Voting
   + Rotate through players (ending with person who ended the round)
@@ -33,7 +34,11 @@
     - Guessed all who had crush?
     - Did they succeed in their mission?
   - Finally displays table of all scores and lets lead person initiate next round
-- Playtest 2!!
+- Milestone 2 complete!!
+- Playtest a bit more
+- Gameplay upgrades
+  - Swapping!
+  - Only three plates per person
 - Visual upgrades
   - Standardize on material design?
   - Think about page formatting for once
@@ -48,7 +53,9 @@
 - Improve lobby screen
   - Add practice mode
   - Be able to see how many people are in the lobby
-- Playtest 3!!
+  - Jar of hearts (with players' names!)
+- Milestone 3!!
+- Playtest, playtest, playtest!
 - Host on the cloud for all to see
   - AWS CDK?
   - Configure app environment (i.e., redis URL)
