@@ -94,6 +94,13 @@ export type Message =
       toId: string,
     }
   | {
+      type: 'swapTokens',
+      tokenId1: string,
+      nodeId1: string,
+      tokenId2: string,
+      nodeId2: string,
+    }
+  | {
       type: 'finishRound',
       playerId: string,
     }

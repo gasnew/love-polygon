@@ -11,6 +11,7 @@ const FINISH_ROUND = 'finishRound';
 const SELECT_PLAYER = 'selectPlayer';
 const SUBMIT_VOTES = 'submitVotes';
 const TRANSFER_TOKEN = 'transferToken';
+const SWAP_TOKENS = 'swapTokens';
 
 export function deselectPlayer(
   sourcePlayerId: string,
@@ -61,6 +62,21 @@ export function transferToken(
   };
 }
 
+export function swapTokens(
+  tokenId1: string,
+  nodeId1: string,
+  tokenId2: string,
+  nodeId2: string
+): Message {
+  return {
+    type: SWAP_TOKENS,
+    tokenId1,
+    nodeId1,
+    tokenId2,
+    nodeId2,
+  };
+}
+
 export default function announce(message: Message) {
   if (
     !_.includes(
@@ -69,6 +85,7 @@ export default function announce(message: Message) {
         SELECT_PLAYER,
         SUBMIT_VOTES,
         TRANSFER_TOKEN,
+        SWAP_TOKENS,
         FINISH_ROUND,
       ],
       message.type
