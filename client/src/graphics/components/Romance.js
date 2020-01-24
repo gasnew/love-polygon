@@ -8,28 +8,22 @@ import FinishRoundButton from './FinishRoundButton';
 import RelationshipBanner from './RelationshipBanner';
 import SlotList from './SlotList';
 import {
+  getNeedsMet,
   getOwnNeed,
   getOwnNodes,
   getOwnRelationship,
   getOwnTokens,
+  getPlayerNodes,
+  getSessionInfo,
 } from '../../state/getters';
 import type { Phase } from '../../../../server/networkTypes';
-
-export function needsMet(): boolean {
-  const nodes = getOwnNodes();
-  const storedTokens = _.pickBy(
-    getOwnTokens(),
-    token => nodes[token.nodeId].type === 'storage'
-  );
-  const need = getOwnNeed() || {};
-  return _.filter(storedTokens, ['type', need.type]).length >= need.count;
-}
 
 type Props = {
   phase: Phase,
 };
 
 export default function Romance({ phase }: Props) {
+  const { playerId } = getSessionInfo();
   const nodes = getOwnNodes();
   const relationship = getOwnRelationship();
   const sharedNodes = _.pickBy(nodes, ['type', 'shared']);
@@ -62,7 +56,7 @@ export default function Romance({ phase }: Props) {
         )}
       </div>
       <div style={{ textAlign: 'center' }}>
-        {needsMet() && phase.name === 'romance' && (
+        {getNeedsMet(playerId) && phase.name === 'romance' && (
           <FinishRoundButton needType={need.type} />
         )}
       </div>

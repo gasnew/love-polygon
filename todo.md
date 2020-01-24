@@ -38,6 +38,8 @@
     - Did they succeed in their mission?
   - Finally displays table of all scores and lets lead person initiate next round
 - Milestone 2 complete!!
+- More gameplay upgrades
+  - Ask the voter whether the note-taker's selections are correct
 - Playtest a bit more
 - Visual upgrades
   - Standardize on material design?

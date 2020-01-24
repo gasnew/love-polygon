@@ -148,6 +148,10 @@ function getSession({ id, emit }: SessionProps): Session {
     console.log('start voting');
     emit('changePhase');
   };
+  const seeResults = async () => {
+    console.log('see results');
+    emit('changePhase');
+  };
 
   const followEdge = getFollowEdge({
     getPhaseName,
@@ -165,6 +169,9 @@ function getSession({ id, emit }: SessionProps): Session {
       },
       finished: {
         startVoting: transition('voting', startVoting),
+      },
+      voting: {
+        seeResults: transition('results', seeResults),
       },
     }),
   });
@@ -288,6 +295,8 @@ function getSession({ id, emit }: SessionProps): Session {
           sourcePlayerId,
         ]);
         return _.includes(crushSelection.playerIds, message.targetPlayerId);
+      } else if (message.type === 'seeResults') {
+        return message.playerId === serverState.partyLeader;
       } else if (message.type === 'submitVotes') {
         return serverState.currentVoter === message.currentVoterId;
       }
@@ -387,6 +396,8 @@ function getSession({ id, emit }: SessionProps): Session {
             'currentVoter',
             votingOrder[votingOrder.indexOf(currentVoterId) + 1]
           );
+      } else if (message.type === 'seeResults') {
+        await followEdge('seeResults');
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       if (await quorum()) await followEdge('startGame');

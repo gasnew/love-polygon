@@ -5,7 +5,8 @@ export type PhaseName =
   | 'romance'
   | 'countdown'
   | 'finished'
-  | 'voting';
+  | 'voting'
+  | 'results';
 export type Phase = {|
   name: PhaseName,
   countdownStartedAt?: number,
@@ -117,6 +118,10 @@ export type Message =
       type: 'deselectPlayer',
       sourcePlayerId: string,
       targetPlayerId: string,
+    }
+  | {
+      type: 'seeResults',
+      playerId: string,
     };
 
 export type SessionInfo = {|

@@ -2,10 +2,11 @@
 
 import React from 'react';
 
+import DraggedItem from './DraggedItem';
 import Lobby from './Lobby';
+import ResultsTable from './ResultsTable';
 import Romance from './Romance';
 import VotingBallot from './VotingBallot';
-import DraggedItem from './DraggedItem';
 import { getPhase } from '../../state/getters';
 import { useGameState } from '../../state/state';
 
@@ -18,6 +19,7 @@ const Scene = ({ phase }: { phase: Phase }) => {
     countdown: <Romance phase={phase} />,
     finished: <Romance phase={phase} />,
     voting: <VotingBallot />,
+    results: <ResultsTable />,
   };
   if (slotLists[phase.name])
     return (

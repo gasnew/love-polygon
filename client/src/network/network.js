@@ -12,6 +12,7 @@ const SELECT_PLAYER = 'selectPlayer';
 const SUBMIT_VOTES = 'submitVotes';
 const TRANSFER_TOKEN = 'transferToken';
 const SWAP_TOKENS = 'swapTokens';
+const SEE_RESULTS = 'seeResults';
 
 export function deselectPlayer(
   sourcePlayerId: string,
@@ -77,6 +78,10 @@ export function swapTokens(
   };
 }
 
+export function seeResults(playerId: string): Message {
+  return { type: SEE_RESULTS, playerId };
+}
+
 export default function announce(message: Message) {
   if (
     !_.includes(
@@ -87,6 +92,7 @@ export default function announce(message: Message) {
         TRANSFER_TOKEN,
         SWAP_TOKENS,
         FINISH_ROUND,
+        SEE_RESULTS,
       ],
       message.type
     )

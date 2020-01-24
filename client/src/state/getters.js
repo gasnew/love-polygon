@@ -68,9 +68,13 @@ export function getNode(nodeId: string): Node {
   return getNodes()[nodeId];
 }
 
+export function getPlayerNodes(playerId: string): Nodes {
+  return _.pickBy(getNodes(), node => _.includes(node.playerIds, playerId));
+}
+
 export function getOwnNodes(): Nodes {
   const { playerId } = getSessionInfo();
-  return _.pickBy(getNodes(), node => _.includes(node.playerIds, playerId));
+  return getPlayerNodes(playerId);
 }
 
 export function getTokens(): Tokens {
@@ -85,9 +89,14 @@ export function getNodeToken(nodeId: string): ?Token {
   return _.find(getTokens(), ['nodeId', nodeId]);
 }
 
-export function getOwnTokens(): Tokens {
-  const nodes = getOwnNodes();
+export function getPlayerTokens(playerId: string): Tokens {
+  const nodes = getPlayerNodes(playerId);
   return _.pickBy(getTokens(), token => nodes[token.nodeId]);
+}
+
+export function getOwnTokens(): Tokens {
+  const { playerId } = getSessionInfo();
+  return getPlayerTokens(playerId);
 }
 
 export function getRelationships(): Relationships {
@@ -107,9 +116,13 @@ export function getNeeds(): Needs {
   return getState().needs;
 }
 
+export function getPlayerNeed(playerId: string): Need {
+  return _.find(getNeeds(), ['playerId', playerId]);
+}
+
 export function getOwnNeed(): Need {
   const { playerId } = getSessionInfo();
-  return _.find(getNeeds(), ['playerId', playerId]);
+  return getPlayerNeed(playerId);
 }
 
 export function getCrushSelections(): CrushSelections {
@@ -124,6 +137,16 @@ export function getVotingOrder(): string[] {
   return getState().votingOrder;
 }
 
+export function getNeedsMet(playerId: string): boolean {
+  const nodes = getPlayerNodes(playerId);
+  const storedTokens = _.pickBy(
+    getPlayerTokens(playerId),
+    token => nodes[token.nodeId].type === 'storage'
+  );
+  const need = getPlayerNeed(playerId) || {};
+  return _.filter(storedTokens, ['type', need.type]).length >= need.count;
+}
+
 export function getGuessedCrushesCorrectly(playerId: string): boolean {
   const crushes = _.map(
     _.filter(
@@ -135,4 +158,29 @@ export function getGuessedCrushesCorrectly(playerId: string): boolean {
   const guesses = getPlayerCrushSelection(playerId).playerIds;
 
   return _.isEqual(_.sortBy(crushes), _.sortBy(guesses));
+}
+
+export function getSecretLove(playerId: string): boolean {
+  const relationship = getPlayerRelationship(playerId);
+  const objectId =
+    relationship.type === 'crush'
+      ? relationship.toId
+      : getPlayerRelationship(relationship.toId).toId;
+  return getNeedsMet(objectId) && !getGuessedCrushesCorrectly(objectId);
+}
+
+export function getSelectedNamesFromPlayerId(playerId: string): string {
+  return _.flow(
+    playerId => getPlayerCrushSelection(playerId).playerIds,
+    playerIds =>
+      _.map(
+        playerIds,
+        _.flow(
+          getPlayer,
+          player => player.name
+        )
+      ),
+    playerNames =>
+      playerNames.length === 0 ? 'None' : _.join(playerNames, ', ')
+  )(playerId);
 }
