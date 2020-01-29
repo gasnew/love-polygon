@@ -24,6 +24,7 @@ import announce, {
   deselectPlayer as networkedDeselectPlayer,
   selectPlayer as networkedSelectPlayer,
   submitVotes as networkedSubmitVotes,
+  seeResults,
 } from '../../network/network';
 import dispatch, {
   deselectPlayer,
@@ -36,6 +37,7 @@ import {
   getPartyLeader,
   getPlayerCrushSelection,
   getPlayers,
+  getSelectedNamesFromPlayerId,
   getSessionInfo,
   getVotingOrder,
 } from '../../state/getters';
@@ -183,30 +185,15 @@ export default function VotingBallot() {
   };
 
   const handleShowFinalResults = () => {
-    //dispatch(submitVotes(currentVoter));
-    // TODO: do this
-    //announce(showFinalResults());
+    announce(seeResults(noteTaker.id));
   };
 
-  const selectedNamesFromPlayerId = _.flow(
-    playerId => getPlayerCrushSelection(playerId).playerIds,
-    playerIds =>
-      _.map(
-        playerIds,
-        _.flow(
-          playerify,
-          player => player.name
-        )
-      ),
-    playerNames =>
-      playerNames.length === 0 ? 'None' : _.join(playerNames, ', ')
-  );
   const hasVoted = playerId => getPlayerCrushSelection(playerId).finalized;
   const playerCardFromPlayerId = _.flow(
     playerify,
     player => ({
       name: player.name,
-      selectedNames: selectedNamesFromPlayerId(player.id),
+      selectedNames: getSelectedNamesFromPlayerId(player.id),
       status: hasVoted(player.id)
         ? getGuessedCrushesCorrectly(player.id)
           ? 'success'
@@ -314,7 +301,7 @@ export default function VotingBallot() {
           onClose={() => setDialogOpen(false)}
           onAccept={handleSubmitVotesClick}
           playerName={player.name}
-          selectedNames={selectedNamesFromPlayerId(player.id)}
+          selectedNames={getSelectedNamesFromPlayerId(player.id)}
         />
       ))}
       <Snackbar open={open} onClose={handleClose}>
