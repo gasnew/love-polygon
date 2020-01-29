@@ -4,7 +4,7 @@ import axios from 'axios';
 import copy from 'copy-to-clipboard';
 import React, { useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
-//import TouchBackend from 'react-dnd-touch-backend-cjs';
+import TouchBackend from 'react-dnd-touch-backend-cjs';
 import MultiBackend from 'react-dnd-multi-backend';
 import HTML5toTouch from 'react-dnd-multi-backend/lib/HTML5toTouch';
 import io from 'socket.io-client';

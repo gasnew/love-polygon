@@ -37,7 +37,7 @@ export default function Item({ token, style }: Props) {
           ...TOKEN_DIMENSIONS,
           ...style,
         }}
-        src={IMAGES_URLS[token.type]}
+        src={IMAGES_URLS[token && token.type]}
       />
     )
   );

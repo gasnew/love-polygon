@@ -176,11 +176,9 @@ function getSession({ id, emit }: SessionProps): Session {
     }),
   });
 
-  const quorum = async (): Promise<boolean> => {
-    const { nodes, players, tokens } = await getAll();
+  const quorum = (serverState: ServerState): boolean => {
+    const { nodes, players, tokens } = serverState;
     const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
-    // TODO remove this temp quorum definition
-    //return _.size(players) >= 1;
     return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 3;
   };
   const getPlayerTokens = (nodes, tokens, playerId) => {
@@ -241,7 +239,10 @@ function getSession({ id, emit }: SessionProps): Session {
       await updateAll(getNewPlayerState({ playerId, playerName }));
     },
     validMessage: (serverState: ServerState, message: Message): boolean => {
-      if (message.type === 'transferToken') {
+      if (message.type === 'startGame') {
+        if (message.playerId !== serverState.partyLeader) return false;
+        return quorum(serverState);
+      } else if (message.type === 'transferToken') {
         const { tokenId, fromId, toId } = message;
         const { nodes, tokens } = serverState;
         const token = tokens[tokenId];
@@ -305,7 +306,9 @@ function getSession({ id, emit }: SessionProps): Session {
     },
     integrateMessage: async (serverState, message) => {
       console.log('Integrating message', message);
-      if (message.type === 'transferToken') {
+      if (message.type === 'startGame') {
+        await followEdge('startGame');
+      } else if (message.type === 'transferToken') {
         const { tokenId, toId: nodeId } = message;
         await update('tokens', {
           [tokenId]: {
@@ -399,8 +402,6 @@ function getSession({ id, emit }: SessionProps): Session {
       } else if (message.type === 'seeResults') {
         await followEdge('seeResults');
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
-
-      if (await quorum()) await followEdge('startGame');
 
       return getAll();
     },

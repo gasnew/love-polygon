@@ -36,7 +36,7 @@ export default function Romance({ phase }: Props) {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        height: '70%',
+        height: '50%',
       }}
     >
       <div>
@@ -66,14 +66,11 @@ export default function Romance({ phase }: Props) {
           top: '50%',
           textAlign: 'center',
           width: '100%',
+          pointerEvents: 'none',
         }}
       >
-        {phase.name === 'countdown' && (
-          <CountdownTimer
-            seconds={Math.ceil(
-              15 - (Date.now() - (phase.countdownStartedAt || 0)) / 1000
-            )}
-          />
+        {phase.name === 'countdown' && phase.countdownStartedAt && (
+          <CountdownTimer startedAt={phase.countdownStartedAt} />
         )}
       </div>
     </div>

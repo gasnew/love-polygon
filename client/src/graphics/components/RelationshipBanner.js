@@ -31,7 +31,7 @@ function Wingman({ targetPlayer, needType }: RelationshipProps) {
     <div>
       <div>You are {targetPlayer.name}'s wingman</div>
       <div>
-        {targetPlayer.name}'s cruch needs {needType}
+        {targetPlayer.name}'s crush needs {needType}
       </div>
     </div>
   );

@@ -89,6 +89,10 @@ export type ServerStateKeys = $Keys<ServerState>;
 
 export type Message =
   | {
+      type: 'startGame',
+      playerId: string,
+    }
+  | {
       type: 'transferToken',
       tokenId: string,
       fromId: string,
