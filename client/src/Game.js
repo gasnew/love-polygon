@@ -3,6 +3,7 @@
 import axios from 'axios';
 import copy from 'copy-to-clipboard';
 import React, { useEffect } from 'react';
+import { isMobile } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import TouchBackend from 'react-dnd-touch-backend-cjs';
 import MultiBackend from 'react-dnd-multi-backend';
@@ -41,9 +42,15 @@ export default function Game({ sessionInfo, exitSession }: Props) {
     };
   });
 
+  const providerProps = isMobile
+    ? { backend: TouchBackend }
+    : {
+        backend: MultiBackend,
+        options: HTML5toTouch,
+      };
+
   return (
-    //<DndProvider backend={TouchBackend}>
-    <DndProvider backend={MultiBackend} options={HTML5toTouch}>
+    <DndProvider {...providerProps}>
       <Table />
       <button
         onClick={() =>

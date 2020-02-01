@@ -38,12 +38,16 @@
     x Guessed all who had crush?
     x Did they succeed in their mission?
   + Finally displays table of all scores
-- Stability
-  - iphones don’t work:(
-    - can probably implement custom target hit detection to fix
+- Usability
+  / iPhones don’t work:(
+    - Maybe they do! Check with Molly and Isaac if we have time:)
+    - Can probably implement custom target hit detection to fix
   - Can easily switch between touch backend and multibackend
-  - need to store session info in cookie because errors happen and refreshes are needed
-    - Prompt user about rejoining session x as y
+  - Need to store session info in cookie because errors happen and refreshes are needed
+    - Put session ID in URL--this can be used as link to lobby
+    - Store username and ID in localstorage--this can be used to jump into session
+    - Prompt user about rejoining session x as y?
+    - Maybe just drop them in automatically if the session is still "active" (people are still present)
   - Catch error and refresh?
 - Final screen pt. 2
   - Lead person can initiate next round
@@ -116,13 +120,17 @@
 ## Known bugs
 - Websocket connection is often flaky (could this be the Chrome same-host connection limit?)
   - Not a problem in practice
+- Session exists after it's over
+  - Set session to expire after all users disconnect?
+  - Alternatively, user action sets 5-minute expiration for session
 - Players can transfer tokens from another player's storage node
   - Either, current token should be set to null (maybe not great)
   - Or, transfers to another player can only occur from shared nodes
 - Relationship generation can fail
 + Someone can be a wingman for a person who has a crush on them
 - Multiple players of the same name can be created if both validate successfully and then join socket. I.e., no socket validation
-  -  Solution: Force disconnect in this case (relies on top feature to fit in
+  - Solution: Force disconnect -> send back to lobby if game hasn't started
+    (with message that name is already taken or that session is in progress)
 - After switching to fullscreen, I will receive state updates, even for moves I make
 - Timers (used for countdown and timing before voting) can be broken by restarting the server
 
