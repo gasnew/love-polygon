@@ -9,6 +9,7 @@
     "axios": "^0.18.0",
     "copy-to-clipboard": "^3.2.0",
     "lodash": "^4.17.11",
+    "query-string": "^6.10.1",
     "react": "^16.8.0",
     "react-device-detect": "^1.11.14",
     "react-dnd": "^9.3.4",
@@ -17,12 +18,14 @@
     "react-dnd-multi-backend": "^4.0.0",
     "react-dnd-touch-backend-cjs": "^9.5.1",
     "react-dom": "^16.8.0",
+    "react-router": "^5.1.2",
     "react-scripts": "^3.0.0",
     "react-swipeable-views": "^0.13.1",
     "screenfull": "^4.0.0",
     "socket.io-client": "^2.2.0",
     "three": "^0.100.0",
-    "uniqid": "^5.0.3"
+    "uniqid": "^5.0.3",
+    "url-parse": "^1.4.7"
   },
   "scripts": {
     "start": "react-scripts start",

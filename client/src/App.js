@@ -1,6 +1,8 @@
 // @flow
 
-import React, { Component } from 'react';
+import React, { useState } from 'react';
+import { Router, Route, Switch } from 'react-router';
+import queryString from 'query-string';
 
 import Game from './Game';
 import LandingPage from './LandingPage';
@@ -8,32 +10,22 @@ import type { SessionInfo } from '../../server/networkTypes';
 
 type Props = {};
 
-type State = {|
-  sessionInfo: ?SessionInfo,
-|};
+const DEBUG_SESSION = {
+  sessionId: 'dep',
+  playerId: 'sktwij7rk5yjyxif',
+  playerName: 'G',
+};
 
-class App extends Component<Props, State> {
-  state = {
-    // This is a default ONLY for testing
-    sessionInfo: {
-      sessionId: 'dep',
-      playerId: 'sktwij7rk5yjyxif',
-      playerName: 'G',
-    },
-    //sessionInfo: null
-  };
+function App() {
+  const [sessionId, setSessionId] = useState(
+    queryString.parse(window.location.search)['sessionId']
+  );
 
-  render() {
-    const setSession = (sessionInfo: SessionInfo) =>
-      this.setState(() => ({ sessionInfo }));
-    const exitSession = () => this.setState(() => ({ sessionInfo: null }));
-
-    return this.state.sessionInfo ? (
-      <Game sessionInfo={this.state.sessionInfo} exitSession={exitSession} />
-    ) : (
-      <LandingPage setSession={setSession} />
-    );
-  }
+  return sessionId ? (
+    <Game sessionId={sessionId} />
+  ) : (
+    <LandingPage setSessionId={setSessionId} />
+  );
 }
 
 export default App;

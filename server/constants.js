@@ -1,0 +1,4 @@
+// @flow
+
+export const VALID_SESSION_ID_CHARACTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+export const SESSION_ID_LENGTH = 4;

@@ -3,9 +3,14 @@
 import Button from '@material-ui/core/Button';
 import _ from 'lodash';
 import React from 'react';
+import TextField from '@material-ui/core/TextField';
 
 import SlotList from './SlotList';
-import announce, { startGame } from '../../network/network';
+import dispatch, { setPlayerName } from '../../state/actions';
+import announce, {
+  setName as networkedSetName,
+  startGame,
+} from '../../network/network';
 import {
   getPlayers,
   getNodes,
@@ -15,8 +20,13 @@ import {
   getTokens,
 } from '../../state/getters';
 
+const throttledNetworkedSetName = _.throttle(
+  name => announce(networkedSetName(name)),
+  1000
+);
+
 export default function Lobby() {
-  const { playerId } = getSessionInfo();
+  const { playerId, playerName } = getSessionInfo();
   const nodes = getOwnNodes();
   const loveBucket = _.pickBy(nodes, ['type', 'loveBucket']);
   const loveBuckets = _.pickBy(getNodes(), ['type', 'loveBucket']);
@@ -26,6 +36,11 @@ export default function Lobby() {
     getTokens(),
     token => loveBuckets[token.nodeId]
   ).length;
+  const handleNameInput = event => {
+    const name = event.target.value;
+    dispatch(setPlayerName(playerId, name));
+    throttledNetworkedSetName(name);
+  };
 
   return (
     <div
@@ -42,6 +57,13 @@ export default function Lobby() {
       <div>
         <SlotList nodes={storageNodes} />
       </div>
+      <TextField
+        label="Name"
+        value={playerName}
+        onChange={handleNameInput}
+        margin="normal"
+        variant="outlined"
+      />
       {playerId === getPartyLeader() && (
         <Button
           variant="contained"

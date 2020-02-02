@@ -13,6 +13,7 @@ import dispatch, {
   setNeeds,
   setPartyLeader,
   setPhase,
+  setPlayerName,
   setRelationships,
   setTokenNodeId,
   setVotingOrder,
@@ -61,6 +62,9 @@ export function updateState(serverState: ServerState) {
   const newPlayers = _.filter(players, playerIsNew);
   _.each(newPlayers, player =>
     dispatch(addPlayer(player.id, player.name, player.color))
+  );
+  _.each(_.reject(players, ['id', getSessionInfo().playerId]), player =>
+    dispatch(setPlayerName(player.id, player.name))
   );
   const newNodes = _.filter(nodes, nodeIsNew);
   _.each(newNodes, node =>
@@ -115,12 +119,19 @@ export function setState(serverState: ServerState) {
     tokens,
     votingOrder,
   } = serverState;
+  const { playerId: currentPlayerId } = getSessionInfo();
   if (phase.name === 'countdown' && (getPhase() || {}).name !== 'countdown')
     dispatch(startCountdown());
   dispatch(setPhase(phase.name));
   dispatch(clearStage());
   _.each(players, (player, id) =>
     dispatch(addPlayer(id, player.name, player.color))
+  );
+  dispatch(
+    setPlayerName(
+      currentPlayerId,
+      _.find(players, ['id', currentPlayerId]).name
+    )
   );
   _.each(nodes, (node, id) =>
     dispatch(addNode(id, node.type, node.playerIds, node.enabled))

@@ -9,6 +9,7 @@ import TouchBackend from 'react-dnd-touch-backend-cjs';
 import MultiBackend from 'react-dnd-multi-backend';
 import HTML5toTouch from 'react-dnd-multi-backend/lib/HTML5toTouch';
 import io from 'socket.io-client';
+import uniqid from 'uniqid';
 
 import Table from './graphics/components/Table';
 import {
@@ -22,15 +23,20 @@ import generateState from './state/state';
 import type { SessionInfo } from '../../server/networkTypes';
 
 type Props = {|
-  sessionInfo: SessionInfo,
-  exitSession: () => void,
+  sessionId: string,
 |};
 
-export default function Game({ sessionInfo, exitSession }: Props) {
-  window.state = generateState(sessionInfo);
+export default function Game({ sessionId }: Props) {
+  const playerId = window.localStorage.getItem('playerId') || uniqid();
+  window.localStorage.setItem('playerId', playerId);
+  window.state = generateState({
+    sessionId,
+    playerId,
+    playerName: '',
+  });
 
   useEffect(() => {
-    const socket = io('', { query: sessionInfo });
+    const socket = io('', { query: { sessionId, playerId } });
     socket
       .on('connect', socketConnect)
       .on('updateState', updateState)
@@ -55,18 +61,14 @@ export default function Game({ sessionInfo, exitSession }: Props) {
       <button
         onClick={() =>
           axios
-            .post('api/get-server-state', { sessionId: sessionInfo.sessionId })
+            .post('api/get-server-state', { sessionId })
             .then(response => copy(JSON.stringify(response.data)))
         }
       >
         Server state -> clipboard
       </button>
       <button
-        onClick={() =>
-          axios.post('api/load-session-from-cache', {
-            sessionId: sessionInfo.sessionId,
-          })
-        }
+        onClick={() => axios.post('api/load-session-from-cache', { sessionId })}
       >
         Load session from cache
       </button>

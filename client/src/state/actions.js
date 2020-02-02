@@ -6,11 +6,13 @@ import type { Socket } from 'socket.io-client';
 
 import {
   getCrushSelections,
-  getState,
   getPhase,
   getPlayerCrushSelection,
+  getPlayer,
   getPlayers,
   getNodes,
+  getSessionInfo,
+  getState,
   getToken,
   getTokens,
   getVotingOrder,
@@ -22,6 +24,7 @@ import type {
   NodeType,
   Phase,
   PhaseName,
+  SessionInfo,
   TokenType,
 } from '../../../server/networkTypes';
 import type {
@@ -36,6 +39,7 @@ import type {
 } from './state';
 
 const ADD_PLAYER = 'addPlayer';
+const SET_PLAYER_NAME = 'setPlayerName';
 const ADD_NODE = 'addNode';
 const ADD_TOKEN = 'addToken';
 const CLEAR_STAGE = 'clearStage';
@@ -67,6 +71,11 @@ type Action =
       id: string,
       name: string,
       color: string,
+    }
+  | {
+      type: 'setPlayerName',
+      playerId: string,
+      name: string,
     }
   | {
       type: 'addToken',
@@ -252,6 +261,14 @@ export function addPlayer(id: string, name: string, color: string): Action {
   };
 }
 
+export function setPlayerName(playerId: string, name: string): Action {
+  return {
+    type: SET_PLAYER_NAME,
+    playerId,
+    name,
+  };
+}
+
 export function addNode(
   id: string,
   type: NodeType,
@@ -348,6 +365,22 @@ export default function dispatch(action: Action) {
         name: action.name,
         color: action.color,
       });
+      break;
+    case SET_PLAYER_NAME:
+      mergeIntoPlayers(action.playerId, {
+        ...getPlayer(action.playerId),
+        name: action.name,
+      });
+
+      const sessionInfo = getSessionInfo();
+      if (action.playerId === sessionInfo.playerId)
+        mergeIntoState(
+          'sessionInfo',
+          ({
+            ...sessionInfo,
+            playerName: action.name,
+          }: SessionInfo)
+        );
       break;
     case ADD_TOKEN:
       mergeIntoTokens(action.id, {

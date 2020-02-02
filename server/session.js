@@ -3,6 +3,7 @@
 import redis from 'async-redis';
 import _ from 'lodash';
 import uniqid from 'uniqid';
+import type { RedisClient } from 'async-redis';
 
 import withEvents from './events';
 import getFollowEdge from './phase';
@@ -17,6 +18,13 @@ import type {
   ServerStateKeys,
   SubServerState,
 } from './networkTypes';
+
+export function sessionExists(
+  redisClient: RedisClient,
+  sessionId: string
+): Promise<boolean> {
+  return redisClient.exists(sessionId);
+}
 
 type RedisMethods = {|
   getAll: () => Promise<ServerState>,
@@ -42,18 +50,22 @@ type BaseSession = {|
   ...RedisMethods,
   update: (ServerStateKeys, SubServerState, ?SubServerState) => Promise<void>,
   updateAll: ServerState => Promise<void>,
+  deleteObjects: (
+    ServerStateKeys,
+    string | string[],
+    ?SubServerState
+  ) => Promise<void>,
 |};
 
 export type BaseSessionProps = {
   id: string,
+  redisClient: RedisClient,
 };
 
-export function getBaseSession({ id }: BaseSessionProps): BaseSession {
-  const redisClient = redis.createClient();
-  redisClient.on('error', function(err) {
-    console.log('Error ' + err);
-  });
-
+export function getBaseSession({
+  id,
+  redisClient,
+}: BaseSessionProps): BaseSession {
   const { getAll, set } = redisMethods(redisClient, id);
   const update = async (
     key: ServerStateKeys,
@@ -85,18 +97,27 @@ export function getBaseSession({ id }: BaseSessionProps): BaseSession {
         await update(key, objects, currentServerState[key])
     );
   };
+  const deleteObjects = async (
+    key: ServerStateKeys,
+    id: string | string[],
+    subState: ?SubServerState = null
+  ) => {
+    const currentObjects = subState || (await getAll())[key];
+    set(key, _.omit(currentObjects, id));
+  };
 
   return {
     getAll,
     set,
     update,
     updateAll,
+    deleteObjects,
   };
 }
 
 type Session = {
   ...BaseSessionProps,
-  exists: () => Promise<boolean>,
+  isInitialized: () => Promise<boolean>,
   init: () => Promise<void>,
   join: ({ playerId: string, playerName: string }) => Promise<void>,
   validMessage: (ServerState, Message) => boolean,
@@ -105,8 +126,11 @@ type Session = {
 
 type SessionProps = BaseSessionProps & { emit: Emitter };
 
-function getSession({ id, emit }: SessionProps): Session {
-  const { getAll, set, update, updateAll } = getBaseSession({ id });
+function getSession({ id, redisClient, emit }: SessionProps): Session {
+  const { deleteObjects, getAll, set, update, updateAll } = getBaseSession({
+    id,
+    redisClient,
+  });
 
   const getPhaseName = async () => (await getAll()).phase.name;
   const setPhaseName = (name: PhaseName) => set('phase', { name });
@@ -207,11 +231,12 @@ function getSession({ id, emit }: SessionProps): Session {
   };
 
   return {
+    deleteObjects,
     getAll,
     set,
     update,
-    exists: async () => (await getAll()).phase !== undefined,
-    init: async playerId => {
+    isInitialized: async () => (await getAll()).phase !== undefined,
+    init: async () => {
       await setPhaseName('lobby');
       await set('players', {});
       await set('needs', {});
@@ -219,11 +244,11 @@ function getSession({ id, emit }: SessionProps): Session {
       await set('tokens', {});
       await set('relationships', {});
       await set('crushSelections', {});
-      await set('partyLeader', playerId);
+      await set('partyLeader', null);
       await set('roundEnder', null);
       await set('currentVoter', null);
     },
-    join: async ({ playerId, playerName }) => {
+    join: async ({ playerId }) => {
       // TODO: REMOVEME
       //const pid1 = uniqid();
       //const pid2 = uniqid();
@@ -236,10 +261,12 @@ function getSession({ id, emit }: SessionProps): Session {
         await update('players', { [playerId]: { active: true } });
         return;
       }
-      await updateAll(getNewPlayerState({ playerId, playerName }));
+      await updateAll(getNewPlayerState({ playerId }));
     },
     validMessage: (serverState: ServerState, message: Message): boolean => {
-      if (message.type === 'startGame') {
+      if (message.type === 'setName') {
+        return true;
+      } else if (message.type === 'startGame') {
         if (message.playerId !== serverState.partyLeader) return false;
         return quorum(serverState);
       } else if (message.type === 'transferToken') {
@@ -306,7 +333,10 @@ function getSession({ id, emit }: SessionProps): Session {
     },
     integrateMessage: async (serverState, message) => {
       console.log('Integrating message', message);
-      if (message.type === 'startGame') {
+      if (message.type === 'setName') {
+        const player = _.find(serverState.players, ['id', message.playerId]);
+        await update('players', { [message.playerId]: { name: message.name } });
+      } else if (message.type === 'startGame') {
         await followEdge('startGame');
       } else if (message.type === 'transferToken') {
         const { tokenId, toId: nodeId } = message;

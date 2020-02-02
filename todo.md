@@ -42,12 +42,17 @@
   / iPhones don’t work:(
     - Maybe they do! Check with Molly and Isaac if we have time:)
     - Can probably implement custom target hit detection to fix
-  - Can easily switch between touch backend and multibackend
-  - Need to store session info in cookie because errors happen and refreshes are needed
-    - Put session ID in URL--this can be used as link to lobby
-    - Store username and ID in localstorage--this can be used to jump into session
-    - Prompt user about rejoining session x as y?
-    - Maybe just drop them in automatically if the session is still "active" (people are still present)
+  + Automatically switch between touch backend and multibackend
+  + Create only one redis connection per server
+  / Improve experience getting into a session
+    + Put session ID in URL--this can be used as link to lobby
+    + Delete nameless player (and nodes and token) who disconnects
+    / Move setting name to in the lobby
+      + Setting and editing name happens here (so people can change their names
+        when starting a new set of rounds)
+      - Only people whose hearts are in the jar are included in the round.
+        Everyone else gets to sit in the lobby
+    + Store username and ID in localstorage for dropping back into session
   - Catch error and refresh?
 - Final screen pt. 2
   - Lead person can initiate next round
@@ -60,13 +65,9 @@
 - Playtest a bit more
 - Improve lobby screen
   - Be able to see how many people are in the lobby
-  - Only people whose hearts are in the jar are included in the round. Everyone
-    else is kicked (probably just notification with a button to go back to the
-    main page) until the round is over.
-  - Setting and editing name happens here (so people can change their names
-    when starting a new set of rounds)
   - Name character limit is imposed for styling reasons
   - Jar of hearts (with players' names!)
+  - Prevent generating sessions by navigating to session page?
 - Practice mode
   - Can trade all you want but cannot end round
   - Party leader can move it back to lobby to start a real round
@@ -118,6 +119,8 @@
     3. True love (bonus points if you guess who)
 
 ## Known bugs
+- Too many dispatches when setting and updating state--make an option to only
+  dispatch once
 - Websocket connection is often flaky (could this be the Chrome same-host connection limit?)
   - Not a problem in practice
 - Session exists after it's over
@@ -133,6 +136,18 @@
     (with message that name is already taken or that session is in progress)
 - After switching to fullscreen, I will receive state updates, even for moves I make
 - Timers (used for countdown and timing before voting) can be broken by restarting the server
+- This one
+      events.js:170
+        throw er; // Unhandled 'error' event
+        ^
+
+  Error: read ECONNRESET
+      at TCP.onStreamRead (internal/stream_base_commons.js:167:27)
+  Emitted 'error' event at:
+      at emitErrorNT (internal/streams/destroy.js:91:8)
+      at emitErrorAndCloseNT (internal/streams/destroy.js:59:3)
+      at processTicksAndRejections (internal/process/task_queues.js:81:17)
+
 
 ## Features to fit in
 - When the client disconnects, drop back into game in refresh

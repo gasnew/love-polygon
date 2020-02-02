@@ -14,12 +14,10 @@ import type {
 
 type NewPlayerStateProps = {
   playerId: string,
-  playerName: string,
 };
 
 export function getNewPlayerState({
   playerId,
-  playerName,
 }: NewPlayerStateProps): $Shape<ServerState> {
   const color = randomColor();
   const nodeId1 = uniqid();
@@ -29,7 +27,7 @@ export function getNewPlayerState({
     players: {
       [playerId]: {
         id: playerId,
-        name: playerName,
+        name: '',
         color,
         active: true,
       },
