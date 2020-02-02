@@ -20,7 +20,6 @@ import {
 } from './network/socket';
 import dispatch, { setSocket } from './state/actions';
 import generateState from './state/state';
-import type { SessionInfo } from '../../server/networkTypes';
 
 type Props = {|
   sessionId: string,

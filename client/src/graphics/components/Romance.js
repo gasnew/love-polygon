@@ -12,8 +12,6 @@ import {
   getOwnNeed,
   getOwnNodes,
   getOwnRelationship,
-  getOwnTokens,
-  getPlayerNodes,
   getSessionInfo,
 } from '../../state/getters';
 import type { Phase } from '../../../../server/networkTypes';

@@ -21,8 +21,6 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 
-import type { SessionInfo } from '../../server/networkTypes';
-
 // NOTE: create-react-app does not allow importing outside of src/, so we have
 // to keep these up-to-date with server/constants.js
 export const VALID_SESSION_ID_CHARACTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -120,7 +118,6 @@ function LandingPage({ classes, setSessionId }: Props) {
     setAndStoreSessionId(sessionId);
   };
 
-  const handleNext = () => setActiveStep(activeStep + 1);
   const handleBack = () => setActiveStep(activeStep - 1);
   const handleTextInput = setField => event => {
     const value = event.target.value;
