@@ -30,6 +30,7 @@ export function getNewPlayerState({
         name: '',
         color,
         active: true,
+        inRound: false,
       },
     },
     nodes: {

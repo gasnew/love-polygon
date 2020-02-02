@@ -27,8 +27,8 @@ type Props = {|
 |};
 
 export default function Game({ sessionId }: Props) {
-  const playerId = window.localStorage.getItem('playerId') || uniqid();
-  window.localStorage.setItem('playerId', playerId);
+  const playerId = window.sessionStorage.getItem('playerId') || uniqid();
+  window.sessionStorage.setItem('playerId', playerId);
   window.state = generateState({
     sessionId,
     playerId,

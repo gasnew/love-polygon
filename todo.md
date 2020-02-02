@@ -44,15 +44,17 @@
     - Can probably implement custom target hit detection to fix
   + Automatically switch between touch backend and multibackend
   + Create only one redis connection per server
-  / Improve experience getting into a session
+  + Improve experience getting into a session
     + Put session ID in URL--this can be used as link to lobby
+    + Improve landing page
+      + Two buttons: "Create session" and "Join session"
     + Delete nameless player (and nodes and token) who disconnects
-    / Move setting name to in the lobby
+    + Move setting name to in the lobby
       + Setting and editing name happens here (so people can change their names
         when starting a new set of rounds)
-      - Only people whose hearts are in the jar are included in the round.
+      + Only people whose hearts are in the jar are included in the round.
         Everyone else gets to sit in the lobby
-    + Store username and ID in localstorage for dropping back into session
+    + Store username and ID in sessionStorage for dropping back into session
   x Catch error and refresh?
 - Final screen pt. 2
   - Lead person can initiate next round
@@ -67,13 +69,13 @@
   - Be able to see how many people are in the lobby
   - Name character limit is imposed for styling reasons
   - Jar of hearts (with players' names!)
+    - This is sorted so you can see who entered first
+    - If leader leaves, next up becomes leader
   - Prevent generating sessions by navigating to session page?
     - Route back to landing page with alert about the session not existing
 - Practice mode
   - Can trade all you want but cannot end round
   - Party leader can move it back to lobby to start a real round
-- Improve landing page
-  - Two buttons: "Create session" and "Join session"
 - Love polygon
   - Actually a graph
   - Separate tab on completion screen?

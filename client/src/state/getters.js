@@ -56,6 +56,15 @@ export function getPlayers(): Players {
   return getState().players;
 }
 
+export function getParticipatingPlayers(): Players {
+  return _.pickBy(getState().players, 'inRound');
+}
+
+export function getInRound(): boolean {
+  const player = getPlayer(getSessionInfo().playerId);
+  return !!player && player.inRound;
+}
+
 export function getPlayer(playerId: string): Player {
   return getPlayers()[playerId];
 }

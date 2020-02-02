@@ -17,6 +17,7 @@ export type Player = {|
   name: string,
   color: string,
   active: boolean,
+  inRound: boolean,
 |};
 export type Players = {|
   [string]: Player,

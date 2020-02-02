@@ -62,7 +62,9 @@ export function updateState(serverState: ServerState) {
 
   const newPlayers = _.filter(players, playerIsNew);
   _.each(newPlayers, player =>
-    silentDispatch(addPlayer(player.id, player.name, player.color))
+    silentDispatch(
+      addPlayer(player.id, player.name, player.color, player.inRound)
+    )
   );
   _.each(_.reject(players, ['id', getSessionInfo().playerId]), player =>
     silentDispatch(setPlayerName(player.id, player.name))
@@ -128,7 +130,7 @@ export function setState(serverState: ServerState) {
   silentDispatch(setPhase(phase.name));
   silentDispatch(clearStage());
   _.each(players, (player, id) =>
-    silentDispatch(addPlayer(id, player.name, player.color))
+    silentDispatch(addPlayer(id, player.name, player.color, player.inRound))
   );
   silentDispatch(
     setPlayerName(

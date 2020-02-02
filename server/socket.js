@@ -37,7 +37,7 @@ export async function handleConnection(
     const { players, nodes, tokens } = await session.getAll();
     console.log(`Fam, ${playerId} has disconnected from ${sessionId}`);
     if (players[playerId].name !== '') {
-      session.update('players', { [playerId]: { active: false } });
+      await session.update('players', { [playerId]: { active: false } });
     } else {
       console.log(`Deleting player ${playerId}`);
 
@@ -47,9 +47,9 @@ export async function handleConnection(
       const playerTokens = _.filter(tokens, token =>
         _.some(playerNodes, ['id', token.nodeId])
       );
-      session.deleteObjects('players', playerId, players);
-      session.deleteObjects('nodes', _.map(playerNodes, 'id'), nodes)
-      session.deleteObjects('tokens', _.map(playerTokens, 'id'), tokens)
+      await session.deleteObjects('players', playerId, players);
+      await session.deleteObjects('nodes', _.map(playerNodes, 'id'), nodes);
+      await session.deleteObjects('tokens', _.map(playerTokens, 'id'), tokens);
     }
   });
 

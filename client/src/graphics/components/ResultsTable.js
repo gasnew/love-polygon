@@ -19,13 +19,13 @@ import {
   getSecretLove,
   getSelectedNamesFromPlayerId,
   getNeedsMet,
-  getPlayers,
+  getParticipatingPlayers,
 } from '../../state/getters';
 
 export default function ResultsTable() {
   if (_.isEmpty(getCrushSelections())) return <p>Loading...</p>;
 
-  const playerResults = _.map(getPlayers(), player => ({
+  const playerResults = _.map(getParticipatingPlayers(), player => ({
     playerName: player.name,
     relationship: _.flow(({ type, toId }) =>
       type === 'crush'

@@ -36,7 +36,7 @@ import {
   getGuessedCrushesCorrectly,
   getPartyLeader,
   getPlayerCrushSelection,
-  getPlayers,
+  getParticipatingPlayers,
   getSelectedNamesFromPlayerId,
   getSessionInfo,
   getVotingOrder,
@@ -156,7 +156,7 @@ export default function VotingBallot() {
   const { open, handleClose, activateSnackbar } = useSnackbar();
   const classes = useStyles();
 
-  const players = getPlayers();
+  const players = getParticipatingPlayers();
   const currentVoter = getCurrentVoter();
 
   if (!currentVoter) return <p>Loading...</p>;

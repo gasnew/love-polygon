@@ -10,6 +10,7 @@ import VotingBallot from './VotingBallot';
 import { getPhase } from '../../state/getters';
 import { useGameState } from '../../state/state';
 
+import { getInRound } from '../../state/getters';
 import type { Phase } from '../../../../server/networkTypes';
 
 const Scene = ({ phase }: { phase: Phase }) => {
@@ -25,7 +26,7 @@ const Scene = ({ phase }: { phase: Phase }) => {
     return (
       <div style={{ height: '770px' }}>
         <p>{phase.name}</p>
-        {slotLists[phase.name]}
+        {getInRound() ? slotLists[phase.name] : slotLists['lobby']}
         <DraggedItem />
       </div>
     );

@@ -12,7 +12,6 @@ import announce, {
   startGame,
 } from '../../network/network';
 import {
-  getPlayers,
   getNodes,
   getOwnNodes,
   getPartyLeader,

@@ -135,13 +135,48 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
   const getPhaseName = async () => (await getAll()).phase.name;
   const setPhaseName = (name: PhaseName) => set('phase', { name });
   const startGame = async () => {
-    await set('nodes', {});
-    await set('tokens', {});
+    const serverState = await getAll();
+    const readyPlayers = _.flow(
+      nodes => _.pickBy(nodes, ['type', 'loveBucket']),
+      loveBuckets =>
+        _.filter(serverState.tokens, token => loveBuckets[token.nodeId]),
+      readyTokens =>
+        _.map(
+          readyTokens,
+          token => serverState.nodes[token.nodeId].playerIds[0]
+        ),
+      playerIds => _.pick(serverState.players, playerIds)
+    )(serverState.nodes);
+    await update(
+      'players',
+      _.reduce(
+        readyPlayers,
+        (players, player) => ({
+          ...players,
+          [player.id]: { inRound: true },
+        }),
+        {}
+      )
+    );
+
+    const nodesToDelete = _.filter(serverState.nodes, node =>
+      _.includes(_.map(readyPlayers, 'id'), node.playerIds[0])
+    );
+    const tokensToDelete = _.filter(serverState.tokens, token =>
+      _.some(nodesToDelete, ['id', token.nodeId])
+    );
+    await deleteObjects('nodes', _.map(nodesToDelete, 'id'), serverState.nodes);
+    await deleteObjects(
+      'tokens',
+      _.map(tokensToDelete, 'id'),
+      serverState.tokens
+    );
+
     try {
-      await updateAll(getRomanceState(await getAll()));
+      await updateAll(getRomanceState({ players: readyPlayers }));
     } catch (error) {
       console.log('WHOOPS! Try, try again');
-      await updateAll(getRomanceState(await getAll()));
+      await updateAll(getRomanceState({ players: readyPlayers }));
     }
     console.log('start game now');
     emit('changePhase');
@@ -162,8 +197,9 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
   };
   const setVotingOrder = async () => {
     const { players, roundEnder: roundEnderOrNone } = await getAll();
-    const roundEnder = roundEnderOrNone || _.sample(players);
-    const otherPlayers = _.reject(players, ['id', roundEnder]);
+    const playersInRound = _.pickBy(players, 'inRound');
+    const roundEnder = roundEnderOrNone || _.sample(playersInRound);
+    const otherPlayers = _.reject(playersInRound, ['id', roundEnder]);
     const votingOrder = [..._.shuffle(_.map(otherPlayers, 'id')), roundEnder];
     await set('votingOrder', votingOrder);
     await set('currentVoter', votingOrder[0]);
@@ -201,7 +237,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
   });
 
   const quorum = (serverState: ServerState): boolean => {
-    const { nodes, players, tokens } = serverState;
+    const { nodes, tokens } = serverState;
     const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
     return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 3;
   };
@@ -213,10 +249,10 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     return _.pickBy(tokens, token => playerNodes[token.nodeId]);
   };
   const endGame = async () => {
-    const { nodes } = await getAll();
+    const { nodes, players } = await getAll();
     await update('nodes', {
       ..._.reduce(
-        nodes,
+        _.filter(nodes, node => players[node.playerIds[0]].inRound),
         (disabledNodes, node) => ({
           ...disabledNodes,
           [node.id]: {
@@ -249,12 +285,6 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       await set('currentVoter', null);
     },
     join: async ({ playerId }) => {
-      // TODO: REMOVEME
-      //const pid1 = uniqid();
-      //const pid2 = uniqid();
-      //await updateAll(getNewPlayerState({ playerId: pid1, playerName: pid1 }))
-      //await updateAll(getNewPlayerState({ playerId: pid2, playerName: pid2 }))
-
       const sessionData = await getAll();
       const playersData = sessionData.players;
       if (playersData[playerId]) {

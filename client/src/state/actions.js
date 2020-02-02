@@ -75,6 +75,7 @@ type Action =
       id: string,
       name: string,
       color: string,
+      inRound: boolean,
     }
   | {
       type: 'setPlayerName',
@@ -262,12 +263,18 @@ export function setVotingOrder(votingOrder: string[]): Action {
   };
 }
 
-export function addPlayer(id: string, name: string, color: string): Action {
+export function addPlayer(
+  id: string,
+  name: string,
+  color: string,
+  inRound: boolean
+): Action {
   return {
     type: ADD_PLAYER,
     id,
     name,
     color,
+    inRound,
   };
 }
 
@@ -386,6 +393,7 @@ export function silentDispatch(action: Action) {
         id: action.id,
         name: action.name,
         color: action.color,
+        inRound: action.inRound,
       });
       break;
     case SET_PLAYER_NAME:
