@@ -3,6 +3,7 @@
 import _ from 'lodash';
 
 import dispatch, {
+  silentDispatch,
   addPlayer,
   addNode,
   addToken,
@@ -61,18 +62,18 @@ export function updateState(serverState: ServerState) {
 
   const newPlayers = _.filter(players, playerIsNew);
   _.each(newPlayers, player =>
-    dispatch(addPlayer(player.id, player.name, player.color))
+    silentDispatch(addPlayer(player.id, player.name, player.color))
   );
   _.each(_.reject(players, ['id', getSessionInfo().playerId]), player =>
-    dispatch(setPlayerName(player.id, player.name))
+    silentDispatch(setPlayerName(player.id, player.name))
   );
   const newNodes = _.filter(nodes, nodeIsNew);
   _.each(newNodes, node =>
-    dispatch(addNode(node.id, node.type, node.playerIds, node.enabled))
+    silentDispatch(addNode(node.id, node.type, node.playerIds, node.enabled))
   );
   const newTokens = _.filter(tokens, tokenIsNew);
   _.each(newTokens, token =>
-    dispatch(addToken(token.id, token.type, token.nodeId))
+    silentDispatch(addToken(token.id, token.type, token.nodeId))
   );
 
   _.each(tokens, serverToken => {
@@ -93,14 +94,16 @@ export function updateState(serverState: ServerState) {
         // likely just lagging behind the client here.
         return;
       }
-      dispatch(setTokenNodeId(id, serverNodeId));
-      if (id === getCurrentTokenId()) dispatch(setCurrentTokenId(null));
+      silentDispatch(setTokenNodeId(id, serverNodeId));
+      if (id === getCurrentTokenId()) silentDispatch(setCurrentTokenId(null));
     }
   });
 
-  dispatch(setPartyLeader(partyLeader));
-  dispatch(setVotingOrder(votingOrder));
-  dispatch(setCrushSelections(crushSelections));
+  silentDispatch(setPartyLeader(partyLeader));
+  silentDispatch(setVotingOrder(votingOrder));
+  silentDispatch(setCrushSelections(crushSelections));
+  // NOTE: We only call `dispatch` for the last update so that the event to
+  // re-render the React components only gets fired once
   dispatch(setCurrentVoter(currentVoter));
 }
 
@@ -121,28 +124,30 @@ export function setState(serverState: ServerState) {
   } = serverState;
   const { playerId: currentPlayerId } = getSessionInfo();
   if (phase.name === 'countdown' && (getPhase() || {}).name !== 'countdown')
-    dispatch(startCountdown());
-  dispatch(setPhase(phase.name));
-  dispatch(clearStage());
+    silentDispatch(startCountdown());
+  silentDispatch(setPhase(phase.name));
+  silentDispatch(clearStage());
   _.each(players, (player, id) =>
-    dispatch(addPlayer(id, player.name, player.color))
+    silentDispatch(addPlayer(id, player.name, player.color))
   );
-  dispatch(
+  silentDispatch(
     setPlayerName(
       currentPlayerId,
       _.find(players, ['id', currentPlayerId]).name
     )
   );
   _.each(nodes, (node, id) =>
-    dispatch(addNode(id, node.type, node.playerIds, node.enabled))
+    silentDispatch(addNode(id, node.type, node.playerIds, node.enabled))
   );
   _.each(tokens, (token, id) =>
-    dispatch(addToken(id, token.type, token.nodeId))
+    silentDispatch(addToken(id, token.type, token.nodeId))
   );
-  dispatch(setNeeds(needs));
-  dispatch(setRelationships(relationships));
-  dispatch(setPartyLeader(partyLeader));
-  dispatch(setVotingOrder(votingOrder));
-  dispatch(setCrushSelections(crushSelections));
+  silentDispatch(setNeeds(needs));
+  silentDispatch(setRelationships(relationships));
+  silentDispatch(setPartyLeader(partyLeader));
+  silentDispatch(setVotingOrder(votingOrder));
+  silentDispatch(setCrushSelections(crushSelections));
+  // NOTE: We only call `dispatch` for the last update so that the event to
+  // re-render the React components only gets fired once
   dispatch(setCurrentVoter(currentVoter));
 }

@@ -17,7 +17,6 @@ const SWAP_TOKENS = 'swapTokens';
 const SEE_RESULTS = 'seeResults';
 
 export function setName(name: string): Message {
-  console.log('setname');
   return {
     type: SET_NAME,
     playerId: getSessionInfo().playerId,

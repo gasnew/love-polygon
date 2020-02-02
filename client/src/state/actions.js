@@ -6,10 +6,13 @@ import type { Socket } from 'socket.io-client';
 
 import {
   getCrushSelections,
+  getNode,
+  getPartyLeader,
   getPhase,
   getPlayerCrushSelection,
   getPlayer,
   getPlayers,
+  getPlayerNodes,
   getNodes,
   getSessionInfo,
   getState,
@@ -48,6 +51,7 @@ const SET_RELATIONSHIPS = 'setRelationships';
 const SET_NEEDS = 'setNeeds';
 const SET_SOCKET = 'setSocket';
 const SET_TOKEN_NODE_ID = 'setTokenNodeId';
+const TRANSFER_TOKEN = 'transferToken';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 const SET_CURRENT_VOTER = 'setCurrentVoter';
 const SET_PARTY_LEADER = 'setPartyLeader';
@@ -124,6 +128,12 @@ type Action =
       type: 'setTokenNodeId',
       tokenId: string,
       nodeId: string,
+    }
+  | {
+      type: 'transferToken',
+      tokenId: string,
+      fromId: string,
+      toId: string,
     }
   | {
       type: 'setCurrentTokenId',
@@ -307,6 +317,19 @@ export function setTokenNodeId(tokenId: string, nodeId: string): Action {
   };
 }
 
+export function transferToken(
+  tokenId: string,
+  fromId: string,
+  toId: string
+): Action {
+  return {
+    type: TRANSFER_TOKEN,
+    tokenId,
+    fromId,
+    toId,
+  };
+}
+
 export function setCurrentTokenId(tokenId: ?string): Action {
   return {
     type: SET_CURRENT_TOKEN,
@@ -348,8 +371,7 @@ export function startCountdown(): Action {
   };
 }
 
-const event = new Event(GAME_STATE_UPDATED);
-export default function dispatch(action: Action) {
+export function silentDispatch(action: Action) {
   switch (action.type) {
     case ADD_NODE:
       mergeIntoNodes(action.id, {
@@ -367,11 +389,13 @@ export default function dispatch(action: Action) {
       });
       break;
     case SET_PLAYER_NAME:
+      // Set player name
       mergeIntoPlayers(action.playerId, {
         ...getPlayer(action.playerId),
         name: action.name,
       });
 
+      // Update sessionInfo
       const sessionInfo = getSessionInfo();
       if (action.playerId === sessionInfo.playerId)
         mergeIntoState(
@@ -381,6 +405,17 @@ export default function dispatch(action: Action) {
             playerName: action.name,
           }: SessionInfo)
         );
+
+      // Enable or disable loveBucket
+      const loveBucket = _.find(getPlayerNodes(action.playerId), [
+        'type',
+        'loveBucket',
+      ]);
+      if (loveBucket) {
+        if (action.name === '') {
+          mergeIntoNodes(loveBucket.id, { ...loveBucket, enabled: false });
+        } else mergeIntoNodes(loveBucket.id, { ...loveBucket, enabled: true });
+      }
       break;
     case ADD_TOKEN:
       mergeIntoTokens(action.id, {
@@ -446,6 +481,23 @@ export default function dispatch(action: Action) {
         nodeId: action.nodeId,
       });
       break;
+    case TRANSFER_TOKEN:
+      mergeIntoTokens(action.tokenId, {
+        ...getToken(action.tokenId),
+        nodeId: action.toId,
+      });
+
+      // Check for setting party leader
+      const toNode = getNode(action.toId);
+      const fromNode = getNode(action.fromId);
+      if (toNode.type === 'loveBucket' && !getPartyLeader())
+        mergeIntoState('partyLeader', toNode.playerIds[0]);
+      else if (
+        fromNode.type === 'loveBucket' &&
+        fromNode.playerIds[0] === getPartyLeader()
+      )
+        mergeIntoState('partyLeader', null);
+      break;
     case SET_CURRENT_TOKEN:
       mergeIntoState('currentTokenId', action.tokenId);
       break;
@@ -478,6 +530,10 @@ export default function dispatch(action: Action) {
     default:
       throw new Error(`Yo, action ${action.type} doesn't exist!`);
   }
+}
 
+const event = new Event(GAME_STATE_UPDATED);
+export default function dispatch(action: Action) {
+  silentDispatch(action);
   window.dispatchEvent(event);
 }

@@ -4,8 +4,11 @@ import React from 'react';
 import { useDrop } from 'react-dnd';
 
 import Item, { TOKEN } from './Item';
-import announce, { swapTokens, transferToken } from '../../network/network';
-import dispatch, { setTokenNodeId } from '../../state/actions';
+import announce, {
+  swapTokens,
+  transferToken as networkedTransferToken,
+} from '../../network/network';
+import dispatch, { setTokenNodeId, transferToken } from '../../state/actions';
 import { getNodeToken, getToken } from '../../state/getters';
 import type { Node } from '../../state/state';
 
@@ -31,8 +34,10 @@ export default function Slot({ node }: Props) {
           swapTokens(draggedToken.id, previousNodeId, token.id, node.id)
         );
       } else {
-        announce(transferToken(draggedToken.id, draggedToken.nodeId, node.id));
-        dispatch(setTokenNodeId(draggedToken.id, node.id));
+        announce(
+          networkedTransferToken(draggedToken.id, draggedToken.nodeId, node.id)
+        );
+        dispatch(transferToken(draggedToken.id, draggedToken.nodeId, node.id));
       }
     },
     collect: monitor => ({

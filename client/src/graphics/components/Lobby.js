@@ -27,10 +27,11 @@ const throttledNetworkedSetName = _.throttle(
 
 export default function Lobby() {
   const { playerId, playerName } = getSessionInfo();
-  const nodes = getOwnNodes();
-  const loveBucket = _.pickBy(nodes, ['type', 'loveBucket']);
+  const ownNodes = getOwnNodes();
+  const tokens = getTokens();
+  const loveBucket = _.find(ownNodes, ['type', 'loveBucket']);
   const loveBuckets = _.pickBy(getNodes(), ['type', 'loveBucket']);
-  const storageNodes = _.pickBy(nodes, ['type', 'storage']);
+  const storageNodes = _.pickBy(ownNodes, ['type', 'storage']);
 
   const readyPlayerCount = _.filter(
     getTokens(),
@@ -41,6 +42,7 @@ export default function Lobby() {
     dispatch(setPlayerName(playerId, name));
     throttledNetworkedSetName(name);
   };
+  const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);
 
   return (
     <div
@@ -52,7 +54,7 @@ export default function Lobby() {
       }}
     >
       <div>
-        <SlotList nodes={loveBucket} />
+        <SlotList nodes={{ [loveBucket.id]: loveBucket }} />
       </div>
       <div>
         <SlotList nodes={storageNodes} />
@@ -63,6 +65,7 @@ export default function Lobby() {
         onChange={handleNameInput}
         margin="normal"
         variant="outlined"
+        disabled={heartIsInBucket}
       />
       {playerId === getPartyLeader() && (
         <Button

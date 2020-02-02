@@ -265,6 +265,17 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     },
     validMessage: (serverState: ServerState, message: Message): boolean => {
       if (message.type === 'setName') {
+        const { playerId } = message;
+        const { players, nodes, tokens } = serverState;
+        const loveBucket = _.find(
+          nodes,
+          node =>
+            _.includes(node.playerIds, playerId) && node.type === 'loveBucket'
+        );
+        if (!loveBucket) return false;
+
+        const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);
+        if (heartIsInBucket) return false;
         return true;
       } else if (message.type === 'startGame') {
         if (message.playerId !== serverState.partyLeader) return false;
@@ -276,7 +287,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
         const fromNode = nodes[fromId];
         const toNode = nodes[toId];
         if (!token || !fromNode || !toNode) return false;
-        if (!fromNode.enabled) return false;
+        if (!fromNode.enabled || !toNode.enabled) return false;
         if (token.nodeId !== fromId) return false;
         if (_.some(tokens, ['nodeId', toId])) return false;
 
@@ -334,17 +345,40 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     integrateMessage: async (serverState, message) => {
       console.log('Integrating message', message);
       if (message.type === 'setName') {
-        const player = _.find(serverState.players, ['id', message.playerId]);
-        await update('players', { [message.playerId]: { name: message.name } });
+        const { name, playerId } = message;
+        const { players, nodes, tokens } = serverState;
+        const player = _.find(players, ['id', message.playerId]);
+        const loveBucket = _.find(
+          nodes,
+          node =>
+            _.includes(node.playerIds, playerId) && node.type === 'loveBucket'
+        );
+
+        await update('players', { [playerId]: { name } });
+        if (name === '')
+          await update('nodes', { [loveBucket.id]: { enabled: false } });
+        else await update('nodes', { [loveBucket.id]: { enabled: true } });
       } else if (message.type === 'startGame') {
         await followEdge('startGame');
       } else if (message.type === 'transferToken') {
-        const { tokenId, toId: nodeId } = message;
+        const { tokenId, fromId, toId } = message;
+        const { nodes, partyLeader } = serverState;
         await update('tokens', {
           [tokenId]: {
-            nodeId,
+            nodeId: toId,
           },
         });
+
+        // Check for setting party leader
+        const toNode = nodes[toId];
+        const fromNode = nodes[fromId];
+        if (toNode.type === 'loveBucket' && !partyLeader)
+          await set('partyLeader', toNode.playerIds[0]);
+        else if (
+          fromNode.type === 'loveBucket' &&
+          fromNode.playerIds[0] === partyLeader
+        )
+          await set('partyLeader', null);
       } else if (message.type === 'swapTokens') {
         const { tokenId1, nodeId1, tokenId2, nodeId2 } = message;
         await update('tokens', {
