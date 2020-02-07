@@ -1,7 +1,5 @@
 // @flow
 
-import axios from 'axios';
-import copy from 'copy-to-clipboard';
 import React, { useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
@@ -26,7 +24,10 @@ type Props = {|
 |};
 
 export default function Game({ sessionId }: Props) {
-  const playerId = window.sessionStorage.getItem('playerId') || uniqid();
+  const stored = name => window.sessionStorage.getItem(name);
+  const playerId =
+    (stored('sessionId') === sessionId && stored('playerId')) || uniqid();
+  window.sessionStorage.setItem('sessionId', sessionId);
   window.sessionStorage.setItem('playerId', playerId);
   window.state = generateState({
     sessionId,
@@ -57,20 +58,6 @@ export default function Game({ sessionId }: Props) {
   return (
     <DndProvider {...providerProps}>
       <Table />
-      <button
-        onClick={() =>
-          axios
-            .post('api/get-server-state', { sessionId })
-            .then(response => copy(JSON.stringify(response.data)))
-        }
-      >
-        Server state -> clipboard
-      </button>
-      <button
-        onClick={() => axios.post('api/load-session-from-cache', { sessionId })}
-      >
-        Load session from cache
-      </button>
     </DndProvider>
   );
 }

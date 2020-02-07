@@ -44,7 +44,10 @@ export default function ResultsTable() {
     result.secretLovePoints;
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer
+      component={Paper}
+      style={{ height: '100%', overflow: 'scroll' }}
+    >
       <Table>
         <TableHead>
           <TableRow>

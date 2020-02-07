@@ -49,7 +49,7 @@ export default function Lobby() {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        height: '50%',
+        height: '100%',
       }}
     >
       <div>

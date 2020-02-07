@@ -38,7 +38,7 @@
     x Guessed all who had crush?
     x Did they succeed in their mission?
   + Finally displays table of all scores
-- Usability
+/ Usability
   / iPhones don’t work:(
     - Maybe they do! Check with Molly and Isaac if we have time:)
     - Can probably implement custom target hit detection to fix
@@ -56,6 +56,11 @@
         Everyone else gets to sit in the lobby
     + Store username and ID in sessionStorage for dropping back into session
   x Catch error and refresh?
+  + Make scrolling a non-issue
+    + There is no way to scroll to put relevant information off-screen
+    + Verify this works on iPhones (even with the weird elastic end-of-page
+      scroll behavior)
+    + Only lock scrolling on some screens
 - Final screen pt. 2
   - Lead person can initiate next round
   - Points accumulate
@@ -91,8 +96,19 @@
   - Deliver animation (w/ gloved hand)
   - Scrolling background with food/heart symbols?
   - Scene transitions
+    - Create/Join session
+      - Heart dropping onto white background
+      - Wipes away when loaded
+    - Start round
+      - Cookie, cake, then candy drop onto screen, background different color
+        for each impact
+      - "You have a crush on {name}" or "You are {name}'s wingman"
+      - One item gets outline with text of the same color that reads, "{name}
+        needs three {items}s"
+      - Then in a split below, "You need three {items} to end the round"
   - Heart/Broken heart/tissue box stamp for guessing crushes correctly?
   - Use ExpansionPanel for VotingBallot
+  - Backdrop for connection problems
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!
@@ -122,6 +138,9 @@
     3. True love (bonus points if you guess who)
 
 ## Known bugs
+- What happens on the frontend when I delete a nameless player?
+  - May have fixed this...
++ Use same player ID even for different sessions (could cause some user-facing issue)
 - Too many dispatches when setting and updating state--make an option to only
   dispatch once
 - Websocket connection is often flaky (could this be the Chrome same-host connection limit?)

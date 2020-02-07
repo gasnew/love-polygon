@@ -184,7 +184,8 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
   const startCountdown = async () => {
     console.log('start countdown');
     // TODO(gnewman): Reimplement this countdown timer to be more robust
-    setTimeout(async () => await endGame(), 15000);
+    // Add 0.5 seconds to account for latency
+    setTimeout(async () => await endGame(), 15500);
     emit('changePhase');
   };
   const finishGame = async () => {

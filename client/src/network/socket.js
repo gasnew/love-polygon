@@ -135,7 +135,9 @@ export function setState(serverState: ServerState) {
   silentDispatch(
     setPlayerName(
       currentPlayerId,
-      _.find(players, ['id', currentPlayerId]).name
+      _.includes(_.map(players, 'id'), currentPlayerId)
+        ? _.find(players, ['id', currentPlayerId]).name
+        : ''
     )
   );
   _.each(nodes, (node, id) =>
