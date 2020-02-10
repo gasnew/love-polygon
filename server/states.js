@@ -135,7 +135,7 @@ export function getRomanceState({
   players,
 }: RomanceStateProps): $Shape<ServerState> {
   const TOKEN_TYPES = ['cookie', 'cake', 'candy'];
-  const NODE_COUNT = 3;
+  const NODE_COUNT = 4;
 
   const storageNodes = _.reduce(
     players,
@@ -191,7 +191,7 @@ export function getRomanceState({
           id: needId,
           playerId: player.id,
           type: _.sample(TOKEN_TYPES),
-          count: 3,
+          count: 4,
         },
       };
     },

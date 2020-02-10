@@ -5,6 +5,7 @@ import _ from 'lodash';
 import uniqid from 'uniqid';
 import type { RedisClient } from 'async-redis';
 
+import { NAME_LIMIT } from './constants';
 import withEvents from './events';
 import getFollowEdge from './phase';
 import { getNewPlayerState, getRomanceState } from './states';
@@ -296,13 +297,14 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     },
     validMessage: (serverState: ServerState, message: Message): boolean => {
       if (message.type === 'setName') {
-        const { playerId } = message;
+        const { name, playerId } = message;
         const { players, nodes, tokens } = serverState;
         const loveBucket = _.find(
           nodes,
           node =>
             _.includes(node.playerIds, playerId) && node.type === 'loveBucket'
         );
+        if (name.length > NAME_LIMIT) return false;
         if (!loveBucket) return false;
 
         const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);

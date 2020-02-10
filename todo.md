@@ -38,10 +38,11 @@
     x Guessed all who had crush?
     x Did they succeed in their mission?
   + Finally displays table of all scores
-/ Usability
-  / iPhones don’t work:(
-    - Maybe they do! Check with Molly and Isaac if we have time:)
-    - Can probably implement custom target hit detection to fix
++ Usability
+  + iPhones don’t work:(
+    + Maybe they do! Check with Molly and Isaac if we have time:)
+    + Can probably implement custom target hit detection to fix
+    + They actually work! Had to update react-dnd-touch-backend
   + Automatically switch between touch backend and multibackend
   + Create only one redis connection per server
   + Improve experience getting into a session
@@ -109,6 +110,10 @@
   - Heart/Broken heart/tissue box stamp for guessing crushes correctly?
   - Use ExpansionPanel for VotingBallot
   - Backdrop for connection problems
+  - Shared plates are colored according to their players and form the shape of
+    an arc
+  - Players can select avatars
+  - Make sure note-taker is noticeable
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!
@@ -118,12 +123,19 @@
   - celebrate
 - Figure out how to actually calculate probabilities, e.g., "How many crushes
   should there be such that guessing nobody isn't the best strategy."
+- True love!!
+  - Bonus points in final round if you can guess the only pair of players who
+    had a crush on each other
+  - This probably occurs after voting once all the information is out there
 - Host on the cloud for all to see
   - AWS CDK?
   - Configure app environment (i.e., redis URL)
   - Dockerize the server and client
 - Make actual landing page
   - Look at Google Keep notes for stuff on donations and game description
+  - Include description of what it looks like to play the game, e.g., "Players
+    are encouraged to say aloud their needs in an attempt to draw out any
+    lovers."
 - Open-source the project
 
 ## Pipe dreams
@@ -184,8 +196,8 @@ Progress is indicated in terms of where I am regarding making these actual items
 ### 1/24/20
 / images_urls type error
   / fixed?
-- switching party leaders is fun
-  - Maybe we want to randomly assign the note-taker?
++ switching party leaders is fun
+  + Maybe we want to randomly assign the note-taker? Nah:)
 + need to store session info in cookie because errors happen and refreshes are needed
 + adjust for different resolutions
 + iphones don’t work:(
@@ -196,6 +208,26 @@ x maybe creating session id is fun
   x no
 + fixed crush counts would be good
 x add tiebreaker
-- actually show graph of relationships
++ actually show graph of relationships
 + better describe game
 + multiple rounds with cumulative points
+
+### 2/8/20
++ talk to each other to play
++ bottom row is own plates
++ enter to join session
+/ getting needs is too fast (four storage plates? four types of food? flowers, ice cream, teddy bear)
+  + We're trying out four-of-a-kind
+  - "Maximize scarcity => maximize communication, but keep enough luck/input
+    randomness such that the game isn't too pure."
++ indicate note-taker
+x lose points for not meeting crush’s needs
+  - There is already a cost to not meeting crush's needs
++ pick an avatar
+- Some role ideas (not sure if scope creep?)
+  - throw away to trade? (role for that?)
+  - trickster—nobody has crush on them (get as many people to guess them as possible)
+- cooldown before can end game
+  - Possibly. I'm still not sure whether it's bad someone can end the game immediately
++ final round—bonus points if mutual attraction
++ restrict name length

@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
-import TouchBackend from 'react-dnd-touch-backend-cjs';
+import TouchBackend from 'react-dnd-touch-backend';
 import MultiBackend from 'react-dnd-multi-backend';
 import HTML5toTouch from 'react-dnd-multi-backend/lib/HTML5toTouch';
 import io from 'socket.io-client';

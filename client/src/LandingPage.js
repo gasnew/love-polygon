@@ -21,10 +21,7 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 
-// NOTE: create-react-app does not allow importing outside of src/, so we have
-// to keep these up-to-date with server/constants.js
-export const VALID_SESSION_ID_CHARACTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-export const SESSION_ID_LENGTH = 4;
+import { SESSION_ID_LENGTH, VALID_SESSION_ID_CHARACTERS } from './constants';
 
 const styles = theme => ({
   main: {
@@ -92,9 +89,11 @@ function LandingPage({ classes, setSessionId }: Props) {
   };
 
   const joinSession = async sessionId => {
-    const { error } = (await axios.post('api/check-session', {
-      sessionId,
-    })).data;
+    const { error } = (
+      await axios.post('api/check-session', {
+        sessionId,
+      })
+    ).data;
     if (error) {
       setSessionIdField({
         ...sessionIdField,
@@ -121,8 +120,6 @@ function LandingPage({ classes, setSessionId }: Props) {
   const handleBack = () => setActiveStep(activeStep - 1);
   const handleTextInput = setField => event => {
     const value = event.target.value;
-    console.log(value);
-    console.log(`[^${VALID_SESSION_ID_CHARACTERS}]+`);
     setField({
       value: _.replace(
         value.toUpperCase(),
@@ -164,6 +161,9 @@ function LandingPage({ classes, setSessionId }: Props) {
                 margin="normal"
                 variant="outlined"
                 fullWidth
+                onKeyPress={({ key }) => {
+                  if (key === 'Enter') joinSession(sessionIdField.value);
+                }}
               />
               <Button
                 fullWidth

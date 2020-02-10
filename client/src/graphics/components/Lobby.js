@@ -6,6 +6,7 @@ import React from 'react';
 import TextField from '@material-ui/core/TextField';
 
 import SlotList from './SlotList';
+import { NAME_LIMIT } from '../../constants';
 import dispatch, { setPlayerName } from '../../state/actions';
 import announce, {
   setName as networkedSetName,
@@ -38,8 +39,9 @@ export default function Lobby() {
   ).length;
   const handleNameInput = event => {
     const name = event.target.value;
-    dispatch(setPlayerName(playerId, name));
-    throttledNetworkedSetName(name);
+    const truncatedName = name.substring(0, NAME_LIMIT);
+    dispatch(setPlayerName(playerId, truncatedName));
+    throttledNetworkedSetName(truncatedName);
   };
   const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);
 

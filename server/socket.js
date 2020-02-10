@@ -36,7 +36,7 @@ export async function handleConnection(
   socket.on('disconnect', async () => {
     const { players, nodes, tokens } = await session.getAll();
     console.log(`Fam, ${playerId} has disconnected from ${sessionId}`);
-    if (players[playerId].name !== '') {
+    if (players[playerId] && players[playerId].name !== '') {
       await session.update('players', { [playerId]: { active: false } });
     } else {
       console.log(`Deleting player ${playerId}`);
