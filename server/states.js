@@ -14,12 +14,10 @@ import type {
 
 type NewPlayerStateProps = {
   playerId: string,
-  playerName: string,
 };
 
 export function getNewPlayerState({
   playerId,
-  playerName,
 }: NewPlayerStateProps): $Shape<ServerState> {
   const color = randomColor();
   const nodeId1 = uniqid();
@@ -29,9 +27,10 @@ export function getNewPlayerState({
     players: {
       [playerId]: {
         id: playerId,
-        name: playerName,
+        name: '',
         color,
         active: true,
+        inRound: false,
       },
     },
     nodes: {
@@ -45,7 +44,7 @@ export function getNewPlayerState({
         id: nodeId2,
         playerIds: [playerId],
         type: 'loveBucket',
-        enabled: true,
+        enabled: false,
       },
     },
     tokens: {
@@ -136,7 +135,7 @@ export function getRomanceState({
   players,
 }: RomanceStateProps): $Shape<ServerState> {
   const TOKEN_TYPES = ['cookie', 'cake', 'candy'];
-  const NODE_COUNT = 3;
+  const NODE_COUNT = 4;
 
   const storageNodes = _.reduce(
     players,
@@ -192,7 +191,7 @@ export function getRomanceState({
           id: needId,
           playerId: player.id,
           type: _.sample(TOKEN_TYPES),
-          count: 3,
+          count: 4,
         },
       };
     },

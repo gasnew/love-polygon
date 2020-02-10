@@ -3,7 +3,9 @@
 import redis from 'async-redis';
 import _ from 'lodash';
 import uniqid from 'uniqid';
+import type { RedisClient } from 'async-redis';
 
+import { NAME_LIMIT } from './constants';
 import withEvents from './events';
 import getFollowEdge from './phase';
 import { getNewPlayerState, getRomanceState } from './states';
@@ -17,6 +19,13 @@ import type {
   ServerStateKeys,
   SubServerState,
 } from './networkTypes';
+
+export function sessionExists(
+  redisClient: RedisClient,
+  sessionId: string
+): Promise<boolean> {
+  return redisClient.exists(sessionId);
+}
 
 type RedisMethods = {|
   getAll: () => Promise<ServerState>,
@@ -42,18 +51,22 @@ type BaseSession = {|
   ...RedisMethods,
   update: (ServerStateKeys, SubServerState, ?SubServerState) => Promise<void>,
   updateAll: ServerState => Promise<void>,
+  deleteObjects: (
+    ServerStateKeys,
+    string | string[],
+    ?SubServerState
+  ) => Promise<void>,
 |};
 
 export type BaseSessionProps = {
   id: string,
+  redisClient: RedisClient,
 };
 
-export function getBaseSession({ id }: BaseSessionProps): BaseSession {
-  const redisClient = redis.createClient();
-  redisClient.on('error', function(err) {
-    console.log('Error ' + err);
-  });
-
+export function getBaseSession({
+  id,
+  redisClient,
+}: BaseSessionProps): BaseSession {
   const { getAll, set } = redisMethods(redisClient, id);
   const update = async (
     key: ServerStateKeys,
@@ -85,18 +98,27 @@ export function getBaseSession({ id }: BaseSessionProps): BaseSession {
         await update(key, objects, currentServerState[key])
     );
   };
+  const deleteObjects = async (
+    key: ServerStateKeys,
+    id: string | string[],
+    subState: ?SubServerState = null
+  ) => {
+    const currentObjects = subState || (await getAll())[key];
+    set(key, _.omit(currentObjects, id));
+  };
 
   return {
     getAll,
     set,
     update,
     updateAll,
+    deleteObjects,
   };
 }
 
 type Session = {
   ...BaseSessionProps,
-  exists: () => Promise<boolean>,
+  isInitialized: () => Promise<boolean>,
   init: () => Promise<void>,
   join: ({ playerId: string, playerName: string }) => Promise<void>,
   validMessage: (ServerState, Message) => boolean,
@@ -105,19 +127,57 @@ type Session = {
 
 type SessionProps = BaseSessionProps & { emit: Emitter };
 
-function getSession({ id, emit }: SessionProps): Session {
-  const { getAll, set, update, updateAll } = getBaseSession({ id });
+function getSession({ id, redisClient, emit }: SessionProps): Session {
+  const { deleteObjects, getAll, set, update, updateAll } = getBaseSession({
+    id,
+    redisClient,
+  });
 
   const getPhaseName = async () => (await getAll()).phase.name;
   const setPhaseName = (name: PhaseName) => set('phase', { name });
   const startGame = async () => {
-    await set('nodes', {});
-    await set('tokens', {});
+    const serverState = await getAll();
+    const readyPlayers = _.flow(
+      nodes => _.pickBy(nodes, ['type', 'loveBucket']),
+      loveBuckets =>
+        _.filter(serverState.tokens, token => loveBuckets[token.nodeId]),
+      readyTokens =>
+        _.map(
+          readyTokens,
+          token => serverState.nodes[token.nodeId].playerIds[0]
+        ),
+      playerIds => _.pick(serverState.players, playerIds)
+    )(serverState.nodes);
+    await update(
+      'players',
+      _.reduce(
+        readyPlayers,
+        (players, player) => ({
+          ...players,
+          [player.id]: { inRound: true },
+        }),
+        {}
+      )
+    );
+
+    const nodesToDelete = _.filter(serverState.nodes, node =>
+      _.includes(_.map(readyPlayers, 'id'), node.playerIds[0])
+    );
+    const tokensToDelete = _.filter(serverState.tokens, token =>
+      _.some(nodesToDelete, ['id', token.nodeId])
+    );
+    await deleteObjects('nodes', _.map(nodesToDelete, 'id'), serverState.nodes);
+    await deleteObjects(
+      'tokens',
+      _.map(tokensToDelete, 'id'),
+      serverState.tokens
+    );
+
     try {
-      await updateAll(getRomanceState(await getAll()));
+      await updateAll(getRomanceState({ players: readyPlayers }));
     } catch (error) {
       console.log('WHOOPS! Try, try again');
-      await updateAll(getRomanceState(await getAll()));
+      await updateAll(getRomanceState({ players: readyPlayers }));
     }
     console.log('start game now');
     emit('changePhase');
@@ -125,7 +185,8 @@ function getSession({ id, emit }: SessionProps): Session {
   const startCountdown = async () => {
     console.log('start countdown');
     // TODO(gnewman): Reimplement this countdown timer to be more robust
-    setTimeout(async () => await endGame(), 15000);
+    // Add 0.5 seconds to account for latency
+    setTimeout(async () => await endGame(), 15500);
     emit('changePhase');
   };
   const finishGame = async () => {
@@ -138,8 +199,9 @@ function getSession({ id, emit }: SessionProps): Session {
   };
   const setVotingOrder = async () => {
     const { players, roundEnder: roundEnderOrNone } = await getAll();
-    const roundEnder = roundEnderOrNone || _.sample(players);
-    const otherPlayers = _.reject(players, ['id', roundEnder]);
+    const playersInRound = _.pickBy(players, 'inRound');
+    const roundEnder = roundEnderOrNone || _.sample(playersInRound);
+    const otherPlayers = _.reject(playersInRound, ['id', roundEnder]);
     const votingOrder = [..._.shuffle(_.map(otherPlayers, 'id')), roundEnder];
     await set('votingOrder', votingOrder);
     await set('currentVoter', votingOrder[0]);
@@ -177,7 +239,7 @@ function getSession({ id, emit }: SessionProps): Session {
   });
 
   const quorum = (serverState: ServerState): boolean => {
-    const { nodes, players, tokens } = serverState;
+    const { nodes, tokens } = serverState;
     const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
     return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 3;
   };
@@ -189,10 +251,10 @@ function getSession({ id, emit }: SessionProps): Session {
     return _.pickBy(tokens, token => playerNodes[token.nodeId]);
   };
   const endGame = async () => {
-    const { nodes } = await getAll();
+    const { nodes, players } = await getAll();
     await update('nodes', {
       ..._.reduce(
-        nodes,
+        _.filter(nodes, node => players[node.playerIds[0]].inRound),
         (disabledNodes, node) => ({
           ...disabledNodes,
           [node.id]: {
@@ -207,11 +269,12 @@ function getSession({ id, emit }: SessionProps): Session {
   };
 
   return {
+    deleteObjects,
     getAll,
     set,
     update,
-    exists: async () => (await getAll()).phase !== undefined,
-    init: async playerId => {
+    isInitialized: async () => (await getAll()).phase !== undefined,
+    init: async () => {
       await setPhaseName('lobby');
       await set('players', {});
       await set('needs', {});
@@ -219,27 +282,35 @@ function getSession({ id, emit }: SessionProps): Session {
       await set('tokens', {});
       await set('relationships', {});
       await set('crushSelections', {});
-      await set('partyLeader', playerId);
+      await set('partyLeader', null);
       await set('roundEnder', null);
       await set('currentVoter', null);
     },
-    join: async ({ playerId, playerName }) => {
-      // TODO: REMOVEME
-      //const pid1 = uniqid();
-      //const pid2 = uniqid();
-      //await updateAll(getNewPlayerState({ playerId: pid1, playerName: pid1 }))
-      //await updateAll(getNewPlayerState({ playerId: pid2, playerName: pid2 }))
-
+    join: async ({ playerId }) => {
       const sessionData = await getAll();
       const playersData = sessionData.players;
       if (playersData[playerId]) {
         await update('players', { [playerId]: { active: true } });
         return;
       }
-      await updateAll(getNewPlayerState({ playerId, playerName }));
+      await updateAll(getNewPlayerState({ playerId }));
     },
     validMessage: (serverState: ServerState, message: Message): boolean => {
-      if (message.type === 'startGame') {
+      if (message.type === 'setName') {
+        const { name, playerId } = message;
+        const { players, nodes, tokens } = serverState;
+        const loveBucket = _.find(
+          nodes,
+          node =>
+            _.includes(node.playerIds, playerId) && node.type === 'loveBucket'
+        );
+        if (name.length > NAME_LIMIT) return false;
+        if (!loveBucket) return false;
+
+        const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);
+        if (heartIsInBucket) return false;
+        return true;
+      } else if (message.type === 'startGame') {
         if (message.playerId !== serverState.partyLeader) return false;
         return quorum(serverState);
       } else if (message.type === 'transferToken') {
@@ -249,7 +320,7 @@ function getSession({ id, emit }: SessionProps): Session {
         const fromNode = nodes[fromId];
         const toNode = nodes[toId];
         if (!token || !fromNode || !toNode) return false;
-        if (!fromNode.enabled) return false;
+        if (!fromNode.enabled || !toNode.enabled) return false;
         if (token.nodeId !== fromId) return false;
         if (_.some(tokens, ['nodeId', toId])) return false;
 
@@ -306,15 +377,41 @@ function getSession({ id, emit }: SessionProps): Session {
     },
     integrateMessage: async (serverState, message) => {
       console.log('Integrating message', message);
-      if (message.type === 'startGame') {
+      if (message.type === 'setName') {
+        const { name, playerId } = message;
+        const { players, nodes, tokens } = serverState;
+        const player = _.find(players, ['id', message.playerId]);
+        const loveBucket = _.find(
+          nodes,
+          node =>
+            _.includes(node.playerIds, playerId) && node.type === 'loveBucket'
+        );
+
+        await update('players', { [playerId]: { name } });
+        if (name === '')
+          await update('nodes', { [loveBucket.id]: { enabled: false } });
+        else await update('nodes', { [loveBucket.id]: { enabled: true } });
+      } else if (message.type === 'startGame') {
         await followEdge('startGame');
       } else if (message.type === 'transferToken') {
-        const { tokenId, toId: nodeId } = message;
+        const { tokenId, fromId, toId } = message;
+        const { nodes, partyLeader } = serverState;
         await update('tokens', {
           [tokenId]: {
-            nodeId,
+            nodeId: toId,
           },
         });
+
+        // Check for setting party leader
+        const toNode = nodes[toId];
+        const fromNode = nodes[fromId];
+        if (toNode.type === 'loveBucket' && !partyLeader)
+          await set('partyLeader', toNode.playerIds[0]);
+        else if (
+          fromNode.type === 'loveBucket' &&
+          fromNode.playerIds[0] === partyLeader
+        )
+          await set('partyLeader', null);
       } else if (message.type === 'swapTokens') {
         const { tokenId1, nodeId1, tokenId2, nodeId2 } = message;
         await update('tokens', {

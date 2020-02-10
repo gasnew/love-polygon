@@ -6,6 +6,7 @@ import { getSessionInfo, getSocket } from '../state/getters';
 
 import type { Message } from '../../../server/networkTypes';
 
+const SET_NAME = 'setName';
 const START_GAME = 'startGame';
 const DESELECT_PLAYER = 'deselectPlayer';
 const FINISH_ROUND = 'finishRound';
@@ -14,6 +15,14 @@ const SUBMIT_VOTES = 'submitVotes';
 const TRANSFER_TOKEN = 'transferToken';
 const SWAP_TOKENS = 'swapTokens';
 const SEE_RESULTS = 'seeResults';
+
+export function setName(name: string): Message {
+  return {
+    type: SET_NAME,
+    playerId: getSessionInfo().playerId,
+    name,
+  };
+}
 
 export function startGame(): Message {
   return {
@@ -94,6 +103,7 @@ export default function announce(message: Message) {
   if (
     !_.includes(
       [
+        SET_NAME,
         START_GAME,
         DESELECT_PLAYER,
         SELECT_PLAYER,

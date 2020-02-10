@@ -2,95 +2,97 @@
 
 import fs from 'fs';
 import _ from 'lodash';
-import generateName from 'sillyname';
+import redis from 'async-redis';
 import uniqid from 'uniqid';
 import type { $Request, $Response } from 'express';
 
-import { getBaseSession } from './session';
+import { getBaseSession, sessionExists } from './session';
+import { VALID_SESSION_ID_CHARACTERS, SESSION_ID_LENGTH } from './constants';
 import type { Players } from './networkTypes';
 
-export async function generateSessionId(
-  request: $Request,
-  response: $Response
-) {
-  const sessionId = generateName();
-
-  response.json({ sessionId });
-}
+type Request<Body> = {
+  ...$Request,
+  body: Body,
+};
 
 type SessionCheck = {
   sessionId: string,
-  playerName: string,
 };
-type CheckRequest = {
-  ...$Request,
-  body: SessionCheck,
-};
-export async function checkSession(request: CheckRequest, response: $Response) {
-  const { sessionId, playerName }: SessionCheck = request.body;
+export async function checkSession(
+  request: Request<SessionCheck>,
+  response: $Response
+) {
+  const { sessionId }: SessionCheck = request.body;
 
-  console.log(`${playerName} is checking to see if ${sessionId} is cool.`);
-  const session = getBaseSession({ id: sessionId });
-  const { phase, players } = await session.getAll();
-  const playerId = _.findKey(players, player => player.name == playerName);
-  if (!playerId && phase && phase.name !== 'lobby') {
+  console.log(`Someone is checking to see if ${sessionId} is cool.`);
+  if (sessionId === '') {
+    response.json({ error: 'Please enter a session ID' });
+  } else if (
+    !(await sessionExists(request.app.get('redisClient'), sessionId))
+  ) {
     response.json({
-      error: {
-        field: 'sessionId',
-        message: `Session ${sessionId} is ongoing. Please choose another
-        session.`,
-      },
+      error: `The session "${sessionId}" does not exist. Try creating a new session instead!`,
     });
-    return;
-  }
-  if (playerId && players[playerId].active) {
-    response.json({
-      error: {
-        field: 'playerId',
-        message: `A player named ${playerName} is already in this session!
-        Please choose another name`,
-      },
-    });
-    return;
+  } else response.json({});
+}
+
+export async function createSession(request: $Request, response: $Response) {
+  const generateSessionId = () =>
+    _.join(
+      _.map(_.range(SESSION_ID_LENGTH), () =>
+        _.sample(VALID_SESSION_ID_CHARACTERS)
+      ),
+      ''
+    );
+
+  let sessionId = generateSessionId();
+  let iterations = 0;
+  while (await sessionExists(request.app.get('redisClient'), sessionId)) {
+    if (iterations > 100) {
+      response.json({ error: 'Unique session ID could not be found' });
+      return;
+    }
+    sessionId = generateSessionId();
+    iterations += 1;
   }
 
-  response.json({ playerId: playerId || uniqid() });
+  response.json({ sessionId });
 }
 
 type GetState = {
   sessionId: string,
 };
-type GetStateRequest = {
-  ...$Request,
-  body: GetState,
-};
 export async function getServerState(
-  request: GetStateRequest,
+  request: Request<GetState>,
   response: $Response
 ) {
   const { sessionId: id }: GetState = request.body;
 
   console.log(`Fetching current session state for session ${id}`);
 
-  response.json(await (await getBaseSession({ id })).getAll());
+  response.json(
+    await (await getBaseSession({
+      id,
+      redisClient: request.app.get('redisClient'),
+    })).getAll()
+  );
 }
 
 type LoadSession = {
   sessionId: string,
 };
-type LoadSessionRequest = {
-  ...$Request,
-  body: LoadSession,
-};
 export async function loadSessionFromCache(
-  request: LoadSessionRequest,
+  request: Request<LoadSession>,
   response: $Response
 ) {
   const { sessionId: id }: GetState = request.body;
 
   console.log(`Loading session ${id} from session state cache...`);
 
-  const session = await getBaseSession({ id });
+  const session = await getBaseSession({
+    id,
+    redisClient: request.app.get('redisClient'),
+  });
   _.each(
     JSON.parse(fs.readFileSync('debugSessionStateCache.json')),
     async (value, key) => await session.set(key, value)

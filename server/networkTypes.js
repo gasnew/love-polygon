@@ -17,6 +17,7 @@ export type Player = {|
   name: string,
   color: string,
   active: boolean,
+  inRound: boolean,
 |};
 export type Players = {|
   [string]: Player,
@@ -89,6 +90,11 @@ export type ServerStateKeys = $Keys<ServerState>;
 
 export type Message =
   | {
+      type: 'setName',
+      playerId: string,
+      name: string,
+    }
+  | {
       type: 'startGame',
       playerId: string,
     }
@@ -131,5 +137,5 @@ export type Message =
 export type SessionInfo = {|
   sessionId: string,
   playerId: string,
-  playerName: string,
+  playerName: ?string,
 |};

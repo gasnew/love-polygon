@@ -1,6 +1,7 @@
 [ignore]
 
 [include]
+../server/constants.js
 ../server/networkTypes.js
 ./src
 

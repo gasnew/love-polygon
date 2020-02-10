@@ -36,7 +36,7 @@ import {
   getGuessedCrushesCorrectly,
   getPartyLeader,
   getPlayerCrushSelection,
-  getPlayers,
+  getParticipatingPlayers,
   getSelectedNamesFromPlayerId,
   getSessionInfo,
   getVotingOrder,
@@ -156,7 +156,7 @@ export default function VotingBallot() {
   const { open, handleClose, activateSnackbar } = useSnackbar();
   const classes = useStyles();
 
-  const players = getPlayers();
+  const players = getParticipatingPlayers();
   const currentVoter = getCurrentVoter();
 
   if (!currentVoter) return <p>Loading...</p>;
@@ -189,18 +189,15 @@ export default function VotingBallot() {
   };
 
   const hasVoted = playerId => getPlayerCrushSelection(playerId).finalized;
-  const playerCardFromPlayerId = _.flow(
-    playerify,
-    player => ({
-      name: player.name,
-      selectedNames: getSelectedNamesFromPlayerId(player.id),
-      status: hasVoted(player.id)
-        ? getGuessedCrushesCorrectly(player.id)
-          ? 'success'
-          : 'failure'
-        : 'tbd',
-    })
-  );
+  const playerCardFromPlayerId = _.flow(playerify, player => ({
+    name: player.name,
+    selectedNames: getSelectedNamesFromPlayerId(player.id),
+    status: hasVoted(player.id)
+      ? getGuessedCrushesCorrectly(player.id)
+        ? 'success'
+        : 'failure'
+      : 'tbd',
+  }));
 
   // Activate the snackbar whenever a new vote is in
   const previousVoter = _.findLast(votingOrder, hasVoted);
@@ -225,7 +222,7 @@ export default function VotingBallot() {
   }
 
   return (
-    <div>
+    <div style={{ height: '100%', overflow: 'scroll' }}>
       <PlayerCardList
         playerCards={_.map(
           _.filter(votingOrder, hasVoted),

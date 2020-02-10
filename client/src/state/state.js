@@ -22,6 +22,7 @@ export type Player = {
   id: string,
   name: string,
   color: string,
+  inRound: boolean,
 };
 
 export type Players = {

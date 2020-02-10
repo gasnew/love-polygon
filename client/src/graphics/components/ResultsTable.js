@@ -2,7 +2,6 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -19,13 +18,13 @@ import {
   getSecretLove,
   getSelectedNamesFromPlayerId,
   getNeedsMet,
-  getPlayers,
+  getParticipatingPlayers,
 } from '../../state/getters';
 
 export default function ResultsTable() {
   if (_.isEmpty(getCrushSelections())) return <p>Loading...</p>;
 
-  const playerResults = _.map(getPlayers(), player => ({
+  const playerResults = _.map(getParticipatingPlayers(), player => ({
     playerName: player.name,
     relationship: _.flow(({ type, toId }) =>
       type === 'crush'
@@ -45,7 +44,10 @@ export default function ResultsTable() {
     result.secretLovePoints;
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer
+      component={Paper}
+      style={{ height: '100%', overflow: 'scroll' }}
+    >
       <Table>
         <TableHead>
           <TableRow>

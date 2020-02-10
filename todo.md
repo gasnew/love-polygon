@@ -38,13 +38,30 @@
     x Guessed all who had crush?
     x Did they succeed in their mission?
   + Finally displays table of all scores
-- Stability
-  - iphones don’t work:(
-    - can probably implement custom target hit detection to fix
-  - Can easily switch between touch backend and multibackend
-  - need to store session info in cookie because errors happen and refreshes are needed
-    - Prompt user about rejoining session x as y
-  - Catch error and refresh?
++ Usability
+  + iPhones don’t work:(
+    + Maybe they do! Check with Molly and Isaac if we have time:)
+    + Can probably implement custom target hit detection to fix
+    + They actually work! Had to update react-dnd-touch-backend
+  + Automatically switch between touch backend and multibackend
+  + Create only one redis connection per server
+  + Improve experience getting into a session
+    + Put session ID in URL--this can be used as link to lobby
+    + Improve landing page
+      + Two buttons: "Create session" and "Join session"
+    + Delete nameless player (and nodes and token) who disconnects
+    + Move setting name to in the lobby
+      + Setting and editing name happens here (so people can change their names
+        when starting a new set of rounds)
+      + Only people whose hearts are in the jar are included in the round.
+        Everyone else gets to sit in the lobby
+    + Store username and ID in sessionStorage for dropping back into session
+  x Catch error and refresh?
+  + Make scrolling a non-issue
+    + There is no way to scroll to put relevant information off-screen
+    + Verify this works on iPhones (even with the weird elastic end-of-page
+      scroll behavior)
+    + Only lock scrolling on some screens
 - Final screen pt. 2
   - Lead person can initiate next round
   - Points accumulate
@@ -56,18 +73,15 @@
 - Playtest a bit more
 - Improve lobby screen
   - Be able to see how many people are in the lobby
-  - Only people whose hearts are in the jar are included in the round. Everyone
-    else is kicked (probably just notification with a button to go back to the
-    main page) until the round is over.
-  - Setting and editing name happens here (so people can change their names
-    when starting a new set of rounds)
   - Name character limit is imposed for styling reasons
   - Jar of hearts (with players' names!)
+    - This is sorted so you can see who entered first
+    - If leader leaves, next up becomes leader
+  - Prevent generating sessions by navigating to session page?
+    - Route back to landing page with alert about the session not existing
 - Practice mode
   - Can trade all you want but cannot end round
   - Party leader can move it back to lobby to start a real round
-- Improve landing page
-  - Two buttons: "Create session" and "Join session"
 - Love polygon
   - Actually a graph
   - Separate tab on completion screen?
@@ -83,8 +97,23 @@
   - Deliver animation (w/ gloved hand)
   - Scrolling background with food/heart symbols?
   - Scene transitions
+    - Create/Join session
+      - Heart dropping onto white background
+      - Wipes away when loaded
+    - Start round
+      - Cookie, cake, then candy drop onto screen, background different color
+        for each impact
+      - "You have a crush on {name}" or "You are {name}'s wingman"
+      - One item gets outline with text of the same color that reads, "{name}
+        needs three {items}s"
+      - Then in a split below, "You need three {items} to end the round"
   - Heart/Broken heart/tissue box stamp for guessing crushes correctly?
   - Use ExpansionPanel for VotingBallot
+  - Backdrop for connection problems
+  - Shared plates are colored according to their players and form the shape of
+    an arc
+  - Players can select avatars
+  - Make sure note-taker is noticeable
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!
@@ -94,12 +123,19 @@
   - celebrate
 - Figure out how to actually calculate probabilities, e.g., "How many crushes
   should there be such that guessing nobody isn't the best strategy."
+- True love!!
+  - Bonus points in final round if you can guess the only pair of players who
+    had a crush on each other
+  - This probably occurs after voting once all the information is out there
 - Host on the cloud for all to see
   - AWS CDK?
   - Configure app environment (i.e., redis URL)
   - Dockerize the server and client
 - Make actual landing page
   - Look at Google Keep notes for stuff on donations and game description
+  - Include description of what it looks like to play the game, e.g., "Players
+    are encouraged to say aloud their needs in an attempt to draw out any
+    lovers."
 - Open-source the project
 
 ## Pipe dreams
@@ -114,17 +150,38 @@
     3. True love (bonus points if you guess who)
 
 ## Known bugs
+- What happens on the frontend when I delete a nameless player?
+  - May have fixed this...
++ Use same player ID even for different sessions (could cause some user-facing issue)
+- Too many dispatches when setting and updating state--make an option to only
+  dispatch once
 - Websocket connection is often flaky (could this be the Chrome same-host connection limit?)
   - Not a problem in practice
+- Session exists after it's over
+  - Set session to expire after all users disconnect?
+  - Alternatively, user action sets 5-minute expiration for session
 - Players can transfer tokens from another player's storage node
   - Either, current token should be set to null (maybe not great)
   - Or, transfers to another player can only occur from shared nodes
 - Relationship generation can fail
 + Someone can be a wingman for a person who has a crush on them
 - Multiple players of the same name can be created if both validate successfully and then join socket. I.e., no socket validation
-  -  Solution: Force disconnect in this case (relies on top feature to fit in
+  - Solution: Force disconnect -> send back to lobby if game hasn't started
+    (with message that name is already taken or that session is in progress)
 - After switching to fullscreen, I will receive state updates, even for moves I make
 - Timers (used for countdown and timing before voting) can be broken by restarting the server
+- This one
+      events.js:170
+        throw er; // Unhandled 'error' event
+        ^
+
+  Error: read ECONNRESET
+      at TCP.onStreamRead (internal/stream_base_commons.js:167:27)
+  Emitted 'error' event at:
+      at emitErrorNT (internal/streams/destroy.js:91:8)
+      at emitErrorAndCloseNT (internal/streams/destroy.js:59:3)
+      at processTicksAndRejections (internal/process/task_queues.js:81:17)
+
 
 ## Features to fit in
 - When the client disconnects, drop back into game in refresh
@@ -139,8 +196,8 @@ Progress is indicated in terms of where I am regarding making these actual items
 ### 1/24/20
 / images_urls type error
   / fixed?
-- switching party leaders is fun
-  - Maybe we want to randomly assign the note-taker?
++ switching party leaders is fun
+  + Maybe we want to randomly assign the note-taker? Nah:)
 + need to store session info in cookie because errors happen and refreshes are needed
 + adjust for different resolutions
 + iphones don’t work:(
@@ -151,6 +208,26 @@ x maybe creating session id is fun
   x no
 + fixed crush counts would be good
 x add tiebreaker
-- actually show graph of relationships
++ actually show graph of relationships
 + better describe game
 + multiple rounds with cumulative points
+
+### 2/8/20
++ talk to each other to play
++ bottom row is own plates
++ enter to join session
+/ getting needs is too fast (four storage plates? four types of food? flowers, ice cream, teddy bear)
+  + We're trying out four-of-a-kind
+  - "Maximize scarcity => maximize communication, but keep enough luck/input
+    randomness such that the game isn't too pure."
++ indicate note-taker
+x lose points for not meeting crush’s needs
+  - There is already a cost to not meeting crush's needs
++ pick an avatar
+- Some role ideas (not sure if scope creep?)
+  - throw away to trade? (role for that?)
+  - trickster—nobody has crush on them (get as many people to guess them as possible)
+- cooldown before can end game
+  - Possibly. I'm still not sure whether it's bad someone can end the game immediately
++ final round—bonus points if mutual attraction
++ restrict name length
