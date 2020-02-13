@@ -2,6 +2,7 @@
 
 import _ from 'lodash';
 import React from 'react';
+import Button from '@material-ui/core/Button';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -9,23 +10,46 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import ArrowUpward from '@material-ui/icons/ArrowUpward';
+import ArrowDownward from '@material-ui/icons/ArrowDownward';
+import Stop from '@material-ui/icons/Stop';
 
+import announce, { startNextRound } from '../../network/network';
 import {
   getCrushSelections,
   getGuessedCrushesCorrectly,
+  getPartyLeader,
   getPlayer,
   getPlayerRelationship,
+  getPoints,
+  getRoundNumber,
   getSecretLove,
   getSelectedNamesFromPlayerId,
+  getSessionInfo,
   getNeedsMet,
   getParticipatingPlayers,
 } from '../../state/getters';
 
+type PlaceDeltaProps = {
+  direction: number,
+};
+
+function PlaceDelta({ direction }: PlaceDeltaProps) {
+  if (direction === 1) return <ArrowUpward />;
+  if (direction === -1) return <ArrowDownward />;
+  if (direction === 0) return <Stop />;
+  return <span>?</span>;
+}
+
 export default function ResultsTable() {
   if (_.isEmpty(getCrushSelections())) return <p>Loading...</p>;
 
-  const playerResults = _.map(getParticipatingPlayers(), player => ({
-    playerName: player.name,
+  const { playerId } = getSessionInfo();
+  const partyLeader = getPartyLeader();
+  const roundNumber = getRoundNumber();
+  const points = getPoints();
+  const playerResults = _.mapValues(getParticipatingPlayers(), player => ({
+    player,
     relationship: _.flow(({ type, toId }) =>
       type === 'crush'
         ? `Crush on ${getPlayer(toId).name}`
@@ -38,42 +62,60 @@ export default function ResultsTable() {
   }));
 
   const stringifyPoints = points => (points === 0 ? '-' : `+${points}`);
-  const total = result =>
+  const newPoints = result =>
     result.needsMetPoints +
     result.guessedCrushesPoints +
     result.secretLovePoints;
+  const previousPoints = result => points[result.player.id] || 0;
+  const total = result => previousPoints(result) + newPoints(result);
+  const handleStartNextRound = () => {
+    announce(startNextRound(playerId));
+  };
+
+  const place = (allPoints, point) =>
+    allPoints.length + 1 - _.sortedLastIndex(_.sortBy(allPoints), point);
+  const places = _.mapValues(playerResults, result => ({
+    place: place(_.map(playerResults, total), total(result)),
+    previousPlace: place(
+      _.map(playerResults, previousPoints),
+      previousPoints(result)
+    ),
+  }));
+  const normalize = value => (value === 0 ? 0 : value / Math.abs(value));
 
   return (
-    <TableContainer
-      component={Paper}
-      style={{ height: '100%', overflow: 'scroll' }}
-    >
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Place</TableCell>
-            <TableCell>Player name</TableCell>
-            <TableCell>Relationship</TableCell>
-            <TableCell>Crush selection</TableCell>
-            <TableCell align="center">Needs met</TableCell>
-            <TableCell align="center">Guessed all lovers</TableCell>
-            <TableCell align="center">Secret love</TableCell>
-            <TableCell align="center">Total</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {_.map(
-            _.zip(
-              _.reverse(_.sortBy(playerResults, total)),
-              _.range(playerResults.length)
-            ),
-            ([result, index]) => (
-              <TableRow key={result.playerName}>
+    <div style={{ height: '100%', overflow: 'scroll' }}>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Place</TableCell>
+              <TableCell>Player name</TableCell>
+              <TableCell>Relationship</TableCell>
+              <TableCell>Crush selection</TableCell>
+              <TableCell align="center">Needs met</TableCell>
+              <TableCell align="center">Guessed all lovers</TableCell>
+              <TableCell align="center">Secret love</TableCell>
+              <TableCell align="center">Total</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {_.map(_.reverse(_.sortBy(playerResults, total)), result => (
+              <TableRow key={result.player.name}>
                 <TableCell component="th" scope="row">
-                  {index + 1}
+                  {_.flow(({ place, previousPlace }) => (
+                    <span>
+                      {place}
+                      {roundNumber !== 1 && (
+                        <PlaceDelta
+                          direction={normalize(previousPlace - place)}
+                        />
+                      )}
+                    </span>
+                  ))(places[result.player.id])}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {result.playerName}
+                  {result.player.name}
                 </TableCell>
                 <TableCell>{result.relationship}</TableCell>
                 <TableCell>{result.crushSelection}</TableCell>
@@ -88,10 +130,20 @@ export default function ResultsTable() {
                 </TableCell>
                 <TableCell align="center">{total(result)}</TableCell>
               </TableRow>
-            )
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      {playerId === partyLeader && (
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          onClick={handleStartNextRound}
+        >
+          Start Round {roundNumber + 1}!
+        </Button>
+      )}
+    </div>
   );
 }

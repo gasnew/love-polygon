@@ -15,6 +15,7 @@ const SUBMIT_VOTES = 'submitVotes';
 const TRANSFER_TOKEN = 'transferToken';
 const SWAP_TOKENS = 'swapTokens';
 const SEE_RESULTS = 'seeResults';
+const START_NEXT_ROUND = 'startNextRound';
 
 export function setName(name: string): Message {
   return {
@@ -99,6 +100,10 @@ export function seeResults(playerId: string): Message {
   return { type: SEE_RESULTS, playerId };
 }
 
+export function startNextRound(playerId: string): Message {
+  return { type: START_NEXT_ROUND, playerId };
+}
+
 export default function announce(message: Message) {
   if (
     !_.includes(
@@ -112,6 +117,7 @@ export default function announce(message: Message) {
         SWAP_TOKENS,
         FINISH_ROUND,
         SEE_RESULTS,
+        START_NEXT_ROUND,
       ],
       message.type
     )

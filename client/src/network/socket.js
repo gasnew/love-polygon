@@ -15,7 +15,9 @@ import dispatch, {
   setPartyLeader,
   setPhase,
   setPlayerName,
+  setPoints,
   setRelationships,
+  setRoundNumber,
   setTokenNodeId,
   setVotingOrder,
   startCountdown,
@@ -118,9 +120,11 @@ export function setState(serverState: ServerState) {
     partyLeader,
     phase,
     players,
+    points,
     needs,
     nodes,
     relationships,
+    roundNumber,
     tokens,
     votingOrder,
   } = serverState;
@@ -153,5 +157,7 @@ export function setState(serverState: ServerState) {
   silentDispatch(setCrushSelections(crushSelections));
   // NOTE: We only call `dispatch` for the last update so that the event to
   // re-render the React components only gets fired once
-  dispatch(setCurrentVoter(currentVoter));
+  silentDispatch(setCurrentVoter(currentVoter));
+  silentDispatch(setRoundNumber(roundNumber));
+  dispatch(setPoints(points));
 }

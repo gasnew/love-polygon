@@ -71,6 +71,10 @@ export type CrushSelections = {
   [string]: CrushSelection,
 };
 
+export type Points = {
+  [string]: number,
+};
+
 export type ServerState = {|
   phase: Phase,
   players: Players,
@@ -83,6 +87,8 @@ export type ServerState = {|
   currentVoter: ?string,
   roundEnder: ?string,
   crushSelections: CrushSelections,
+  roundNumber: number,
+  points: Points,
 |};
 
 export type SubServerState = $Values<ServerState>;
@@ -131,6 +137,10 @@ export type Message =
     }
   | {
       type: 'seeResults',
+      playerId: string,
+    }
+  | {
+      type: 'startNextRound',
       playerId: string,
     };
 

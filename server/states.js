@@ -5,11 +5,15 @@ import randomColor from 'randomcolor';
 import uniqid from 'uniqid';
 
 import type {
+  CrushSelections,
+  Needs,
+  Nodes,
   Player,
   Players,
   Relationships,
   RelationshipType,
   ServerState,
+  Tokens,
 } from './networkTypes';
 
 type NewPlayerStateProps = {
@@ -214,7 +218,7 @@ export function getRomanceState({
       needs,
       (needTypes, need) => [
         ...needTypes,
-        ..._.map(_.range(3), () => need.type),
+        ..._.map(_.range(NODE_COUNT), () => need.type),
       ],
       []
     ),
@@ -292,6 +296,38 @@ export function getRomanceState({
     },
     needs,
     votingOrder: [],
+    crushSelections,
+  };
+}
+
+type RomanceCleanupProps = {
+  players: Players,
+  nodes: Nodes,
+  tokens: Tokens,
+  relationships: Relationships,
+  needs: Needs,
+  crushSelections: CrushSelections,
+};
+
+export function getRomanceCleanup({
+  players,
+  nodes,
+  tokens,
+  relationships,
+  needs,
+  crushSelections,
+}: RomanceCleanupProps): $Shape<ServerState> {
+  const participatingPlayers = _.pickBy(players, 'inRound');
+  const nodesToDelete = _.pickBy(nodes, node =>
+    _.includes(_.map(participatingPlayers, 'id'), node.playerIds[0])
+  );
+  const tokensToDelete = _.pickBy(tokens, token => nodes[token.nodeId]);
+
+  return {
+    nodes: nodesToDelete,
+    tokens: tokensToDelete,
+    relationships,
+    needs,
     crushSelections,
   };
 }

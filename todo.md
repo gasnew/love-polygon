@@ -62,10 +62,10 @@
     + Verify this works on iPhones (even with the weird elastic end-of-page
       scroll behavior)
     + Only lock scrolling on some screens
-- Final screen pt. 2
-  - Lead person can initiate next round
-  - Points accumulate
-  - Ties are indicated properly (two tie at top => both 2nd place)
+/ Final screen pt. 2
+  + Lead person can initiate next round
+  + Points accumulate
+  + Ties are indicated properly (two tie at top => both 2nd place)
   - At end of third round, button links to lobby page
 - Milestone 2 complete!!
 - More gameplay upgrades
@@ -114,6 +114,7 @@
     an arc
   - Players can select avatars
   - Make sure note-taker is noticeable
+  - Descriptions for points in table
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!
@@ -127,6 +128,11 @@
   - Bonus points in final round if you can guess the only pair of players who
     had a crush on each other
   - This probably occurs after voting once all the information is out there
+- Pre-results screen
+  - Shows points being added to previous total
+  - Shows how placements changed
+  - Crowns victor on final round
+  - Transitions to results screen
 - Host on the cloud for all to see
   - AWS CDK?
   - Configure app environment (i.e., redis URL)
