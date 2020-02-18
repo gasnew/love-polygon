@@ -5,7 +5,7 @@ import _ from 'lodash';
 import uniqid from 'uniqid';
 import type { RedisClient } from 'async-redis';
 
-import { NAME_LIMIT } from './constants';
+import { NAME_LIMIT, ROUND_COUNT } from './constants';
 import withEvents from './events';
 import getFollowEdge from './phase';
 import {
@@ -13,7 +13,12 @@ import {
   getRomanceCleanup,
   getRomanceState,
 } from './states';
-import { getPlayerTokens, getPointCriteria } from './util';
+import {
+  asyncArrayEach,
+  asyncObjectEach,
+  getPlayerTokens,
+  getPointCriteria,
+} from './util';
 import type { Emitter } from './events';
 
 import type {
@@ -97,7 +102,7 @@ export function getBaseSession({
   };
   const updateAll = async (serverState: ServerState) => {
     const currentServerState = await getAll();
-    _.each(
+    asyncObjectEach(
       serverState,
       async (objects, key) =>
         await update(key, objects, currentServerState[key])
@@ -242,7 +247,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     await set('roundNumber', roundNumber + 1);
 
     // Reset romance state
-    await _.each(
+    await asyncObjectEach(
       getRomanceCleanup(serverState),
       async (objects, name) =>
         await deleteObjects(name, _.map(objects, 'id'), serverState[name])
@@ -261,6 +266,37 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       await updateAll(getRomanceState({ players }));
     }
     console.log(`starting round ${roundNumber + 1}!`);
+    emit('changePhase');
+  };
+  const returnToLobby = async () => {
+    const serverState = await getAll();
+
+    // Remove all traces of round
+    await asyncObjectEach(
+      getRomanceCleanup(serverState),
+      async (objects, name) => {
+        await deleteObjects(name, _.map(objects, 'id'), serverState[name]);
+      }
+    );
+    await set('partyLeader', null);
+    await set('votingOrder', []);
+    await set('currentVoter', null);
+    await set('roundEnder', null);
+    await set('roundNumber', 1);
+    await set('points', {});
+
+    // Grant in-round players the "new player" state, and set them to be not
+    // in-round
+    const participatingPlayers = _.pickBy(serverState.players, 'inRound');
+    await asyncObjectEach(participatingPlayers, async player => {
+      const { nodes, tokens } = getNewPlayerState({
+        playerId: player.id,
+      });
+      await update('nodes', nodes);
+      await update('tokens', tokens);
+      await update('players', { [player.id]: { inRound: false } });
+    });
+
     emit('changePhase');
   };
 
@@ -286,6 +322,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       },
       results: {
         startNextRound: transition('romance', startNextRound),
+        returnToLobby: transition('lobby', returnToLobby),
       },
     }),
   });
@@ -420,7 +457,12 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
         return serverState.currentVoter === message.currentVoterId;
       } else if (message.type === 'startNextRound') {
         return (
-          serverState.roundNumber < 3 &&
+          serverState.roundNumber < ROUND_COUNT &&
+          message.playerId === serverState.partyLeader
+        );
+      } else if (message.type === 'returnToLobby') {
+        return (
+          serverState.roundNumber === ROUND_COUNT &&
           message.playerId === serverState.partyLeader
         );
       }
@@ -552,6 +594,8 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
         await followEdge('seeResults');
       } else if (message.type === 'startNextRound') {
         await followEdge('startNextRound');
+      } else if (message.type === 'returnToLobby') {
+        await followEdge('returnToLobby');
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       return getAll();

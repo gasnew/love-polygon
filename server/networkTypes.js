@@ -142,6 +142,10 @@ export type Message =
   | {
       type: 'startNextRound',
       playerId: string,
+    }
+  | {
+      type: 'returnToLobby',
+      playerId: string,
     };
 
 export type SessionInfo = {|

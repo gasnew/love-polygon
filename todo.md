@@ -62,18 +62,22 @@
     + Verify this works on iPhones (even with the weird elastic end-of-page
       scroll behavior)
     + Only lock scrolling on some screens
-/ Final screen pt. 2
++ Final screen pt. 2
   + Lead person can initiate next round
   + Points accumulate
   + Ties are indicated properly (two tie at top => both 2nd place)
-  - At end of third round, button links to lobby page
+  + At end of third round, button links to lobby page
+- True love!!
+  - Bonus points (+5?) in final round if you can guess the only pair of players
+    who had a crush on each other
+  - This probably occurs after voting once all the information is out there
 - Milestone 2 complete!!
-- More gameplay upgrades
-  - Ask the voter whether the note-taker's selections are correct
 - Playtest a bit more
 - Improve lobby screen
   - Be able to see how many people are in the lobby
   - Name character limit is imposed for styling reasons
+  - Name input field appears in dialog and is focused on page load (if name is
+    empty). It can be opened again
   - Jar of hearts (with players' names!)
     - This is sorted so you can see who entered first
     - If leader leaves, next up becomes leader
@@ -115,6 +119,10 @@
   - Players can select avatars
   - Make sure note-taker is noticeable
   - Descriptions for points in table
+- More gameplay upgrades
+  - Ask the voter whether the note-taker's selections are correct
+  - Include "pick"ing, which will prevent a player from stealing an item from
+    another player's hand
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!
@@ -124,15 +132,12 @@
   - celebrate
 - Figure out how to actually calculate probabilities, e.g., "How many crushes
   should there be such that guessing nobody isn't the best strategy."
-- True love!!
-  - Bonus points in final round if you can guess the only pair of players who
-    had a crush on each other
-  - This probably occurs after voting once all the information is out there
 - Pre-results screen
   - Shows points being added to previous total
   - Shows how placements changed
   - Crowns victor on final round
   - Transitions to results screen
+- Fix all or virtually all bugs
 - Host on the cloud for all to see
   - AWS CDK?
   - Configure app environment (i.e., redis URL)
@@ -158,11 +163,6 @@
 ## Known bugs
 - What happens on the frontend when I delete a nameless player?
   - May have fixed this...
-+ Use same player ID even for different sessions (could cause some user-facing issue)
-- Too many dispatches when setting and updating state--make an option to only
-  dispatch once
-- Websocket connection is often flaky (could this be the Chrome same-host connection limit?)
-  - Not a problem in practice
 - Session exists after it's over
   - Set session to expire after all users disconnect?
   - Alternatively, user action sets 5-minute expiration for session
@@ -170,12 +170,13 @@
   - Either, current token should be set to null (maybe not great)
   - Or, transfers to another player can only occur from shared nodes
 - Relationship generation can fail
-+ Someone can be a wingman for a person who has a crush on them
 - Multiple players of the same name can be created if both validate successfully and then join socket. I.e., no socket validation
   - Solution: Force disconnect -> send back to lobby if game hasn't started
     (with message that name is already taken or that session is in progress)
 - After switching to fullscreen, I will receive state updates, even for moves I make
 - Timers (used for countdown and timing before voting) can be broken by restarting the server
+  - Maybe solve with redis delayed task?
+    https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-4-task-queues/6-4-2-delayed-tasks/
 - This one
       events.js:170
         throw er; // Unhandled 'error' event
@@ -187,7 +188,12 @@
       at emitErrorNT (internal/streams/destroy.js:91:8)
       at emitErrorAndCloseNT (internal/streams/destroy.js:59:3)
       at processTicksAndRejections (internal/process/task_queues.js:81:17)
-
++ Websocket connection is often flaky (could this be the Chrome same-host connection limit?)
+  + Not a problem in practice
++ Use same player ID even for different sessions (could cause some user-facing issue)
++ Someone can be a wingman for a person who has a crush on them
++ Too many dispatches when setting and updating state--make an option to only
+  dispatch once
 
 ## Features to fit in
 - When the client disconnects, drop back into game in refresh
@@ -228,7 +234,7 @@ x add tiebreaker
     randomness such that the game isn't too pure."
 + indicate note-taker
 x lose points for not meeting crush’s needs
-  - There is already a cost to not meeting crush's needs
+  x There is already a cost to not meeting crush's needs
 + pick an avatar
 - Some role ideas (not sure if scope creep?)
   - throw away to trade? (role for that?)

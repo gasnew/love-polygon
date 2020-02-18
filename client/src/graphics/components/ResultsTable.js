@@ -14,7 +14,8 @@ import ArrowUpward from '@material-ui/icons/ArrowUpward';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import Stop from '@material-ui/icons/Stop';
 
-import announce, { startNextRound } from '../../network/network';
+import { ROUND_COUNT } from '../../constants';
+import announce, { returnToLobby, startNextRound } from '../../network/network';
 import {
   getCrushSelections,
   getGuessedCrushesCorrectly,
@@ -68,9 +69,6 @@ export default function ResultsTable() {
     result.secretLovePoints;
   const previousPoints = result => points[result.player.id] || 0;
   const total = result => previousPoints(result) + newPoints(result);
-  const handleStartNextRound = () => {
-    announce(startNextRound(playerId));
-  };
 
   const place = (allPoints, point) =>
     allPoints.length + 1 - _.sortedLastIndex(_.sortBy(allPoints), point);
@@ -82,6 +80,13 @@ export default function ResultsTable() {
     ),
   }));
   const normalize = value => (value === 0 ? 0 : value / Math.abs(value));
+
+  const handleStartNextRound = () => {
+    announce(startNextRound(playerId));
+  };
+  const handleReturnToLobby = () => {
+    announce(returnToLobby(playerId));
+  };
 
   return (
     <div style={{ height: '100%', overflow: 'scroll' }}>
@@ -134,14 +139,26 @@ export default function ResultsTable() {
           </TableBody>
         </Table>
       </TableContainer>
-      {playerId === partyLeader && (
+      {playerId === partyLeader && roundNumber < ROUND_COUNT && (
         <Button
           fullWidth
           variant="contained"
           color="primary"
           onClick={handleStartNextRound}
         >
-          Start Round {roundNumber + 1}!
+          {roundNumber < ROUND_COUNT - 1
+            ? `Start Round ${roundNumber + 1}!`
+            : 'Start Final Round!'}
+        </Button>
+      )}
+      {playerId === partyLeader && roundNumber === ROUND_COUNT && (
+        <Button
+          fullWidth
+          variant="contained"
+          color="secondary"
+          onClick={handleReturnToLobby}
+        >
+          Return to Lobby
         </Button>
       )}
     </div>

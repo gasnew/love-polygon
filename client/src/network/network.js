@@ -16,6 +16,7 @@ const TRANSFER_TOKEN = 'transferToken';
 const SWAP_TOKENS = 'swapTokens';
 const SEE_RESULTS = 'seeResults';
 const START_NEXT_ROUND = 'startNextRound';
+const RETURN_TO_LOBBY = 'returnToLobby';
 
 export function setName(name: string): Message {
   return {
@@ -104,6 +105,10 @@ export function startNextRound(playerId: string): Message {
   return { type: START_NEXT_ROUND, playerId };
 }
 
+export function returnToLobby(playerId: string): Message {
+  return { type: RETURN_TO_LOBBY, playerId };
+}
+
 export default function announce(message: Message) {
   if (
     !_.includes(
@@ -118,6 +123,7 @@ export default function announce(message: Message) {
         FINISH_ROUND,
         SEE_RESULTS,
         START_NEXT_ROUND,
+        RETURN_TO_LOBBY,
       ],
       message.type
     )

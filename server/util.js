@@ -7,8 +7,29 @@ import type {
   Needs,
   Nodes,
   Relationships,
+  ServerState,
+  ServerStateKeys,
+  SubServerState,
   Tokens,
 } from './networkTypes';
+
+export async function asyncArrayEach<Item>(
+  items: Array<Item>,
+  func: Item => any
+): Promise<void> {
+  for (const item of items) {
+    await func(item);
+  }
+}
+
+export async function asyncObjectEach<T: Object>(
+  obj: T,
+  func: ($Values<T>, $Keys<T>) => Promise<any>
+): Promise<void> {
+  for (const key of _.keys(obj)) {
+    await func(obj[key], key);
+  }
+}
 
 export function getPlayerNodes(nodes: Nodes, playerId: string): Nodes {
   return _.pickBy(
