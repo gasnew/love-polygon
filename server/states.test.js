@@ -8,20 +8,25 @@ import {
   getNumberOfLovers,
   getRoles,
   getRomanceState,
+  getTrueLoveState,
   pairs,
 } from './states';
-import type { Players } from './networkTypes';
+import type { Player, Players } from './networkTypes';
 
 jest.mock('uniqid');
 
-function buildPlayer(id: string): Players {
+function buildPlayer(id: string): Player {
   return {
-    [id]: {
-      id,
-      name: 'bobbeh',
-      active: true,
-    },
+    id,
+    name: 'bobbeh',
+    active: true,
+    inRound: true,
+    color: '#000000',
   };
+}
+
+function buildPlayers(ids: string[]): $Shape<Players> {
+  return _.keyBy(_.map(ids, buildPlayer), 'id');
 }
 
 describe('pairs', () => {
@@ -39,26 +44,18 @@ describe('pairs', () => {
 });
 
 describe('getNumberOfLovers', () => {
-  it('returns a number sometimes', () => {
-    const randomMock = jest.spyOn(_, 'random');
-
-    getNumberOfLovers(3);
-    expect(randomMock).toHaveBeenCalledWith(1, 3);
+  it('returns a number', () => {
+    expect(getNumberOfLovers(3)).toEqual(3);
   });
 
   it('throws an error if number of players is unsupported', () => {
-    expect(() => getNumberOfLovers(1000)).toThrow(/not supported/);
+    expect(() => getNumberOfLovers(1000)).toThrow(/Too many folks for love/);
   });
 });
 
 describe('getRoles', () => {
   it('returns lovers and wingmen given a set of players', () => {
-    const players = {
-      ...buildPlayer('abc'),
-      ...buildPlayer('def'),
-      ...buildPlayer('ghi'),
-      ...buildPlayer('jkl'),
-    };
+    const players = buildPlayers(['abc', 'def', 'ghi', 'jkl']);
 
     const shuffleMock = jest.spyOn(_, 'shuffle');
     shuffleMock.mockReturnValue(['abc', 'jkl', 'ghi', 'def']);
@@ -80,11 +77,8 @@ describe('getRoles', () => {
 
 describe('buildRelationships', () => {
   it('works with multiple sources and one target', () => {
-    const sourcePlayers = {
-      ...buildPlayer('abc'),
-      ...buildPlayer('def'),
-    };
-    const targetPlayers = buildPlayer('ghi');
+    const sourcePlayers = buildPlayers(['abc', 'def']);
+    const targetPlayers = buildPlayers(['ghi']);
 
     uniqid.mockReturnValueOnce('myFirstId').mockReturnValueOnce('mySecondId');
 
@@ -107,18 +101,12 @@ describe('buildRelationships', () => {
   });
 
   it('works with multiple sources and targets', () => {
-    const shuffleMock = jest.spyOn(_, 'shuffle');
-    const sourcePlayers = {
-      ...buildPlayer('abc'),
-      ...buildPlayer('def'),
-    };
-    const targetPlayers = {
-      ...buildPlayer('ghi'),
-      ...buildPlayer('jkl'),
-    };
+    const sampleMock = jest.spyOn(_, 'sample');
+    const sourcePlayers = buildPlayers(['abc', 'def']);
+    const targetPlayers = buildPlayers(['ghi', 'jkl']);
 
     uniqid.mockReturnValueOnce('myFirstId').mockReturnValueOnce('mySecondId');
-    shuffleMock.mockReturnValue([targetPlayers.jkl, targetPlayers.ghi]);
+    sampleMock.mockReturnValue(targetPlayers.jkl);
 
     expect(buildRelationships(sourcePlayers, targetPlayers, 'wingman')).toEqual(
       {
@@ -137,6 +125,56 @@ describe('buildRelationships', () => {
       }
     );
 
-    shuffleMock.mockRestore();
+    sampleMock.mockRestore();
+  });
+});
+
+describe('getTrueLoveState', () => {
+  uniqid.mockImplementation(jest.requireActual('uniqid'));
+
+  it('returns the right number of crushes and wingmen', () => {
+    const players = buildPlayers(_.map(_.range(8), String));
+
+    const { relationships } = getTrueLoveState({ players });
+
+    expect(_.size(relationships)).toEqual(8);
+    expect(_.size(_.filter(relationships, ['type', 'crush']))).toEqual(5);
+    expect(_.size(_.filter(relationships, ['type', 'wingman']))).toEqual(3);
+  });
+
+  it('never allows someone to crush on themselves', () => {
+    const players = buildPlayers(_.map(_.range(8), String));
+
+    _.each(_.range(100), () => {
+      const { relationships } = getTrueLoveState({ players });
+
+      expect(
+        !_.some(relationships, ({ fromId, toId }) => fromId === toId)
+      ).toEqual(true);
+    });
+  });
+
+  it('returns only one reciprocal crush', () => {
+    const players = buildPlayers(_.map(_.range(8), String));
+
+    _.each(_.range(100), () => {
+      const { relationships } = getTrueLoveState({ players });
+
+      expect(
+        _.flow(
+          relationships => _.filter(relationships, ['type', 'crush']),
+          crushes =>
+            _.filter(crushes, crush =>
+              _.some(
+                crushes,
+                otherCrush =>
+                  crush.fromId === otherCrush.toId &&
+                  crush.toId === otherCrush.fromId
+              )
+            ),
+          _.size
+        )(relationships)
+      ).toEqual(2);
+    });
   });
 });

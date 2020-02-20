@@ -71,6 +71,16 @@ export type CrushSelections = {
   [string]: CrushSelection,
 };
 
+export type TrueLoveSelection = {|
+  id: string,
+  playerId: string,
+  player1Id: ?string,
+  player2Id: ?string,
+|};
+export type TrueLoveSelections = {
+  [string]: TrueLoveSelection,
+};
+
 export type Points = {
   [string]: number,
 };
@@ -87,6 +97,7 @@ export type ServerState = {|
   currentVoter: ?string,
   roundEnder: ?string,
   crushSelections: CrushSelections,
+  trueLoveSelections: TrueLoveSelections,
   roundNumber: number,
   points: Points,
 |};
@@ -134,6 +145,12 @@ export type Message =
       type: 'deselectPlayer',
       sourcePlayerId: string,
       targetPlayerId: string,
+    }
+  | {
+      type: 'submitTrueLoveSelections',
+      playerId: string,
+      player1Id: string,
+      player2Id: string,
     }
   | {
       type: 'seeResults',

@@ -12,6 +12,7 @@ import {
   getNewPlayerState,
   getRomanceCleanup,
   getRomanceState,
+  getTrueLoveState,
 } from './states';
 import {
   asyncArrayEach,
@@ -102,7 +103,7 @@ export function getBaseSession({
   };
   const updateAll = async (serverState: ServerState) => {
     const currentServerState = await getAll();
-    asyncObjectEach(
+    await asyncObjectEach(
       serverState,
       async (objects, key) =>
         await update(key, objects, currentServerState[key])
@@ -184,24 +185,24 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     );
 
     try {
-      await updateAll(getRomanceState({ players: readyPlayers }));
+      await updateAll(getTrueLoveState({ players: readyPlayers }));
     } catch (error) {
       console.log('WHOOPS! Try, try again');
-      await updateAll(getRomanceState({ players: readyPlayers }));
+      await updateAll(getTrueLoveState({ players: readyPlayers }));
     }
     console.log('start game now');
-    emit('changePhase');
+    await emit('changePhase');
   };
   const startCountdown = async () => {
     console.log('start countdown');
     // TODO(gnewman): Reimplement this countdown timer to be more robust
     // Add 0.5 seconds to account for latency
-    setTimeout(async () => await endGame(), 15500);
-    emit('changePhase');
+    setTimeout(endGame, 15500);
+    await emit('changePhase');
   };
   const finishGame = async () => {
     console.log('finish game');
-    emit('changePhase');
+    await emit('changePhase');
     setTimeout(async () => {
       await setVotingOrder();
       await followEdge('startVoting');
@@ -218,11 +219,11 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
   };
   const startVoting = async () => {
     console.log('start voting');
-    emit('changePhase');
+    await emit('changePhase');
   };
   const seeResults = async () => {
     console.log('see results');
-    emit('changePhase');
+    await emit('changePhase');
   };
   const startNextRound = async () => {
     const serverState = await getAll();
@@ -266,7 +267,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       await updateAll(getRomanceState({ players }));
     }
     console.log(`starting round ${roundNumber + 1}!`);
-    emit('changePhase');
+    await emit('changePhase');
   };
   const returnToLobby = async () => {
     const serverState = await getAll();
@@ -297,7 +298,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       await update('players', { [player.id]: { inRound: false } });
     });
 
-    emit('changePhase');
+    await emit('changePhase');
   };
 
   const followEdge = getFollowEdge({
@@ -455,6 +456,21 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
         return message.playerId === serverState.partyLeader;
       } else if (message.type === 'submitVotes') {
         return serverState.currentVoter === message.currentVoterId;
+      } else if (message.type === 'submitTrueLoveSelections') {
+        const { playerId, player1Id, player2Id } = message;
+        const { partyLeader, trueLoveSelections } = serverState;
+
+        const trueLoveSelection = _.find(trueLoveSelections, [
+          'playerId',
+          playerId,
+        ]);
+        if (trueLoveSelection.player1Id || trueLoveSelection.player2Id)
+          return false;
+        return (
+          partyLeader === playerId &&
+          playerId !== player1Id &&
+          playerId !== player2Id
+        );
       } else if (message.type === 'startNextRound') {
         return (
           serverState.roundNumber < ROUND_COUNT &&
@@ -590,6 +606,20 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
             'currentVoter',
             votingOrder[votingOrder.indexOf(currentVoterId) + 1]
           );
+      } else if (message.type === 'submitTrueLoveSelections') {
+        const { playerId, player1Id, player2Id } = message;
+        const { trueLoveSelections } = serverState;
+
+        const trueLoveSelection = _.find(trueLoveSelections, [
+          'playerId',
+          playerId,
+        ]);
+        await update('trueLoveSelections', {
+          [trueLoveSelection.id]: {
+            player1Id,
+            player2Id,
+          },
+        });
       } else if (message.type === 'seeResults') {
         await followEdge('seeResults');
       } else if (message.type === 'startNextRound') {
