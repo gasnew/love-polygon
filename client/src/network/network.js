@@ -14,6 +14,9 @@ const SELECT_PLAYER = 'selectPlayer';
 const SUBMIT_VOTES = 'submitVotes';
 const TRANSFER_TOKEN = 'transferToken';
 const SWAP_TOKENS = 'swapTokens';
+const START_TRUE_LOVE_VOTING = 'startTrueLoveVoting';
+const DESELECT_TRUE_LOVE = 'deselectTrueLove';
+const SELECT_TRUE_LOVE = 'selectTrueLove';
 const SEE_RESULTS = 'seeResults';
 const START_NEXT_ROUND = 'startNextRound';
 const RETURN_TO_LOBBY = 'returnToLobby';
@@ -101,6 +104,32 @@ export function seeResults(playerId: string): Message {
   return { type: SEE_RESULTS, playerId };
 }
 
+export function startTrueLoveVoting(playerId: string): Message {
+  return { type: START_TRUE_LOVE_VOTING, playerId };
+}
+
+export function deselectTrueLove(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Message {
+  return {
+    type: DESELECT_TRUE_LOVE,
+    sourcePlayerId,
+    targetPlayerId,
+  };
+}
+
+export function selectTrueLove(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Message {
+  return {
+    type: SELECT_TRUE_LOVE,
+    sourcePlayerId,
+    targetPlayerId,
+  };
+}
+
 export function startNextRound(playerId: string): Message {
   return { type: START_NEXT_ROUND, playerId };
 }
@@ -122,6 +151,9 @@ export default function announce(message: Message) {
         SWAP_TOKENS,
         FINISH_ROUND,
         SEE_RESULTS,
+        START_TRUE_LOVE_VOTING,
+        DESELECT_TRUE_LOVE,
+        SELECT_TRUE_LOVE,
         START_NEXT_ROUND,
         RETURN_TO_LOBBY,
       ],

@@ -19,6 +19,7 @@ import announce, { returnToLobby, startNextRound } from '../../network/network';
 import {
   getCrushSelections,
   getGuessedCrushesCorrectly,
+  getGuessedTrueLoveCorrectly,
   getPartyLeader,
   getPlayer,
   getPlayerRelationship,
@@ -38,7 +39,7 @@ type PlaceDeltaProps = {
 function PlaceDelta({ direction }: PlaceDeltaProps) {
   if (direction === 1) return <ArrowUpward />;
   if (direction === -1) return <ArrowDownward />;
-  if (direction === 0) return <Stop />;
+  if (direction === 0) return <span></span>;
   return <span>?</span>;
 }
 
@@ -60,13 +61,15 @@ export default function ResultsTable() {
     needsMetPoints: getNeedsMet(player.id) ? 1 : 0,
     guessedCrushesPoints: getGuessedCrushesCorrectly(player.id) ? 2 : 0,
     secretLovePoints: getSecretLove(player.id) ? 3 : 0,
+    trueLovePoints: getGuessedTrueLoveCorrectly(player.id) ? 5 : 0,
   }));
 
   const stringifyPoints = points => (points === 0 ? '-' : `+${points}`);
   const newPoints = result =>
     result.needsMetPoints +
     result.guessedCrushesPoints +
-    result.secretLovePoints;
+    result.secretLovePoints +
+    result.trueLovePoints;
   const previousPoints = result => points[result.player.id] || 0;
   const total = result => previousPoints(result) + newPoints(result);
 
@@ -101,6 +104,9 @@ export default function ResultsTable() {
               <TableCell align="center">Needs met</TableCell>
               <TableCell align="center">Guessed all lovers</TableCell>
               <TableCell align="center">Secret love</TableCell>
+              {roundNumber === ROUND_COUNT && (
+                <TableCell align="center">Guessed true love</TableCell>
+              )}
               <TableCell align="center">Total</TableCell>
             </TableRow>
           </TableHead>
@@ -133,6 +139,11 @@ export default function ResultsTable() {
                 <TableCell align="center">
                   {stringifyPoints(result.secretLovePoints)}
                 </TableCell>
+                {roundNumber === ROUND_COUNT && (
+                  <TableCell align="center">
+                    {stringifyPoints(result.trueLovePoints)}
+                  </TableCell>
+                )}
                 <TableCell align="center">{total(result)}</TableCell>
               </TableRow>
             ))}

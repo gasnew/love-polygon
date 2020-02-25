@@ -9,15 +9,17 @@ import {
   getNode,
   getPartyLeader,
   getPhase,
-  getPlayerCrushSelection,
   getPlayer,
+  getPlayerCrushSelection,
   getPlayers,
+  getPlayerTrueLoveSelection,
   getPlayerNodes,
   getNodes,
   getSessionInfo,
   getState,
   getToken,
   getTokens,
+  getTrueLoveSelections,
   getVotingOrder,
 } from './getters';
 import { GAME_STATE_UPDATED } from './state';
@@ -30,6 +32,8 @@ import type {
   Points,
   SessionInfo,
   TokenType,
+  TrueLoveSelection,
+  TrueLoveSelections,
 } from '../../../server/networkTypes';
 import type {
   Needs,
@@ -62,6 +66,9 @@ const START_COUNTDOWN = 'startCountdown';
 const SET_CRUSH_SELECTIONS = 'setCrushSelections';
 const SELECT_PLAYER = 'selectPlayer';
 const DESELECT_PLAYER = 'deselectPlayer';
+const SET_TRUE_LOVE_SELECTIONS = 'setTrueLoveSelections';
+const SELECT_TRUE_LOVE = 'selectTrueLove';
+const DESELECT_TRUE_LOVE = 'deselectTrueLove';
 const SET_ROUND_NUMBER = 'setRoundNumber';
 const SET_POINTS = 'setPoints';
 
@@ -117,6 +124,20 @@ type Action =
     }
   | {
       type: 'deselectPlayer',
+      sourcePlayerId: string,
+      targetPlayerId: string,
+    }
+  | {
+      type: 'setTrueLoveSelections',
+      trueLoveSelections: TrueLoveSelections,
+    }
+  | {
+      type: 'selectTrueLove',
+      sourcePlayerId: string,
+      targetPlayerId: string,
+    }
+  | {
+      type: 'deselectTrueLove',
       sourcePlayerId: string,
       targetPlayerId: string,
     }
@@ -181,6 +202,16 @@ const mergeIntoCrushSelections = (
   mergeIntoState('crushSelections', {
     ...getCrushSelections(),
     [crushSelectionId]: crushSelection,
+  });
+};
+
+const mergeIntoTrueLoveSelections = (
+  trueLoveSelectionId: string,
+  trueLoveSelection: TrueLoveSelection
+) => {
+  mergeIntoState('trueLoveSelections', {
+    ...getTrueLoveSelections(),
+    [trueLoveSelectionId]: trueLoveSelection,
   });
 };
 
@@ -262,6 +293,37 @@ export function deselectPlayer(
 ): Action {
   return {
     type: DESELECT_PLAYER,
+    sourcePlayerId,
+    targetPlayerId,
+  };
+}
+
+export function setTrueLoveSelections(
+  trueLoveSelections: TrueLoveSelections
+): Action {
+  return {
+    type: SET_TRUE_LOVE_SELECTIONS,
+    trueLoveSelections,
+  };
+}
+
+export function selectTrueLove(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Action {
+  return {
+    type: SELECT_TRUE_LOVE,
+    sourcePlayerId,
+    targetPlayerId,
+  };
+}
+
+export function deselectTrueLove(
+  sourcePlayerId: string,
+  targetPlayerId: string
+): Action {
+  return {
+    type: DESELECT_TRUE_LOVE,
     sourcePlayerId,
     targetPlayerId,
   };
@@ -492,6 +554,29 @@ export function silentDispatch(action: Action) {
             getPlayerCrushSelection(action.sourcePlayerId).playerIds,
             [action.targetPlayerId]
           ),
+        })
+      )(action.sourcePlayerId);
+      break;
+    case SET_TRUE_LOVE_SELECTIONS:
+      mergeIntoState('trueLoveSelections', action.trueLoveSelections);
+      break;
+    case SELECT_TRUE_LOVE:
+      _.flow(getPlayerTrueLoveSelection, selection =>
+        mergeIntoTrueLoveSelections(selection.id, {
+          ...selection,
+          ...(selection.player1Id
+            ? { player2Id: action.targetPlayerId }
+            : { player1Id: action.targetPlayerId }),
+        })
+      )(action.sourcePlayerId);
+      break;
+    case DESELECT_TRUE_LOVE:
+      _.flow(getPlayerTrueLoveSelection, selection =>
+        mergeIntoTrueLoveSelections(selection.id, {
+          ...selection,
+          ...(selection.player1Id === action.targetPlayerId
+            ? { player1Id: null }
+            : { player2Id: null }),
         })
       )(action.sourcePlayerId);
       break;

@@ -6,6 +6,7 @@ export type PhaseName =
   | 'countdown'
   | 'finished'
   | 'voting'
+  | 'trueLove'
   | 'results';
 export type Phase = {|
   name: PhaseName,
@@ -155,6 +156,20 @@ export type Message =
   | {
       type: 'seeResults',
       playerId: string,
+    }
+  | {
+      type: 'startTrueLoveVoting',
+      playerId: string,
+    }
+  | {
+      type: 'selectTrueLove',
+      sourcePlayerId: string,
+      targetPlayerId: string,
+    }
+  | {
+      type: 'deselectTrueLove',
+      sourcePlayerId: string,
+      targetPlayerId: string,
     }
   | {
       type: 'startNextRound',

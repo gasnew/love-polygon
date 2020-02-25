@@ -71,6 +71,7 @@
   - Bonus points (+5?) in final round if you can guess the only pair of players
     who had a crush on each other
   - This probably occurs after voting once all the information is out there
+  - lock-in
 - Milestone 2 complete!!
 - Playtest a bit more
 - Improve lobby screen
@@ -123,6 +124,8 @@
   - Ask the voter whether the note-taker's selections are correct
   - Include "pick"ing, which will prevent a player from stealing an item from
     another player's hand
+  - Allow player to hop back into active session (on top header bar?) even from
+    the landing page
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!

@@ -12,6 +12,7 @@ import type {
   RelationshipType,
   SessionInfo,
   TokenType,
+  TrueLoveSelections,
 } from '../../../server/networkTypes';
 
 export type Dimensions = {|
@@ -87,6 +88,7 @@ export type State = {|
   votingOrder: string[],
   currentVoter: ?string,
   crushSelections: CrushSelections,
+  trueLoveSelections: TrueLoveSelections,
   roundNumber: number,
   points: Points,
 |};
@@ -112,6 +114,7 @@ export default function generateState(sessionInfo: SessionInfo): State {
     votingOrder: [],
     currentVoter: null,
     crushSelections: {},
+    trueLoveSelections: {},
     roundNumber: 1,
     points: {},
   };

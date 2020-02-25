@@ -19,6 +19,7 @@ import dispatch, {
   setRelationships,
   setRoundNumber,
   setTokenNodeId,
+  setTrueLoveSelections,
   setVotingOrder,
   startCountdown,
 } from '../state/actions';
@@ -126,6 +127,7 @@ export function setState(serverState: ServerState) {
     relationships,
     roundNumber,
     tokens,
+    trueLoveSelections,
     votingOrder,
   } = serverState;
   const { playerId: currentPlayerId } = getSessionInfo();
@@ -155,9 +157,10 @@ export function setState(serverState: ServerState) {
   silentDispatch(setPartyLeader(partyLeader));
   silentDispatch(setVotingOrder(votingOrder));
   silentDispatch(setCrushSelections(crushSelections));
-  // NOTE: We only call `dispatch` for the last update so that the event to
-  // re-render the React components only gets fired once
+  silentDispatch(setTrueLoveSelections(trueLoveSelections));
   silentDispatch(setCurrentVoter(currentVoter));
   silentDispatch(setRoundNumber(roundNumber));
+  // NOTE: We only call `dispatch` for the last update so that the event to
+  // re-render the React components only gets fired once
   dispatch(setPoints(points));
 }
