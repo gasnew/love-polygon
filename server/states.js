@@ -211,6 +211,7 @@ function getTableState({ players }: TableStateProps): $Shape<ServerState> {
           playerId: player.id,
           player1Id: null,
           player2Id: null,
+          finalized: false,
         },
       };
     },

@@ -23,12 +23,14 @@ import { makeStyles } from '@material-ui/core/styles';
 import announce, {
   deselectTrueLove as networkedDeselectTrueLove,
   selectTrueLove as networkedSelectTrueLove,
+  submitTrueLoveSelections as networkedSubmitTrueLoveSelections,
   submitVotes as networkedSubmitVotes,
   seeResults,
 } from '../../network/network';
 import dispatch, {
   deselectTrueLove,
   selectTrueLove,
+  submitTrueLoveSelections,
 } from '../../state/actions';
 import {
   getAllTrueLoveSelectionsFinished,
@@ -161,6 +163,14 @@ export default function VotingBallot() {
 
   const playerify = playerId => players[playerId];
 
+  const handleSubmitTrueLoveSelections = () => {
+    const { player1Id, player2Id } = trueLoveSelection;
+    if (!player1Id || !player2Id) return;
+    dispatch(submitTrueLoveSelections(currentPlayerId, player1Id, player2Id));
+    announce(
+      networkedSubmitTrueLoveSelections(currentPlayerId, player1Id, player2Id)
+    );
+  };
   const handleShowFinalResults = () => {
     announce(seeResults(currentPlayerId));
   };
@@ -218,6 +228,21 @@ export default function VotingBallot() {
           ))}
         </List>
       </CardContent>
+      {!allTrueLoveSelectionsFinished && (
+        <CardActions>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            disabled={!bothSelectionsMade || trueLoveSelection.finalized}
+            onClick={handleSubmitTrueLoveSelections}
+          >
+            {trueLoveSelection.finalized
+              ? 'Waiting for other players...'
+              : 'Submit True Love Selections'}
+          </Button>
+        </CardActions>
+      )}
       {allTrueLoveSelectionsFinished && (
         <CardContent>
           {getGuessedTrueLoveCorrectly(currentPlayerId)
@@ -225,7 +250,6 @@ export default function VotingBallot() {
             : 'Nope :/'}
         </CardContent>
       )}
-
       {currentPlayerId === partyLeader && allTrueLoveSelectionsFinished && (
         <CardActions>
           <Button

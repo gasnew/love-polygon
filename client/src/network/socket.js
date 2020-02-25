@@ -20,16 +20,19 @@ import dispatch, {
   setRoundNumber,
   setTokenNodeId,
   setTrueLoveSelections,
+  setTrueLoveSelection,
   setVotingOrder,
   startCountdown,
 } from '../state/actions';
 import {
   getCurrentTokenId,
   getNode,
+  getOwnTrueLoveSelection,
   getPhase,
   getPlayer,
   getSessionInfo,
   getToken,
+  getTrueLoveSelections,
 } from '../state/getters';
 import type { ServerState } from '../../../server/networkTypes';
 
@@ -56,6 +59,7 @@ export function updateState(serverState: ServerState) {
     nodes,
     tokens,
     currentVoter,
+    trueLoveSelections,
     votingOrder,
   } = serverState;
   const getIsNew = getObject => object => !getObject(object.id);
@@ -107,6 +111,17 @@ export function updateState(serverState: ServerState) {
   silentDispatch(setPartyLeader(partyLeader));
   silentDispatch(setVotingOrder(votingOrder));
   silentDispatch(setCrushSelections(crushSelections));
+  _.flow(
+    selections =>
+      _.pickBy(
+        selections,
+        selection => selection.id !== getOwnTrueLoveSelection().id
+      ),
+    otherSelections =>
+      _.each(otherSelections, selection =>
+        silentDispatch(setTrueLoveSelection(selection))
+      )
+  )(trueLoveSelections);
   // NOTE: We only call `dispatch` for the last update so that the event to
   // re-render the React components only gets fired once
   dispatch(setCurrentVoter(currentVoter));

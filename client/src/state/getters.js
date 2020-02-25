@@ -151,15 +151,17 @@ export function getPlayerTrueLoveSelection(
   return _.find(getTrueLoveSelections(), ['playerId', playerId]);
 }
 
+export function getOwnTrueLoveSelection(): TrueLoveSelection {
+  const { playerId } = getSessionInfo();
+  return getPlayerTrueLoveSelection(playerId);
+}
+
 export function getTrueLoveSelections(): TrueLoveSelections {
   return getState().trueLoveSelections;
 }
 
 export function getAllTrueLoveSelectionsFinished(): boolean {
-  return _.every(
-    getTrueLoveSelections(),
-    ({ player1Id, player2Id }) => player1Id && player2Id
-  );
+  return _.every(getTrueLoveSelections(), 'finalized');
 }
 
 export function getVotingOrder(): string[] {

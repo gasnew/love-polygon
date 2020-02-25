@@ -506,8 +506,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
           'playerId',
           playerId,
         ]);
-        if (trueLoveSelection.player1Id && trueLoveSelection.player2Id)
-          return false;
+        if (trueLoveSelection.finalized) return false;
         return player1Id !== player2Id;
       } else if (message.type === 'startNextRound') {
         return (
@@ -686,8 +685,10 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
         ]);
         await update('trueLoveSelections', {
           [trueLoveSelection.id]: {
+            ...trueLoveSelection,
             player1Id,
             player2Id,
+            finalized: true,
           },
         });
       } else if (message.type === 'seeResults') {

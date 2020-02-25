@@ -77,6 +77,7 @@ export type TrueLoveSelection = {|
   playerId: string,
   player1Id: ?string,
   player2Id: ?string,
+  finalized: boolean,
 |};
 export type TrueLoveSelections = {
   [string]: TrueLoveSelection,

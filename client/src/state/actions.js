@@ -67,8 +67,10 @@ const SET_CRUSH_SELECTIONS = 'setCrushSelections';
 const SELECT_PLAYER = 'selectPlayer';
 const DESELECT_PLAYER = 'deselectPlayer';
 const SET_TRUE_LOVE_SELECTIONS = 'setTrueLoveSelections';
+const SET_TRUE_LOVE_SELECTION = 'setTrueLoveSelection';
 const SELECT_TRUE_LOVE = 'selectTrueLove';
 const DESELECT_TRUE_LOVE = 'deselectTrueLove';
+const SUBMIT_TRUE_LOVE_SELECTIONS = 'submitTrueLoveSelections';
 const SET_ROUND_NUMBER = 'setRoundNumber';
 const SET_POINTS = 'setPoints';
 
@@ -132,6 +134,10 @@ type Action =
       trueLoveSelections: TrueLoveSelections,
     }
   | {
+      type: 'setTrueLoveSelection',
+      trueLoveSelection: TrueLoveSelection,
+    }
+  | {
       type: 'selectTrueLove',
       sourcePlayerId: string,
       targetPlayerId: string,
@@ -140,6 +146,12 @@ type Action =
       type: 'deselectTrueLove',
       sourcePlayerId: string,
       targetPlayerId: string,
+    }
+  | {
+      type: 'submitTrueLoveSelections',
+      playerId: string,
+      player1Id: string,
+      player2Id: string,
     }
   | {
       type: 'setSocket',
@@ -307,6 +319,15 @@ export function setTrueLoveSelections(
   };
 }
 
+export function setTrueLoveSelection(
+  trueLoveSelection: TrueLoveSelection
+): Action {
+  return {
+    type: SET_TRUE_LOVE_SELECTION,
+    trueLoveSelection,
+  };
+}
+
 export function selectTrueLove(
   sourcePlayerId: string,
   targetPlayerId: string
@@ -326,6 +347,19 @@ export function deselectTrueLove(
     type: DESELECT_TRUE_LOVE,
     sourcePlayerId,
     targetPlayerId,
+  };
+}
+
+export function submitTrueLoveSelections(
+  playerId: string,
+  player1Id: string,
+  player2Id: string
+): Action {
+  return {
+    type: SUBMIT_TRUE_LOVE_SELECTIONS,
+    playerId,
+    player1Id,
+    player2Id,
   };
 }
 
@@ -560,6 +594,12 @@ export function silentDispatch(action: Action) {
     case SET_TRUE_LOVE_SELECTIONS:
       mergeIntoState('trueLoveSelections', action.trueLoveSelections);
       break;
+    case SET_TRUE_LOVE_SELECTION:
+      mergeIntoTrueLoveSelections(
+        action.trueLoveSelection.id,
+        action.trueLoveSelection
+      );
+      break;
     case SELECT_TRUE_LOVE:
       _.flow(getPlayerTrueLoveSelection, selection =>
         mergeIntoTrueLoveSelections(selection.id, {
@@ -579,6 +619,14 @@ export function silentDispatch(action: Action) {
             : { player2Id: null }),
         })
       )(action.sourcePlayerId);
+      break;
+    case SUBMIT_TRUE_LOVE_SELECTIONS:
+      _.flow(getPlayerTrueLoveSelection, selection =>
+        mergeIntoTrueLoveSelections(selection.id, {
+          ...selection,
+          finalized: true,
+        })
+      )(action.playerId);
       break;
     case SET_SOCKET:
       mergeIntoState('socket', action.socket);
