@@ -185,10 +185,10 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     );
 
     try {
-      await updateAll(getTrueLoveState({ players: readyPlayers }));
+      await updateAll(getRomanceState({ players: readyPlayers }));
     } catch (error) {
       console.log('WHOOPS! Try, try again');
-      await updateAll(getTrueLoveState({ players: readyPlayers }));
+      await updateAll(getRomanceState({ players: readyPlayers }));
     }
     console.log('start game now');
     await emit('changePhase');
@@ -233,6 +233,8 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     const serverState = await getAll();
     const { points, roundNumber, players } = serverState;
 
+    const participatingPlayers = _.pickBy(players, 'inRound');
+
     // Update points and round number
     const currentPoints = playerId => points[playerId] || 0;
     const newPoints = _.flow(
@@ -245,7 +247,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     await set(
       'points',
       _.mapValues(
-        serverState.players,
+        participatingPlayers,
         player => currentPoints(player.id) + newPoints(player.id)
       )
     );
@@ -265,10 +267,14 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     // TODO: Update getRomanceState such that we don't have to try twice (i.e.,
     // fix the wingman problem)
     try {
-      await updateAll(getRomanceState({ players }));
+      if (roundNumber === ROUND_COUNT - 1)
+        await updateAll(getTrueLoveState({ players: participatingPlayers }));
+      else await updateAll(getRomanceState({ players: participatingPlayers }));
     } catch (error) {
       console.log('WHOOPS! Try, try again');
-      await updateAll(getRomanceState({ players }));
+      if (roundNumber === ROUND_COUNT - 1)
+        await updateAll(getTrueLoveState({ players: participatingPlayers }));
+      else await updateAll(getRomanceState({ players: participatingPlayers }));
     }
     console.log(`starting round ${roundNumber + 1}!`);
     await emit('changePhase');
@@ -297,7 +303,10 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       const { nodes, tokens } = getNewPlayerState({
         playerId: player.id,
       });
-      await update('nodes', nodes);
+      await update(
+        'nodes',
+        _.mapValues(nodes, node => ({ ...node, enabled: true }))
+      );
       await update('tokens', tokens);
       await update('players', { [player.id]: { inRound: false } });
     });

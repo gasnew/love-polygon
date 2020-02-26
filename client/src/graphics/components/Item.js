@@ -8,12 +8,10 @@ import type { Token } from '../../state/state';
 const TOKEN_DIMENSIONS = { width: '60px', height: '60px' };
 export const TOKEN = 'token';
 const IMAGES_URLS = {
-  heart: 'https://pixy.org/src/74/thumbs350/749699.jpg',
-  cookie:
-    'https://previews.123rf.com/images/maxpayne222/maxpayne2221512/maxpayne222151200087/50509875-chocolate-chip-cookie-isolated-on-white-background.jpg',
-  cake:
-    'https://previews.123rf.com/images/imagestore/imagestore1606/imagestore160600288/57800504-devil-s-cake-slice-on-white-background.jpg',
-  candy: 'https://d2gg9evh47fn9z.cloudfront.net/800px_COLOURBOX34133221.jpg',
+  heart: 'heart.png',
+  cookie: 'cookie.png',
+  cake: 'cake.png',
+  candy: 'candy.png',
 };
 
 type Props = {

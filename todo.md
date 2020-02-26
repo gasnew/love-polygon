@@ -67,11 +67,11 @@
   + Points accumulate
   + Ties are indicated properly (two tie at top => both 2nd place)
   + At end of third round, button links to lobby page
-- True love!!
-  - Bonus points (+5?) in final round if you can guess the only pair of players
++ True love!!
+  + Bonus points (+5?) in final round if you can guess the only pair of players
     who had a crush on each other
-  - This probably occurs after voting once all the information is out there
-  - lock-in
+  + This probably occurs after voting once all the information is out there
+  + lock-in
 - Milestone 2 complete!!
 - Playtest a bit more
 - Improve lobby screen
@@ -126,6 +126,10 @@
     another player's hand
   - Allow player to hop back into active session (on top header bar?) even from
     the landing page
+  - Allow player to hop in for another player in a session
+    - Perhaps this is a dialog that opens if you join a session that has at
+      least one inactive player? It gives you the player name and the option to
+      accept or be a new player
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!
@@ -164,6 +168,7 @@
     3. True love (bonus points if you guess who)
 
 ## Known bugs
+- Non-participating players' tokens may be deleted during normal play...
 - What happens on the frontend when I delete a nameless player?
   - May have fixed this...
 - Session exists after it's over

@@ -115,7 +115,7 @@ export function updateState(serverState: ServerState) {
     selections =>
       _.pickBy(
         selections,
-        selection => selection.id !== getOwnTrueLoveSelection().id
+        selection => selection.id !== (getOwnTrueLoveSelection() || {}).id
       ),
     otherSelections =>
       _.each(otherSelections, selection =>

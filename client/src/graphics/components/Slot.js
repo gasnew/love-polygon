@@ -52,7 +52,9 @@ export default function Slot({ node }: Props) {
         ...SLOT_DIMENSIONS,
         ...(node.enabled ? {} : { filter: 'brightness(0.7)' }),
         backgroundImage:
-          'url(https://image.shutterstock.com/image-vector/white-dish-plate-isolated-on-260nw-1054819865.jpg)',
+          node.type === 'loveBucket'
+            ? 'url(jar.png)'
+            : 'url(https://image.shutterstock.com/image-vector/white-dish-plate-isolated-on-260nw-1054819865.jpg)',
         backgroundSize: 'cover',
       }}
     >
