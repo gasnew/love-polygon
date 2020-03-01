@@ -8,6 +8,7 @@ import type {
   CrushSelection,
   CrushSelections,
   Phase,
+  Points,
   SessionInfo,
 } from '../../../server/networkTypes';
 import type {
@@ -192,4 +193,12 @@ export function getSelectedNamesFromPlayerId(playerId: string): string {
     playerNames =>
       playerNames.length === 0 ? 'None' : _.join(playerNames, ', ')
   )(playerId);
+}
+
+export function getRoundNumber(): number {
+  return getState().roundNumber;
+}
+
+export function getPoints(): Points {
+  return getState().points;
 }

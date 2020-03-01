@@ -8,7 +8,12 @@ import type { RedisClient } from 'async-redis';
 import { NAME_LIMIT } from './constants';
 import withEvents from './events';
 import getFollowEdge from './phase';
-import { getNewPlayerState, getRomanceState } from './states';
+import {
+  getNewPlayerState,
+  getRomanceCleanup,
+  getRomanceState,
+} from './states';
+import { getPlayerTokens, getPointCriteria } from './util';
 import type { Emitter } from './events';
 
 import type {
@@ -214,6 +219,50 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     console.log('see results');
     emit('changePhase');
   };
+  const startNextRound = async () => {
+    const serverState = await getAll();
+    const { points, roundNumber, players } = serverState;
+
+    // Update points and round number
+    const currentPoints = playerId => points[playerId] || 0;
+    const newPoints = _.flow(
+      playerId => getPointCriteria({ ...serverState, playerId }),
+      ({ needsMet, guessedCrushesCorrectly, secretLove }) =>
+        (needsMet ? 1 : 0) +
+        (guessedCrushesCorrectly ? 2 : 0) +
+        (secretLove ? 3 : 0)
+    );
+    await set(
+      'points',
+      _.mapValues(
+        serverState.players,
+        player => currentPoints(player.id) + newPoints(player.id)
+      )
+    );
+    await set('roundNumber', roundNumber + 1);
+
+    // Reset romance state
+    await _.each(
+      getRomanceCleanup(serverState),
+      async (objects, name) =>
+        await deleteObjects(name, _.map(objects, 'id'), serverState[name])
+    );
+    await set('votingOrder', []);
+    await set('currentVoter', null);
+    await set('roundEnder', null);
+
+    // Get new romance state
+    // TODO: Update getRomanceState such that we don't have to try twice (i.e.,
+    // fix the wingman problem)
+    try {
+      await updateAll(getRomanceState({ players }));
+    } catch (error) {
+      console.log('WHOOPS! Try, try again');
+      await updateAll(getRomanceState({ players }));
+    }
+    console.log(`starting round ${roundNumber + 1}!`);
+    emit('changePhase');
+  };
 
   const followEdge = getFollowEdge({
     getPhaseName,
@@ -235,6 +284,9 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       voting: {
         seeResults: transition('results', seeResults),
       },
+      results: {
+        startNextRound: transition('romance', startNextRound),
+      },
     }),
   });
 
@@ -242,13 +294,6 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     const { nodes, tokens } = serverState;
     const loveBuckets = _.pickBy(nodes, ['type', 'loveBucket']);
     return _.filter(tokens, token => loveBuckets[token.nodeId]).length >= 3;
-  };
-  const getPlayerTokens = (nodes, tokens, playerId) => {
-    const playerNodes = _.pickBy(
-      nodes,
-      node => _.includes(node.playerIds, playerId) && node.type === 'storage'
-    );
-    return _.pickBy(tokens, token => playerNodes[token.nodeId]);
   };
   const endGame = async () => {
     const { nodes, players } = await getAll();
@@ -285,6 +330,8 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       await set('partyLeader', null);
       await set('roundEnder', null);
       await set('currentVoter', null);
+      await set('roundNumber', 1);
+      await set('points', {});
     },
     join: async ({ playerId }) => {
       const sessionData = await getAll();
@@ -371,6 +418,11 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
         return message.playerId === serverState.partyLeader;
       } else if (message.type === 'submitVotes') {
         return serverState.currentVoter === message.currentVoterId;
+      } else if (message.type === 'startNextRound') {
+        return (
+          serverState.roundNumber < 3 &&
+          message.playerId === serverState.partyLeader
+        );
       }
 
       return false;
@@ -498,6 +550,8 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
           );
       } else if (message.type === 'seeResults') {
         await followEdge('seeResults');
+      } else if (message.type === 'startNextRound') {
+        await followEdge('startNextRound');
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       return getAll();

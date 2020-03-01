@@ -8,6 +8,7 @@ import type {
   CrushSelections,
   NodeType,
   Phase,
+  Points,
   RelationshipType,
   SessionInfo,
   TokenType,
@@ -86,6 +87,8 @@ export type State = {|
   votingOrder: string[],
   currentVoter: ?string,
   crushSelections: CrushSelections,
+  roundNumber: number,
+  points: Points,
 |};
 
 export default function generateState(sessionInfo: SessionInfo): State {
@@ -109,6 +112,8 @@ export default function generateState(sessionInfo: SessionInfo): State {
     votingOrder: [],
     currentVoter: null,
     crushSelections: {},
+    roundNumber: 1,
+    points: {},
   };
 }
 

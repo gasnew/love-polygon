@@ -27,6 +27,7 @@ import type {
   NodeType,
   Phase,
   PhaseName,
+  Points,
   SessionInfo,
   TokenType,
 } from '../../../server/networkTypes';
@@ -61,6 +62,8 @@ const START_COUNTDOWN = 'startCountdown';
 const SET_CRUSH_SELECTIONS = 'setCrushSelections';
 const SELECT_PLAYER = 'selectPlayer';
 const DESELECT_PLAYER = 'deselectPlayer';
+const SET_ROUND_NUMBER = 'setRoundNumber';
+const SET_POINTS = 'setPoints';
 
 type Action =
   | {
@@ -154,6 +157,14 @@ type Action =
     }
   | {
       type: 'startCountdown',
+    }
+  | {
+      type: 'setRoundNumber',
+      roundNumber: number,
+    }
+  | {
+      type: 'setPoints',
+      points: Points,
     };
 
 const mergeIntoState = (key: $Keys<State>, subState: $Values<State>) => {
@@ -378,6 +389,20 @@ export function startCountdown(): Action {
   };
 }
 
+export function setRoundNumber(roundNumber: number): Action {
+  return {
+    type: SET_ROUND_NUMBER,
+    roundNumber,
+  };
+}
+
+export function setPoints(points: Points): Action {
+  return {
+    type: SET_POINTS,
+    points,
+  };
+}
+
 export function silentDispatch(action: Action) {
   switch (action.type) {
     case ADD_NODE:
@@ -452,26 +477,22 @@ export function silentDispatch(action: Action) {
       mergeIntoState('crushSelections', action.crushSelections);
       break;
     case SELECT_PLAYER:
-      _.flow(
-        getPlayerCrushSelection,
-        crushSelection =>
-          mergeIntoCrushSelections(crushSelection.id, {
-            ...crushSelection,
-            playerIds: [...crushSelection.playerIds, action.targetPlayerId],
-          })
+      _.flow(getPlayerCrushSelection, crushSelection =>
+        mergeIntoCrushSelections(crushSelection.id, {
+          ...crushSelection,
+          playerIds: [...crushSelection.playerIds, action.targetPlayerId],
+        })
       )(action.sourcePlayerId);
       break;
     case DESELECT_PLAYER:
-      _.flow(
-        getPlayerCrushSelection,
-        crushSelection =>
-          mergeIntoCrushSelections(crushSelection.id, {
-            ...crushSelection,
-            playerIds: _.difference(
-              getPlayerCrushSelection(action.sourcePlayerId).playerIds,
-              [action.targetPlayerId]
-            ),
-          })
+      _.flow(getPlayerCrushSelection, crushSelection =>
+        mergeIntoCrushSelections(crushSelection.id, {
+          ...crushSelection,
+          playerIds: _.difference(
+            getPlayerCrushSelection(action.sourcePlayerId).playerIds,
+            [action.targetPlayerId]
+          ),
+        })
       )(action.sourcePlayerId);
       break;
     case SET_SOCKET:
@@ -530,10 +551,19 @@ export function silentDispatch(action: Action) {
       mergeIntoState('votingOrder', action.votingOrder);
       break;
     case START_COUNTDOWN:
-      mergeIntoState('phase', {
-        name: (getPhase() || {}).name,
-        countdownStartedAt: (Date.now(): number),
-      });
+      mergeIntoState(
+        'phase',
+        ({
+          name: (getPhase() || {}).name,
+          countdownStartedAt: Date.now(),
+        }: Phase)
+      );
+      break;
+    case SET_ROUND_NUMBER:
+      mergeIntoState('roundNumber', action.roundNumber);
+      break;
+    case SET_POINTS:
+      mergeIntoState('points', action.points);
       break;
     default:
       throw new Error(`Yo, action ${action.type} doesn't exist!`);

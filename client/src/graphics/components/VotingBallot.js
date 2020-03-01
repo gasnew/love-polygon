@@ -185,7 +185,7 @@ export default function VotingBallot() {
   };
 
   const handleShowFinalResults = () => {
-    announce(seeResults(noteTaker.id));
+    announce(seeResults(currentPlayerId));
   };
 
   const hasVoted = playerId => getPlayerCrushSelection(playerId).finalized;
@@ -280,7 +280,7 @@ export default function VotingBallot() {
           playerCardFromPlayerId
         )}
       />
-      {_.every(votingOrder, hasVoted) && (
+      {currentPlayerId === noteTaker.id && _.every(votingOrder, hasVoted) && (
         <Button
           fullWidth
           variant="contained"
