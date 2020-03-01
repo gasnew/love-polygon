@@ -8,6 +8,7 @@ import DraggedItem from './DraggedItem';
 import Lobby from './Lobby';
 import ResultsTable from './ResultsTable';
 import Romance from './Romance';
+import TrueLoveVoting from './TrueLoveVoting';
 import VotingBallot from './VotingBallot';
 import { getPhase } from '../../state/getters';
 import { useGameState } from '../../state/state';
@@ -22,6 +23,7 @@ const Scene = ({ phase }: { phase: Phase }) => {
     countdown: <Romance phase={phase} />,
     finished: <Romance phase={phase} />,
     voting: <VotingBallot />,
+    trueLove: <TrueLoveVoting />,
     results: <ResultsTable />,
   };
   if (slotLists[phase.name])

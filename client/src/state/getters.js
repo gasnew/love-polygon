@@ -10,6 +10,8 @@ import type {
   Phase,
   Points,
   SessionInfo,
+  TrueLoveSelection,
+  TrueLoveSelections,
 } from '../../../server/networkTypes';
 import type {
   Need,
@@ -143,6 +145,25 @@ export function getPlayerCrushSelection(playerId: string): CrushSelection {
   return _.find(getCrushSelections(), ['playerId', playerId]);
 }
 
+export function getPlayerTrueLoveSelection(
+  playerId: string
+): TrueLoveSelection {
+  return _.find(getTrueLoveSelections(), ['playerId', playerId]);
+}
+
+export function getOwnTrueLoveSelection(): ?TrueLoveSelection {
+  const { playerId } = getSessionInfo();
+  return getPlayerTrueLoveSelection(playerId);
+}
+
+export function getTrueLoveSelections(): TrueLoveSelections {
+  return getState().trueLoveSelections;
+}
+
+export function getAllTrueLoveSelectionsFinished(): boolean {
+  return _.every(getTrueLoveSelections(), 'finalized');
+}
+
 export function getVotingOrder(): string[] {
   return getState().votingOrder;
 }
@@ -185,14 +206,32 @@ export function getSelectedNamesFromPlayerId(playerId: string): string {
     playerIds =>
       _.map(
         playerIds,
-        _.flow(
-          getPlayer,
-          player => player.name
-        )
+        _.flow(getPlayer, player => player.name)
       ),
     playerNames =>
       playerNames.length === 0 ? 'None' : _.join(playerNames, ', ')
   )(playerId);
+}
+
+export function getTrueLoveCouple(): string[] {
+  return _.flow(
+    relationships => _.filter(relationships, ['type', 'crush']),
+    crushes =>
+      _.filter(crushes, ({ fromId, toId }) =>
+        _.some(crushes, crush => crush.toId === fromId && crush.fromId === toId)
+      ),
+    couple => _.map(couple, 'fromId')
+  )(getRelationships());
+}
+
+export function getGuessedTrueLoveCorrectly(playerId: string): boolean {
+  const trueLoveSelection = getPlayerTrueLoveSelection(playerId);
+  const trueLoveCouple = getTrueLoveCouple();
+
+  return _.isEqual(
+    _.sortBy([trueLoveSelection.player1Id, trueLoveSelection.player2Id]),
+    _.sortBy(trueLoveCouple)
+  );
 }
 
 export function getRoundNumber(): number {

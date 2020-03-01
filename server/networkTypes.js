@@ -6,6 +6,7 @@ export type PhaseName =
   | 'countdown'
   | 'finished'
   | 'voting'
+  | 'trueLove'
   | 'results';
 export type Phase = {|
   name: PhaseName,
@@ -71,6 +72,17 @@ export type CrushSelections = {
   [string]: CrushSelection,
 };
 
+export type TrueLoveSelection = {|
+  id: string,
+  playerId: string,
+  player1Id: ?string,
+  player2Id: ?string,
+  finalized: boolean,
+|};
+export type TrueLoveSelections = {
+  [string]: TrueLoveSelection,
+};
+
 export type Points = {
   [string]: number,
 };
@@ -87,6 +99,7 @@ export type ServerState = {|
   currentVoter: ?string,
   roundEnder: ?string,
   crushSelections: CrushSelections,
+  trueLoveSelections: TrueLoveSelections,
   roundNumber: number,
   points: Points,
 |};
@@ -136,11 +149,35 @@ export type Message =
       targetPlayerId: string,
     }
   | {
+      type: 'submitTrueLoveSelections',
+      playerId: string,
+      player1Id: string,
+      player2Id: string,
+    }
+  | {
       type: 'seeResults',
       playerId: string,
     }
   | {
+      type: 'startTrueLoveVoting',
+      playerId: string,
+    }
+  | {
+      type: 'selectTrueLove',
+      sourcePlayerId: string,
+      targetPlayerId: string,
+    }
+  | {
+      type: 'deselectTrueLove',
+      sourcePlayerId: string,
+      targetPlayerId: string,
+    }
+  | {
       type: 'startNextRound',
+      playerId: string,
+    }
+  | {
+      type: 'returnToLobby',
       playerId: string,
     };
 

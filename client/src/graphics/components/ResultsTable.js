@@ -12,12 +12,13 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
-import Stop from '@material-ui/icons/Stop';
 
-import announce, { startNextRound } from '../../network/network';
+import { ROUND_COUNT } from '../../constants';
+import announce, { returnToLobby, startNextRound } from '../../network/network';
 import {
   getCrushSelections,
   getGuessedCrushesCorrectly,
+  getGuessedTrueLoveCorrectly,
   getPartyLeader,
   getPlayer,
   getPlayerRelationship,
@@ -37,7 +38,7 @@ type PlaceDeltaProps = {
 function PlaceDelta({ direction }: PlaceDeltaProps) {
   if (direction === 1) return <ArrowUpward />;
   if (direction === -1) return <ArrowDownward />;
-  if (direction === 0) return <Stop />;
+  if (direction === 0) return <span />;
   return <span>?</span>;
 }
 
@@ -59,18 +60,17 @@ export default function ResultsTable() {
     needsMetPoints: getNeedsMet(player.id) ? 1 : 0,
     guessedCrushesPoints: getGuessedCrushesCorrectly(player.id) ? 2 : 0,
     secretLovePoints: getSecretLove(player.id) ? 3 : 0,
+    trueLovePoints: getGuessedTrueLoveCorrectly(player.id) ? 5 : 0,
   }));
 
   const stringifyPoints = points => (points === 0 ? '-' : `+${points}`);
   const newPoints = result =>
     result.needsMetPoints +
     result.guessedCrushesPoints +
-    result.secretLovePoints;
+    result.secretLovePoints +
+    result.trueLovePoints;
   const previousPoints = result => points[result.player.id] || 0;
   const total = result => previousPoints(result) + newPoints(result);
-  const handleStartNextRound = () => {
-    announce(startNextRound(playerId));
-  };
 
   const place = (allPoints, point) =>
     allPoints.length + 1 - _.sortedLastIndex(_.sortBy(allPoints), point);
@@ -82,6 +82,13 @@ export default function ResultsTable() {
     ),
   }));
   const normalize = value => (value === 0 ? 0 : value / Math.abs(value));
+
+  const handleStartNextRound = () => {
+    announce(startNextRound(playerId));
+  };
+  const handleReturnToLobby = () => {
+    announce(returnToLobby(playerId));
+  };
 
   return (
     <div style={{ height: '100%', overflow: 'scroll' }}>
@@ -96,6 +103,9 @@ export default function ResultsTable() {
               <TableCell align="center">Needs met</TableCell>
               <TableCell align="center">Guessed all lovers</TableCell>
               <TableCell align="center">Secret love</TableCell>
+              {roundNumber === ROUND_COUNT && (
+                <TableCell align="center">Guessed true love</TableCell>
+              )}
               <TableCell align="center">Total</TableCell>
             </TableRow>
           </TableHead>
@@ -128,20 +138,37 @@ export default function ResultsTable() {
                 <TableCell align="center">
                   {stringifyPoints(result.secretLovePoints)}
                 </TableCell>
+                {roundNumber === ROUND_COUNT && (
+                  <TableCell align="center">
+                    {stringifyPoints(result.trueLovePoints)}
+                  </TableCell>
+                )}
                 <TableCell align="center">{total(result)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      {playerId === partyLeader && (
+      {playerId === partyLeader && roundNumber < ROUND_COUNT && (
         <Button
           fullWidth
           variant="contained"
           color="primary"
           onClick={handleStartNextRound}
         >
-          Start Round {roundNumber + 1}!
+          {roundNumber < ROUND_COUNT - 1
+            ? `Start Round ${roundNumber + 1}!`
+            : 'Start Final Round!'}
+        </Button>
+      )}
+      {playerId === partyLeader && roundNumber === ROUND_COUNT && (
+        <Button
+          fullWidth
+          variant="contained"
+          color="secondary"
+          onClick={handleReturnToLobby}
+        >
+          Return to Lobby
         </Button>
       )}
     </div>

@@ -5,15 +5,21 @@ import _ from 'lodash';
 import uniqid from 'uniqid';
 import type { RedisClient } from 'async-redis';
 
-import { NAME_LIMIT } from './constants';
+import { NAME_LIMIT, ROUND_COUNT } from './constants';
 import withEvents from './events';
 import getFollowEdge from './phase';
 import {
   getNewPlayerState,
   getRomanceCleanup,
   getRomanceState,
+  getTrueLoveState,
 } from './states';
-import { getPlayerTokens, getPointCriteria } from './util';
+import {
+  asyncArrayEach,
+  asyncObjectEach,
+  getPlayerTokens,
+  getPointCriteria,
+} from './util';
 import type { Emitter } from './events';
 
 import type {
@@ -97,7 +103,7 @@ export function getBaseSession({
   };
   const updateAll = async (serverState: ServerState) => {
     const currentServerState = await getAll();
-    _.each(
+    await asyncObjectEach(
       serverState,
       async (objects, key) =>
         await update(key, objects, currentServerState[key])
@@ -185,18 +191,18 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       await updateAll(getRomanceState({ players: readyPlayers }));
     }
     console.log('start game now');
-    emit('changePhase');
+    await emit('changePhase');
   };
   const startCountdown = async () => {
     console.log('start countdown');
     // TODO(gnewman): Reimplement this countdown timer to be more robust
     // Add 0.5 seconds to account for latency
-    setTimeout(async () => await endGame(), 15500);
-    emit('changePhase');
+    setTimeout(endGame, 15500);
+    await emit('changePhase');
   };
   const finishGame = async () => {
     console.log('finish game');
-    emit('changePhase');
+    await emit('changePhase');
     setTimeout(async () => {
       await setVotingOrder();
       await followEdge('startVoting');
@@ -213,15 +219,21 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
   };
   const startVoting = async () => {
     console.log('start voting');
-    emit('changePhase');
+    await emit('changePhase');
   };
   const seeResults = async () => {
     console.log('see results');
-    emit('changePhase');
+    await emit('changePhase');
+  };
+  const startTrueLoveVoting = async () => {
+    console.log('start true love voting');
+    await emit('changePhase');
   };
   const startNextRound = async () => {
     const serverState = await getAll();
     const { points, roundNumber, players } = serverState;
+
+    const participatingPlayers = _.pickBy(players, 'inRound');
 
     // Update points and round number
     const currentPoints = playerId => points[playerId] || 0;
@@ -235,14 +247,14 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     await set(
       'points',
       _.mapValues(
-        serverState.players,
+        participatingPlayers,
         player => currentPoints(player.id) + newPoints(player.id)
       )
     );
     await set('roundNumber', roundNumber + 1);
 
     // Reset romance state
-    await _.each(
+    await asyncObjectEach(
       getRomanceCleanup(serverState),
       async (objects, name) =>
         await deleteObjects(name, _.map(objects, 'id'), serverState[name])
@@ -255,13 +267,51 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     // TODO: Update getRomanceState such that we don't have to try twice (i.e.,
     // fix the wingman problem)
     try {
-      await updateAll(getRomanceState({ players }));
+      if (roundNumber === ROUND_COUNT - 1)
+        await updateAll(getTrueLoveState({ players: participatingPlayers }));
+      else await updateAll(getRomanceState({ players: participatingPlayers }));
     } catch (error) {
       console.log('WHOOPS! Try, try again');
-      await updateAll(getRomanceState({ players }));
+      if (roundNumber === ROUND_COUNT - 1)
+        await updateAll(getTrueLoveState({ players: participatingPlayers }));
+      else await updateAll(getRomanceState({ players: participatingPlayers }));
     }
     console.log(`starting round ${roundNumber + 1}!`);
-    emit('changePhase');
+    await emit('changePhase');
+  };
+  const returnToLobby = async () => {
+    const serverState = await getAll();
+
+    // Remove all traces of round
+    await asyncObjectEach(
+      getRomanceCleanup(serverState),
+      async (objects, name) => {
+        await deleteObjects(name, _.map(objects, 'id'), serverState[name]);
+      }
+    );
+    await set('partyLeader', null);
+    await set('votingOrder', []);
+    await set('currentVoter', null);
+    await set('roundEnder', null);
+    await set('roundNumber', 1);
+    await set('points', {});
+
+    // Grant in-round players the "new player" state, and set them to be not
+    // in-round
+    const participatingPlayers = _.pickBy(serverState.players, 'inRound');
+    await asyncObjectEach(participatingPlayers, async player => {
+      const { nodes, tokens } = getNewPlayerState({
+        playerId: player.id,
+      });
+      await update(
+        'nodes',
+        _.mapValues(nodes, node => ({ ...node, enabled: true }))
+      );
+      await update('tokens', tokens);
+      await update('players', { [player.id]: { inRound: false } });
+    });
+
+    await emit('changePhase');
   };
 
   const followEdge = getFollowEdge({
@@ -283,9 +333,14 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       },
       voting: {
         seeResults: transition('results', seeResults),
+        startTrueLoveVoting: transition('trueLove', startTrueLoveVoting),
+      },
+      trueLove: {
+        seeResults: transition('results', seeResults),
       },
       results: {
         startNextRound: transition('romance', startNextRound),
+        returnToLobby: transition('lobby', returnToLobby),
       },
     }),
   });
@@ -330,6 +385,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       await set('partyLeader', null);
       await set('roundEnder', null);
       await set('currentVoter', null);
+      await set('trueLoveSelections', {});
       await set('roundNumber', 1);
       await set('points', {});
     },
@@ -414,13 +470,61 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
           sourcePlayerId,
         ]);
         return _.includes(crushSelection.playerIds, message.targetPlayerId);
+      } else if (message.type === 'selectTrueLove') {
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { trueLoveSelections } = serverState;
+
+        const trueLoveSelection = _.find(trueLoveSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
+        return (
+          trueLoveSelection.player1Id !== targetPlayerId &&
+          trueLoveSelection.player2Id !== targetPlayerId
+        );
+      } else if (message.type === 'deselectTrueLove') {
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { trueLoveSelections } = serverState;
+
+        const trueLoveSelection = _.find(trueLoveSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
+        return (
+          trueLoveSelection.player1Id === targetPlayerId ||
+          trueLoveSelection.player2Id === targetPlayerId
+        );
       } else if (message.type === 'seeResults') {
+        const { playerId } = message;
+        const { partyLeader, phase, roundNumber } = serverState;
+
+        // We can't go straight to "results" when on the final round
+        if (roundNumber === ROUND_COUNT && phase.name === 'voting')
+          return false;
+
+        return playerId === partyLeader;
+      } else if (message.type === 'startTrueLoveVoting') {
         return message.playerId === serverState.partyLeader;
       } else if (message.type === 'submitVotes') {
         return serverState.currentVoter === message.currentVoterId;
+      } else if (message.type === 'submitTrueLoveSelections') {
+        const { playerId, player1Id, player2Id } = message;
+        const { trueLoveSelections } = serverState;
+
+        const trueLoveSelection = _.find(trueLoveSelections, [
+          'playerId',
+          playerId,
+        ]);
+        if (trueLoveSelection.finalized) return false;
+        return player1Id !== player2Id;
       } else if (message.type === 'startNextRound') {
         return (
-          serverState.roundNumber < 3 &&
+          serverState.roundNumber < ROUND_COUNT &&
+          message.playerId === serverState.partyLeader
+        );
+      } else if (message.type === 'returnToLobby') {
+        return (
+          serverState.roundNumber === ROUND_COUNT &&
           message.playerId === serverState.partyLeader
         );
       }
@@ -529,6 +633,38 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
             playerIds: _.difference(crushSelection.playerIds, [targetPlayerId]),
           },
         });
+      } else if (message.type === 'selectTrueLove') {
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { trueLoveSelections } = serverState;
+
+        const trueLoveSelection = _.find(trueLoveSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
+        await update('trueLoveSelections', {
+          [trueLoveSelection.id]: {
+            ...trueLoveSelection,
+            ...(trueLoveSelection.player1Id
+              ? { player2Id: targetPlayerId }
+              : { player1Id: targetPlayerId }),
+          },
+        });
+      } else if (message.type === 'deselectTrueLove') {
+        const { sourcePlayerId, targetPlayerId } = message;
+        const { trueLoveSelections } = serverState;
+
+        const trueLoveSelection = _.find(trueLoveSelections, [
+          'playerId',
+          sourcePlayerId,
+        ]);
+        await update('trueLoveSelections', {
+          [trueLoveSelection.id]: {
+            ...trueLoveSelection,
+            ...(trueLoveSelection.player1Id === targetPlayerId
+              ? { player1Id: null }
+              : { player2Id: null }),
+          },
+        });
       } else if (message.type === 'submitVotes') {
         const { currentVoterId } = message;
         const { crushSelections, votingOrder } = serverState;
@@ -548,10 +684,30 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
             'currentVoter',
             votingOrder[votingOrder.indexOf(currentVoterId) + 1]
           );
+      } else if (message.type === 'submitTrueLoveSelections') {
+        const { playerId, player1Id, player2Id } = message;
+        const { trueLoveSelections } = serverState;
+
+        const trueLoveSelection = _.find(trueLoveSelections, [
+          'playerId',
+          playerId,
+        ]);
+        await update('trueLoveSelections', {
+          [trueLoveSelection.id]: {
+            ...trueLoveSelection,
+            player1Id,
+            player2Id,
+            finalized: true,
+          },
+        });
       } else if (message.type === 'seeResults') {
         await followEdge('seeResults');
+      } else if (message.type === 'startTrueLoveVoting') {
+        await followEdge('startTrueLoveVoting');
       } else if (message.type === 'startNextRound') {
         await followEdge('startNextRound');
+      } else if (message.type === 'returnToLobby') {
+        await followEdge('returnToLobby');
       } else throw new Error(`Yo, message ${message.type} doesn't exist!`);
 
       return getAll();

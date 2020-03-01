@@ -20,11 +20,13 @@ import Alert from '@material-ui/lab/Alert';
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
+import { ROUND_COUNT } from '../../constants';
 import announce, {
   deselectPlayer as networkedDeselectPlayer,
   selectPlayer as networkedSelectPlayer,
   submitVotes as networkedSubmitVotes,
   seeResults,
+  startTrueLoveVoting,
 } from '../../network/network';
 import dispatch, {
   deselectPlayer,
@@ -37,6 +39,7 @@ import {
   getPartyLeader,
   getPlayerCrushSelection,
   getParticipatingPlayers,
+  getRoundNumber,
   getSelectedNamesFromPlayerId,
   getSessionInfo,
   getVotingOrder,
@@ -167,6 +170,7 @@ export default function VotingBallot() {
 
   const playerify = playerId => players[playerId];
   const noteTaker = playerify(getPartyLeader());
+  const roundNumber = getRoundNumber();
 
   const handleToggle = playerId => () => {
     if (_.includes(selectedPlayerIds, playerId)) {
@@ -186,6 +190,9 @@ export default function VotingBallot() {
 
   const handleShowFinalResults = () => {
     announce(seeResults(currentPlayerId));
+  };
+  const handleStartTrueLoveVoting = () => {
+    announce(startTrueLoveVoting(currentPlayerId));
   };
 
   const hasVoted = playerId => getPlayerCrushSelection(playerId).finalized;
@@ -280,16 +287,30 @@ export default function VotingBallot() {
           playerCardFromPlayerId
         )}
       />
-      {currentPlayerId === noteTaker.id && _.every(votingOrder, hasVoted) && (
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={handleShowFinalResults}
-        >
-          See Round 1 results!
-        </Button>
-      )}
+      {roundNumber < ROUND_COUNT &&
+        currentPlayerId === noteTaker.id &&
+        _.every(votingOrder, hasVoted) && (
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick={handleShowFinalResults}
+          >
+            See Round {roundNumber} results!
+          </Button>
+        )}
+      {roundNumber === ROUND_COUNT &&
+        currentPlayerId === noteTaker.id &&
+        _.every(votingOrder, hasVoted) && (
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick={handleStartTrueLoveVoting}
+          >
+            Next
+          </Button>
+        )}
       {/* This is a hack so we get nice looking ComponentWillUnmount animations */}
       {_.map(players, player => (
         <VotingConfirmationDialog

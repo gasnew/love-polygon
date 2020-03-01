@@ -19,12 +19,15 @@ import dispatch, {
   setRelationships,
   setRoundNumber,
   setTokenNodeId,
+  setTrueLoveSelections,
+  setTrueLoveSelection,
   setVotingOrder,
   startCountdown,
 } from '../state/actions';
 import {
   getCurrentTokenId,
   getNode,
+  getOwnTrueLoveSelection,
   getPhase,
   getPlayer,
   getSessionInfo,
@@ -55,6 +58,7 @@ export function updateState(serverState: ServerState) {
     nodes,
     tokens,
     currentVoter,
+    trueLoveSelections,
     votingOrder,
   } = serverState;
   const getIsNew = getObject => object => !getObject(object.id);
@@ -106,6 +110,17 @@ export function updateState(serverState: ServerState) {
   silentDispatch(setPartyLeader(partyLeader));
   silentDispatch(setVotingOrder(votingOrder));
   silentDispatch(setCrushSelections(crushSelections));
+  _.flow(
+    selections =>
+      _.pickBy(
+        selections,
+        selection => selection.id !== (getOwnTrueLoveSelection() || {}).id
+      ),
+    otherSelections =>
+      _.each(otherSelections, selection =>
+        silentDispatch(setTrueLoveSelection(selection))
+      )
+  )(trueLoveSelections);
   // NOTE: We only call `dispatch` for the last update so that the event to
   // re-render the React components only gets fired once
   dispatch(setCurrentVoter(currentVoter));
@@ -126,6 +141,7 @@ export function setState(serverState: ServerState) {
     relationships,
     roundNumber,
     tokens,
+    trueLoveSelections,
     votingOrder,
   } = serverState;
   const { playerId: currentPlayerId } = getSessionInfo();
@@ -155,9 +171,10 @@ export function setState(serverState: ServerState) {
   silentDispatch(setPartyLeader(partyLeader));
   silentDispatch(setVotingOrder(votingOrder));
   silentDispatch(setCrushSelections(crushSelections));
-  // NOTE: We only call `dispatch` for the last update so that the event to
-  // re-render the React components only gets fired once
+  silentDispatch(setTrueLoveSelections(trueLoveSelections));
   silentDispatch(setCurrentVoter(currentVoter));
   silentDispatch(setRoundNumber(roundNumber));
+  // NOTE: We only call `dispatch` for the last update so that the event to
+  // re-render the React components only gets fired once
   dispatch(setPoints(points));
 }
