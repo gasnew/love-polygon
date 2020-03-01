@@ -12,7 +12,6 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
-import Stop from '@material-ui/icons/Stop';
 
 import { ROUND_COUNT } from '../../constants';
 import announce, { returnToLobby, startNextRound } from '../../network/network';
@@ -39,7 +38,7 @@ type PlaceDeltaProps = {
 function PlaceDelta({ direction }: PlaceDeltaProps) {
   if (direction === 1) return <ArrowUpward />;
   if (direction === -1) return <ArrowDownward />;
-  if (direction === 0) return <span></span>;
+  if (direction === 0) return <span />;
   return <span>?</span>;
 }
 

@@ -32,7 +32,6 @@ import {
   getPlayer,
   getSessionInfo,
   getToken,
-  getTrueLoveSelections,
 } from '../state/getters';
 import type { ServerState } from '../../../server/networkTypes';
 

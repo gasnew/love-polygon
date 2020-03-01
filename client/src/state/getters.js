@@ -215,9 +215,10 @@ export function getSelectedNamesFromPlayerId(playerId: string): string {
 
 export function getTrueLoveCouple(): string[] {
   return _.flow(
-    relationships =>
-      _.filter(relationships, ({ fromId }) =>
-        _.some(relationships, ['toId', fromId])
+    relationships => _.filter(relationships, ['type', 'crush']),
+    crushes =>
+      _.filter(crushes, ({ fromId, toId }) =>
+        _.some(crushes, crush => crush.toId === fromId && crush.fromId === toId)
       ),
     couple => _.map(couple, 'fromId')
   )(getRelationships());

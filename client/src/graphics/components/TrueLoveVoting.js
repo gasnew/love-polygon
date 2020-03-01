@@ -5,26 +5,19 @@ import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import Snackbar from '@material-ui/core/Snackbar';
 import Typography from '@material-ui/core/Typography';
-import Cancel from '@material-ui/icons/Cancel';
-import CheckCircle from '@material-ui/icons/CheckCircle';
-import EmojiEmotions from '@material-ui/icons/EmojiEmotions';
 import Checkbox from '@material-ui/core/Checkbox';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Alert from '@material-ui/lab/Alert';
-import React, { useState } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
 import announce, {
   deselectTrueLove as networkedDeselectTrueLove,
   selectTrueLove as networkedSelectTrueLove,
   submitTrueLoveSelections as networkedSubmitTrueLoveSelections,
-  submitVotes as networkedSubmitVotes,
   seeResults,
 } from '../../network/network';
 import dispatch, {
@@ -34,52 +27,14 @@ import dispatch, {
 } from '../../state/actions';
 import {
   getAllTrueLoveSelectionsFinished,
-  getCurrentVoter,
-  getGuessedCrushesCorrectly,
   getGuessedTrueLoveCorrectly,
   getPartyLeader,
-  getPlayerCrushSelection,
   getPlayerTrueLoveSelection,
   getParticipatingPlayers,
-  getSelectedNamesFromPlayerId,
   getSessionInfo,
-  getVotingOrder,
 } from '../../state/getters';
-import VotingConfirmationDialog from './VotingConfirmationDialog';
 
 import type { Player } from '../../state/state';
-
-const usePlayerCardStyles = makeStyles(theme => ({
-  root: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
-  },
-}));
-
-type PlayerCard = { name: string, selectedNames: string, status: string };
-const PlayerCardList = ({ playerCards }: { playerCards: PlayerCard[] }) => {
-  const { root } = usePlayerCardStyles();
-
-  return (
-    <List className={root}>
-      {_.map(playerCards, ({ name, selectedNames, status }) => (
-        <ListItem key={name}>
-          <ListItemAvatar>
-            {status === 'success' ? (
-              <CheckCircle style={{ color: '67ac5c' }} />
-            ) : status === 'failure' ? (
-              <Cancel style={{ color: 'e25141' }} />
-            ) : (
-              <EmojiEmotions style={{ color: '888888' }} />
-            )}
-          </ListItemAvatar>
-          <ListItemText primary={name} secondary={selectedNames} />
-        </ListItem>
-      ))}
-    </List>
-  );
-};
 
 const PlayerCheckbox = ({
   player,
@@ -132,25 +87,8 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const useSnackbar = () => {
-  const [open, setOpen] = useState(false);
 
-  const activateSnackbar = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setOpen(false);
-  };
-
-  return { open, handleClose, activateSnackbar };
-};
-
-export default function VotingBallot() {
+export default function TrueLoveVoting() {
   const classes = useStyles();
 
   const partyLeader = getPartyLeader();
@@ -160,8 +98,6 @@ export default function VotingBallot() {
   const { playerId: currentPlayerId } = getSessionInfo();
   const trueLoveSelection = getPlayerTrueLoveSelection(currentPlayerId);
   const players = getParticipatingPlayers();
-
-  const playerify = playerId => players[playerId];
 
   const handleSubmitTrueLoveSelections = () => {
     const { player1Id, player2Id } = trueLoveSelection;
@@ -174,17 +110,6 @@ export default function VotingBallot() {
   const handleShowFinalResults = () => {
     announce(seeResults(currentPlayerId));
   };
-
-  const hasVoted = playerId => getPlayerCrushSelection(playerId).finalized;
-  const playerCardFromPlayerId = _.flow(playerify, player => ({
-    name: player.name,
-    selectedNames: getSelectedNamesFromPlayerId(player.id),
-    status: hasVoted(player.id)
-      ? getGuessedCrushesCorrectly(player.id)
-        ? 'success'
-        : 'failure'
-      : 'tbd',
-  }));
 
   const isChecked = playerId =>
     playerId === trueLoveSelection.player1Id ||
