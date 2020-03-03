@@ -73,21 +73,36 @@
   + This probably occurs after voting once all the information is out there
   + lock-in
 + Milestone 2 complete!!
-/ Playtest a bit more
-- Improve lobby screen
-  - Be able to see how many people are in the lobby
++ Playtest a bit more
+/ Improve lobby screen
+  - See list of players in the lobby and their statuses
   - Name character limit is imposed for styling reasons
   - Names must be unique
-  - Name input field appears in dialog and is focused on page load (if name is
+  + Name input field appears in dialog and is focused on page load (if name is
     empty). It can be opened again
   - Jar of hearts (with players' names!)
     - This is sorted so you can see who entered first
     - If leader leaves, next up becomes leader
-  - Prevent generating sessions by navigating to session page?
-    - Route back to landing page with alert about the session not existing
+  - New start button that shows how many players are in the game and what roles
+    will be filled
+  - Players have unique colors (preselected 6)
+- Top info and navigation bar for all phases
+  - "Main Menu"
+  - Player name
+  - Phase name and round number
+  - Session ID
+  - Share and copy buttons
+  - See mockups
+- Improve romance screen
+  - Arc of plates
+  - Joint plates are colored accordingly
+  - Better header for crush
+  - Better needs indicator
+  - Better "end round" button
 - Practice mode
   - Can trade all you want but cannot end round
   - Party leader can move it back to lobby to start a real round
+  - Lots of cool tutorial info
 - Love polygon
   - Actually a graph
   - Separate tab on completion screen?
@@ -131,6 +146,8 @@
     - Perhaps this is a dialog that opens if you join a session that has at
       least one inactive player? It gives you the player name and the option to
       accept or be a new player
+  - Prevent generating sessions by navigating to session page?
+    - Route back to landing page with alert about the session not existing
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!

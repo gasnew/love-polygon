@@ -1,8 +1,12 @@
 // @flow
 
-import Button from '@material-ui/core/Button';
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 
 import SlotList from './SlotList';
@@ -27,6 +31,9 @@ const throttledNetworkedSetName = _.throttle(
 
 export default function Lobby() {
   const { playerId, playerName } = getSessionInfo();
+  const [dialogOpen, setDialogOpen] = useState(!!!playerName);
+  const [nameError, setNameError] = useState('');
+
   const ownNodes = getOwnNodes();
   const tokens = getTokens();
   const loveBucket = _.find(ownNodes, ['type', 'loveBucket']);
@@ -45,6 +52,13 @@ export default function Lobby() {
     const truncatedName = name.substring(0, NAME_LIMIT);
     dispatch(setPlayerName(playerId, truncatedName));
     throttledNetworkedSetName(truncatedName);
+    setNameError('');
+  };
+  const handleDialogClose = () =>
+    playerName ? setDialogOpen(false) : setNameError('Please enter a name');
+  const handleConfirmName = () => {
+    playerName && announce(networkedSetName(playerName));
+    handleDialogClose();
   };
   const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);
 
@@ -57,29 +71,67 @@ export default function Lobby() {
         height: '100%',
       }}
     >
-      <div>
-        <SlotList nodes={{ [loveBucket.id]: loveBucket }} />
-      </div>
-      <div>
-        <SlotList nodes={storageNodes} />
-      </div>
-      <TextField
-        label="Name"
-        value={playerName}
-        onChange={handleNameInput}
-        margin="normal"
-        variant="outlined"
-        disabled={heartIsInBucket}
-      />
-      {playerId === getPartyLeader() && (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          height: '100%',
+        }}
+      >
+        <div>
+          <SlotList nodes={{ [loveBucket.id]: loveBucket }} />
+        </div>
+        <div>
+          <SlotList nodes={storageNodes} />
+        </div>
         <Button
-          variant="contained"
           color="primary"
-          onClick={() => announce(startGame())}
+          variant="contained"
+          onClick={() => setDialogOpen(true)}
+          disabled={heartIsInBucket}
         >
-          Start game for {readyPlayerCount} people
+          Change name
         </Button>
-      )}
+        {playerId === getPartyLeader() && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => announce(startGame())}
+          >
+            Start game for {readyPlayerCount} people
+          </Button>
+        )}
+      </div>
+      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle id="alert-dialog-title">
+          Please enter your name
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Name"
+            value={playerName}
+            onChange={handleNameInput}
+            margin="normal"
+            variant="outlined"
+            error={!!nameError}
+            helperText={nameError}
+            onKeyPress={({ key }) => {
+              if (key === 'Enter') handleConfirmName();
+            }}
+            autoFocus
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleConfirmName}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
