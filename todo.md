@@ -75,7 +75,7 @@
 + Milestone 2 complete!!
 + Playtest a bit more
 / Improve lobby screen
-  - See list of players in the lobby and their statuses
+  + See list of players in the lobby and their statuses
   - Name character limit is imposed for styling reasons
   - Names must be unique
   + Name input field appears in dialog and is focused on page load (if name is
@@ -186,6 +186,7 @@
     3. True love (bonus points if you guess who)
 
 ## Known bugs
+- Would be nice to allow people to swipe to refresh again
 - Non-participating players' tokens may be deleted during normal play...
 - Session exists after it's over
   - Set session to expire after all users disconnect?

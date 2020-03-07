@@ -9,6 +9,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 
+import PlayerList from './PlayerList';
 import SlotList from './SlotList';
 import { NAME_LIMIT } from '../../constants';
 import dispatch, { setPlayerName } from '../../state/actions';
@@ -17,7 +18,7 @@ import announce, {
   startGame,
 } from '../../network/network';
 import {
-  getNodes,
+  getLoveBuckets,
   getOwnNodes,
   getPartyLeader,
   getSessionInfo,
@@ -40,7 +41,7 @@ export default function Lobby() {
 
   if (!loveBucket) return <div>Loading, my dudes...</div>;
 
-  const loveBuckets = _.pickBy(getNodes(), ['type', 'loveBucket']);
+  const loveBuckets = getLoveBuckets();
   const storageNodes = _.pickBy(ownNodes, ['type', 'storage']);
 
   const readyPlayerCount = _.filter(
@@ -66,17 +67,23 @@ export default function Lobby() {
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         justifyContent: 'space-between',
         height: '100%',
+        width: '100%',
       }}
     >
+      <div style={{ flexBasis: '30%', top: '20%', position: 'relative' }}>
+        <PlayerList />
+      </div>
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
+          flexBasis: '70%',
           height: '100%',
+          width: '100%',
         }}
       >
         <div>
@@ -102,36 +109,36 @@ export default function Lobby() {
             Start game for {readyPlayerCount} people
           </Button>
         )}
+        <Dialog open={dialogOpen} onClose={handleDialogClose}>
+          <DialogTitle id="alert-dialog-title">
+            Please enter your name
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              label="Name"
+              value={playerName}
+              onChange={handleNameInput}
+              margin="normal"
+              variant="outlined"
+              error={!!nameError}
+              helperText={nameError}
+              onKeyPress={({ key }) => {
+                if (key === 'Enter') handleConfirmName();
+              }}
+              autoFocus
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleConfirmName}
+            >
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
-      <Dialog open={dialogOpen} onClose={handleDialogClose}>
-        <DialogTitle id="alert-dialog-title">
-          Please enter your name
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Name"
-            value={playerName}
-            onChange={handleNameInput}
-            margin="normal"
-            variant="outlined"
-            error={!!nameError}
-            helperText={nameError}
-            onKeyPress={({ key }) => {
-              if (key === 'Enter') handleConfirmName();
-            }}
-            autoFocus
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleConfirmName}
-          >
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 }

@@ -51,12 +51,21 @@ export function getPartyLeader(): string {
   return getState().partyLeader;
 }
 
+export function getPlayerOrder(): string[] {
+  return getState().playerOrder;
+}
+
 export function getCurrentVoter(): ?string {
   return getState().currentVoter;
 }
 
 export function getPlayers(): Players {
   return getState().players;
+}
+
+export function getPlayerReady(playerId: string): boolean {
+  const loveBuckets = getLoveBuckets();
+  return _.some(getPlayerTokens(playerId), token => loveBuckets[token.nodeId]);
 }
 
 export function getParticipatingPlayers(): Players {
@@ -87,6 +96,10 @@ export function getPlayerNodes(playerId: string): Nodes {
 export function getOwnNodes(): Nodes {
   const { playerId } = getSessionInfo();
   return getPlayerNodes(playerId);
+}
+
+export function getLoveBuckets(): Nodes {
+  return _.pickBy(getNodes(), ['type', 'loveBucket']);
 }
 
 export function getTokens(): Tokens {

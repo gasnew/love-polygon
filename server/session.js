@@ -115,7 +115,7 @@ export function getBaseSession({
     subState: ?SubServerState = null
   ) => {
     const currentObjects = subState || (await getAll())[key];
-    set(key, _.omit(currentObjects, id));
+    await set(key, _.omit(currentObjects, id));
   };
 
   return {
@@ -291,6 +291,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
     );
     await set('partyLeader', null);
     await set('votingOrder', []);
+    await set('playerOrder', []);
     await set('currentVoter', null);
     await set('roundEnder', null);
     await set('roundNumber', 1);
@@ -380,6 +381,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
       await set('needs', {});
       await set('nodes', {});
       await set('tokens', {});
+      await set('playerOrder', []);
       await set('relationships', {});
       await set('crushSelections', {});
       await set('partyLeader', null);
@@ -551,23 +553,27 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
         await followEdge('startGame');
       } else if (message.type === 'transferToken') {
         const { tokenId, fromId, toId } = message;
-        const { nodes, partyLeader } = serverState;
+        const { nodes, partyLeader, phase, playerOrder } = serverState;
         await update('tokens', {
           [tokenId]: {
             nodeId: toId,
           },
         });
 
-        // Check for setting party leader
-        const toNode = nodes[toId];
-        const fromNode = nodes[fromId];
-        if (toNode.type === 'loveBucket' && !partyLeader)
-          await set('partyLeader', toNode.playerIds[0]);
-        else if (
-          fromNode.type === 'loveBucket' &&
-          fromNode.playerIds[0] === partyLeader
-        )
-          await set('partyLeader', null);
+        // Check for inserting player into playerOrder
+        if (phase.name === 'lobby') {
+          const toNode = nodes[toId];
+          const fromNode = nodes[fromId];
+          const playerId = fromNode.playerIds[0];
+          if (toNode.type === 'loveBucket') {
+            await set('playerOrder', [...playerOrder, playerId]);
+            if (!partyLeader) await set('partyLeader', playerId);
+          } else if (fromNode.type === 'loveBucket') {
+            const newPlayerOrder = _.difference(playerOrder, [playerId]);
+            await set('playerOrder', newPlayerOrder);
+            await set('partyLeader', newPlayerOrder[0] || null);
+          }
+        }
       } else if (message.type === 'swapTokens') {
         const { tokenId1, nodeId1, tokenId2, nodeId2 } = message;
         await update('tokens', {

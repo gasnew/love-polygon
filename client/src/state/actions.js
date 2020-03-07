@@ -14,6 +14,7 @@ import {
   getPlayers,
   getPlayerTrueLoveSelection,
   getPlayerNodes,
+  getPlayerOrder,
   getNodes,
   getSessionInfo,
   getState,
@@ -60,6 +61,7 @@ const TRANSFER_TOKEN = 'transferToken';
 const SET_CURRENT_TOKEN = 'setCurrentTokenId';
 const SET_CURRENT_VOTER = 'setCurrentVoter';
 const SET_PARTY_LEADER = 'setPartyLeader';
+const SET_PLAYER_ORDER = 'setPlayerOrder';
 const SUBMIT_VOTES = 'submitVotes';
 const SET_VOTING_ORDER = 'setVotingOrder';
 const START_COUNTDOWN = 'startCountdown';
@@ -181,6 +183,10 @@ type Action =
       partyLeaderId: string,
     }
   | {
+      type: 'setPlayerOrder',
+      playerOrder: string[],
+    }
+  | {
       type: 'setCurrentVoter',
       currentVoter: ?string,
     }
@@ -278,6 +284,13 @@ export function setPartyLeader(partyLeaderId: string): Action {
   return {
     type: SET_PARTY_LEADER,
     partyLeaderId,
+  };
+}
+
+export function setPlayerOrder(playerOrder: string[]): Action {
+  return {
+    type: SET_PLAYER_ORDER,
+    playerOrder,
   };
 }
 
@@ -569,6 +582,9 @@ export function silentDispatch(action: Action) {
     case SET_PARTY_LEADER:
       mergeIntoState('partyLeader', action.partyLeaderId);
       break;
+    case SET_PLAYER_ORDER:
+      mergeIntoState('playerOrder', action.playerOrder);
+      break;
     case SET_CRUSH_SELECTIONS:
       mergeIntoState('crushSelections', action.crushSelections);
       break;
@@ -649,7 +665,21 @@ export function silentDispatch(action: Action) {
         nodeId: action.toId,
       });
 
-      // Check for setting party leader
+      // Check for inserting player into playerOrder
+      if ((getPhase() || {}).name === 'lobby') {
+        const toNode = getNode(action.toId);
+        const fromNode = getNode(action.fromId);
+        const playerId = fromNode.playerIds[0];
+        const playerOrder = getPlayerOrder();
+        if (toNode.type === 'loveBucket') {
+          mergeIntoState('playerOrder',  [...playerOrder, playerId]);
+          if (!getPartyLeader()) mergeIntoState('partyLeader', playerId);
+        } else if (fromNode.type === 'loveBucket') {
+          const newPlayerOrder = _.difference(playerOrder, [playerId]);
+          mergeIntoState('playerOrder', newPlayerOrder);
+          mergeIntoState('partyLeader', newPlayerOrder[0] || null);
+        }
+      }
       const toNode = getNode(action.toId);
       const fromNode = getNode(action.fromId);
       if (toNode.type === 'loveBucket' && !getPartyLeader())
