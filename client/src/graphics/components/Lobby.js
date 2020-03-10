@@ -9,7 +9,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 
-import PlayerList from './PlayerList';
+import SeriesInfoCard from './SeriesInfoCard';
 import SlotList from './SlotList';
 import { NAME_LIMIT } from '../../constants';
 import dispatch, { setPlayerName } from '../../state/actions';
@@ -18,9 +18,7 @@ import announce, {
   startGame,
 } from '../../network/network';
 import {
-  getLoveBuckets,
   getOwnNodes,
-  getPartyLeader,
   getSessionInfo,
   getTokens,
 } from '../../state/getters';
@@ -41,13 +39,8 @@ export default function Lobby() {
 
   if (!loveBucket) return <div>Loading, my dudes...</div>;
 
-  const loveBuckets = getLoveBuckets();
   const storageNodes = _.pickBy(ownNodes, ['type', 'storage']);
 
-  const readyPlayerCount = _.filter(
-    getTokens(),
-    token => loveBuckets[token.nodeId]
-  ).length;
   const handleNameInput = event => {
     const name = event.target.value;
     const truncatedName = name.substring(0, NAME_LIMIT);
@@ -66,15 +59,22 @@ export default function Lobby() {
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
         height: '100%',
         width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
       }}
     >
-      <div style={{ flexBasis: '30%', top: '20%', position: 'relative' }}>
-        <PlayerList />
+      <div
+        style={{
+          height: '100%',
+          width: '100%',
+          flexBasis: '30%',
+        }}
+      >
+        <div style={{ position: 'relative', top: '20%' }}>
+          <SeriesInfoCard onClick={() => announce(startGame())} />
+        </div>
       </div>
       <div
         style={{
@@ -100,15 +100,6 @@ export default function Lobby() {
         >
           Change name
         </Button>
-        {playerId === getPartyLeader() && (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => announce(startGame())}
-          >
-            Start game for {readyPlayerCount} people
-          </Button>
-        )}
         <Dialog open={dialogOpen} onClose={handleDialogClose}>
           <DialogTitle id="alert-dialog-title">
             Please enter your name

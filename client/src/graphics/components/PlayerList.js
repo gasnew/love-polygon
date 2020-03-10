@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function SimpleList() {
+export default function PlayerList() {
   const classes = useStyles();
 
   const partyLeader = getPartyLeader();
@@ -55,7 +55,7 @@ export default function SimpleList() {
                 )}
               </ListItemIcon>
               <ListItemText
-                primary={player.name || <i>new player</i>}
+                primary={player.name || <i>New Player</i>}
                 style={{ color: grey[player.inRound ? 500 : 900] }}
               />
             </ListItem>

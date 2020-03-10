@@ -254,3 +254,17 @@ export function getRoundNumber(): number {
 export function getPoints(): Points {
   return getState().points;
 }
+
+// WARNING: This is copied from server/states.js and *must* be kept up-to-date.
+// We put this here instead of query-able via the API to keep things speedy
+export const getNumberOfLovers = (numberOfPlayers: number): number => {
+  if (numberOfPlayers <= 2) throw new Error('Nah, man! Too few folks for love');
+  if (numberOfPlayers === 3) return 3;
+  if (numberOfPlayers === 4) return 3;
+  if (numberOfPlayers === 5) return 3;
+  if (numberOfPlayers === 6) return 4;
+  if (numberOfPlayers === 7) return 5;
+  if (numberOfPlayers === 8) return 5;
+  throw new Error('Whoa!! Too many folks for love. Let me breathe the air');
+};
+
