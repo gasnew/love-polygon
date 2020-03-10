@@ -17,11 +17,59 @@ import announce, {
   setName as networkedSetName,
   startGame,
 } from '../../network/network';
-import {
-  getOwnNodes,
-  getSessionInfo,
-  getTokens,
-} from '../../state/getters';
+import { getOwnNodes, getSessionInfo, getTokens } from '../../state/getters';
+
+type NameDialogProps = {
+  playerName: string,
+  handlePlayerNameChange: string => void,
+  open: boolean,
+  onClose: () => void,
+};
+
+const NameDialog = ({
+  playerName,
+  handlePlayerNameChange,
+  open,
+  onClose,
+}: NameDialogProps) => {
+  const [nameError, setNameError] = useState('');
+
+  const handleNameInput = event => {
+    handlePlayerNameChange(event.target.value);
+    setNameError('');
+  };
+  const handleDialogClose = () =>
+    playerName ? onClose() : setNameError('Please enter a name');
+  const handleConfirmName = () => {
+    playerName && announce(networkedSetName(playerName));
+    handleDialogClose();
+  };
+  return (
+    <Dialog onClose={handleDialogClose} open={open}>
+      <DialogTitle id="alert-dialog-title">Please enter your name</DialogTitle>
+      <DialogContent>
+        <TextField
+          label="Name"
+          value={playerName}
+          onChange={handleNameInput}
+          margin="normal"
+          variant="outlined"
+          error={!!nameError}
+          helperText={nameError}
+          onKeyPress={({ key }) => {
+            if (key === 'Enter') handleConfirmName();
+          }}
+          autoFocus
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button variant="contained" color="primary" onClick={handleConfirmName}>
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 const throttledNetworkedSetName = _.throttle(
   name => announce(networkedSetName(name)),
@@ -31,7 +79,8 @@ const throttledNetworkedSetName = _.throttle(
 export default function Lobby() {
   const { playerId, playerName } = getSessionInfo();
   const [dialogOpen, setDialogOpen] = useState(!!!playerName);
-  const [nameError, setNameError] = useState('');
+
+  if (playerName == null) return <div>One sec, lads</div>;
 
   const ownNodes = getOwnNodes();
   const tokens = getTokens();
@@ -41,20 +90,13 @@ export default function Lobby() {
 
   const storageNodes = _.pickBy(ownNodes, ['type', 'storage']);
 
-  const handleNameInput = event => {
-    const name = event.target.value;
+  const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);
+
+  const handlePlayerNameChange = name => {
     const truncatedName = name.substring(0, NAME_LIMIT);
     dispatch(setPlayerName(playerId, truncatedName));
     throttledNetworkedSetName(truncatedName);
-    setNameError('');
   };
-  const handleDialogClose = () =>
-    playerName ? setDialogOpen(false) : setNameError('Please enter a name');
-  const handleConfirmName = () => {
-    playerName && announce(networkedSetName(playerName));
-    handleDialogClose();
-  };
-  const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);
 
   return (
     <div
@@ -100,35 +142,12 @@ export default function Lobby() {
         >
           Change name
         </Button>
-        <Dialog open={dialogOpen} onClose={handleDialogClose}>
-          <DialogTitle id="alert-dialog-title">
-            Please enter your name
-          </DialogTitle>
-          <DialogContent>
-            <TextField
-              label="Name"
-              value={playerName}
-              onChange={handleNameInput}
-              margin="normal"
-              variant="outlined"
-              error={!!nameError}
-              helperText={nameError}
-              onKeyPress={({ key }) => {
-                if (key === 'Enter') handleConfirmName();
-              }}
-              autoFocus
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleConfirmName}
-            >
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <NameDialog
+          playerName={playerName}
+          handlePlayerNameChange={handlePlayerNameChange}
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+        />
       </div>
     </div>
   );

@@ -76,16 +76,16 @@
 + Playtest a bit more
 / Improve lobby screen
   + See list of players in the lobby and their statuses
-  - Name character limit is imposed for styling reasons
+  + Name character limit is imposed for styling reasons
   - Names must be unique
   + Name input field appears in dialog and is focused on page load (if name is
     empty). It can be opened again
-  - Jar of hearts (with players' names!)
+  / Jar of hearts (with players' names!)
     - This is sorted so you can see who entered first
-    - If leader leaves, next up becomes leader
-  - New start button that shows how many players are in the game and what roles
+    + If leader leaves, next up becomes leader
+  + New start button that shows how many players are in the game and what roles
     will be filled
-  - Players have unique colors (preselected 6)
+  - Players have unique colors (preselected 6?)
 - Top info and navigation bar for all phases
   - "Main Menu"
   - Player name
