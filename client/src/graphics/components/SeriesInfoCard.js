@@ -37,9 +37,7 @@ const getRoleCounts = participatingPlayerCount => {
 };
 
 const useStyles = makeStyles({
-  root: {
-    minWidth: 180,
-  },
+  root: {},
   bullet: {
     display: 'inline-block',
     margin: '0 2px',
@@ -78,13 +76,17 @@ export default function OutlinedCard({ onClick }: Props) {
         <Typography variant="h5" component="h2" className={classes.title}>
           {canStartRound ? (
             <b>
-              {crushCount} crushes | {wingmanCount}{' '}
+              {crushCount}&nbsp;crushes | {wingmanCount}&nbsp;
               {wingmanCount === 1 ? 'wingman' : 'wingmen'}
             </b>
           ) : (
             <i>
-              Waiting for at least {PLAYER_COUNT_MIN} players (
-              {participatingPlayerCount}/{PLAYER_COUNT_MIN})...
+              {_.flow(
+                playersNeeded =>
+                  `Waiting for ${playersNeeded} more player${
+                    playersNeeded === 1 ? '' : 's'
+                  }...`
+              )(PLAYER_COUNT_MIN - participatingPlayerCount)}
             </i>
           )}
         </Typography>

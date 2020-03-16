@@ -81,7 +81,8 @@
   + Name input field appears in dialog and is focused on page load (if name is
     empty). It can be opened again
   / Jar of hearts (with players' names!)
-    - This is sorted so you can see who entered first
+    + This is sorted so you can see who entered first
+    - Hearts have players' names on them
     + If leader leaves, next up becomes leader
   + New start button that shows how many players are in the game and what roles
     will be filled

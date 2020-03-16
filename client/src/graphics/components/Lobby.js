@@ -10,6 +10,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 
 import SeriesInfoCard from './SeriesInfoCard';
+import Jar from './Jar';
 import SlotList from './SlotList';
 import { NAME_LIMIT } from '../../constants';
 import dispatch, { setPlayerName } from '../../state/actions';
@@ -104,33 +105,35 @@ export default function Lobby() {
         height: '100%',
         width: '100%',
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
       }}
     >
       <div
         style={{
           height: '100%',
           width: '100%',
-          flexBasis: '30%',
+          flexBasis: '60%',
+          display: 'flex',
+          flexDirection: 'row',
         }}
       >
-        <div style={{ position: 'relative', top: '20%' }}>
+        <div style={{ marginTop: '20%', flexBasis: '40%' }}>
           <SeriesInfoCard onClick={() => announce(startGame())} />
+        </div>
+        <div style={{ flexBasis: '60%' }}>
+          <Jar node={loveBucket} />
         </div>
       </div>
       <div
         style={{
+          height: '100%',
+          width: '100%',
+          flexBasis: '40%',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          flexBasis: '70%',
-          height: '100%',
-          width: '100%',
         }}
       >
-        <div>
-          <SlotList nodes={{ [loveBucket.id]: loveBucket }} />
-        </div>
         <div>
           <SlotList nodes={storageNodes} />
         </div>
