@@ -3,6 +3,7 @@
 import React from 'react';
 import { useDrag } from 'react-dnd';
 
+import Heart from './Heart';
 import type { Token } from '../../state/state';
 
 export const TOKEN_DIMENSIONS = { width: 60, height: 60 };
@@ -26,8 +27,20 @@ export default function Item({ token, style }: Props) {
       isDragging: !!monitor.isDragging(),
     }),
   });
+  const tokenType = token && token.type;
   return (
-    !isDragging && (
+    !isDragging &&
+    (tokenType === 'heart' ? (
+      <div ref={drag}>
+        <Heart
+          token={token}
+          style={{
+            ...TOKEN_DIMENSIONS,
+            ...style,
+          }}
+        />
+      </div>
+    ) : (
       <img
         ref={drag}
         alt="I am a delicious food"
@@ -35,8 +48,8 @@ export default function Item({ token, style }: Props) {
           ...TOKEN_DIMENSIONS,
           ...style,
         }}
-        src={IMAGES_URLS[token && token.type]}
+        src={IMAGES_URLS[tokenType]}
       />
-    )
+    ))
   );
 }

@@ -82,11 +82,12 @@
     empty). It can be opened again
   / Jar of hearts (with players' names!)
     + This is sorted so you can see who entered first
-    - Hearts have players' names on them
+    + Hearts have players' names on them
     + If leader leaves, next up becomes leader
+    - Players have unique colors (preselected 6?)
   + New start button that shows how many players are in the game and what roles
     will be filled
-  - Players have unique colors (preselected 6?)
+  + Test that multiple players can interact with the jar at once
 - Top info and navigation bar for all phases
   - "Main Menu"
   - Player name

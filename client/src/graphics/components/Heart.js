@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import { getNode, getPlayer } from '../../state/getters';
 import { TOKEN_DIMENSIONS } from './Item';
 
 import type { Token } from '../../state/state';
@@ -12,14 +13,19 @@ type Props = {
 };
 
 export default function Heart({ token, style }: Props) {
+  const playerName = getPlayer(getNode(token.nodeId).playerIds[0]).name;
+
   return (
-    <img
-      alt="I am a beautiful heart"
+    <div
       style={{
         ...TOKEN_DIMENSIONS,
         ...style,
+        textAlign: 'center',
+        backgroundImage: 'url(heart.png)',
+        backgroundSize: 'cover',
       }}
-      src="heart.png"
-    />
+    >
+      <span style={{position: 'relative', top: 15 }}>{playerName}</span>
+    </div>
   );
 }

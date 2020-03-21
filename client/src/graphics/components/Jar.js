@@ -3,24 +3,17 @@
 import _ from 'lodash';
 import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import type { Item as DndItem, Monitor } from 'react-dnd';
 
 import Heart from './Heart';
-import Item, { TOKEN, TOKEN_DIMENSIONS } from './Item';
+import { TOKEN, TOKEN_DIMENSIONS } from './Item';
 import { makeUseDropOptions } from './Slot';
-import announce, {
-  swapTokens,
-  transferToken as networkedTransferToken,
-} from '../../network/network';
-import dispatch, { setTokenNodeId, transferToken } from '../../state/actions';
 import {
   getNode,
   getNodeToken,
   getPlayerOrder,
   getPlayerTokens,
-  getToken,
 } from '../../state/getters';
-import type { Node, Token } from '../../state/state';
+import type { Node } from '../../state/state';
 
 const TOKEN_POSITIONS = [
   {
@@ -67,11 +60,8 @@ export default function Jar({ node }: Props) {
   );
 
   const [, drop] = useDrop(makeUseDropOptions(node, ownToken));
-  const [{ isDragging }, drag] = useDrag({
+  const [, drag] = useDrag({
     item: { id: ownToken && ownToken.id, type: TOKEN },
-    collect: monitor => ({
-      isDragging: !!monitor.isDragging(),
-    }),
   });
 
   return (
@@ -87,20 +77,16 @@ export default function Jar({ node }: Props) {
         position: 'relative',
       }}
     >
-      {_.map(
-        tokens,
-        token =>
-          !(ownToken && token.id === ownToken.id && isDragging) && (
-            <Heart
-              key={token.id}
-              token={token}
-              style={{
-                position: 'absolute',
-                ...TOKEN_POSITIONS[tokens.indexOf(token)],
-              }}
-            />
-          )
-      )}
+      {_.map(tokens, token => (
+        <Heart
+          key={token.id}
+          token={token}
+          style={{
+            position: 'absolute',
+            ...TOKEN_POSITIONS[tokens.indexOf(token)],
+          }}
+        />
+      ))}
     </div>
   );
 }
