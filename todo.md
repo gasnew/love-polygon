@@ -77,7 +77,7 @@
 / Improve lobby screen
   + See list of players in the lobby and their statuses
   + Name character limit is imposed for styling reasons
-  - Names must be unique
+  + Names must be unique
   + Name input field appears in dialog and is focused on page load (if name is
     empty). It can be opened again
   / Jar of hearts (with players' names!)

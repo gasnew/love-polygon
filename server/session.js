@@ -410,6 +410,15 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
             _.includes(node.playerIds, playerId) && node.type === 'loveBucket'
         );
         if (name.length > NAME_LIMIT) return false;
+
+        if (
+          _.flow(
+            players => _.reject(players, ['id', playerId]),
+            otherPlayers => _.map(otherPlayers, 'name'),
+            otherNames => _.includes(otherNames, name)
+          )(players)
+        )
+          return false;
         if (!loveBucket) return false;
 
         const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);

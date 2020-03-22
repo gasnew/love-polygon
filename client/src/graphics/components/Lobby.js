@@ -18,7 +18,12 @@ import announce, {
   setName as networkedSetName,
   startGame,
 } from '../../network/network';
-import { getOwnNodes, getSessionInfo, getTokens } from '../../state/getters';
+import {
+  getOwnNodes,
+  getPlayers,
+  getSessionInfo,
+  getTokens,
+} from '../../state/getters';
 
 type NameDialogProps = {
   playerName: string,
@@ -39,14 +44,25 @@ const NameDialog = ({
     handlePlayerNameChange(event.target.value);
     setNameError('');
   };
-  const handleDialogClose = () =>
-    playerName ? onClose() : setNameError('Please enter a name');
   const handleConfirmName = () => {
-    playerName && announce(networkedSetName(playerName));
-    handleDialogClose();
+    if (!playerName) {
+      setNameError('Please enter a name');
+      return;
+    } else if (
+      _.flow(
+        players => _.reject(players, ['id', getSessionInfo().playerId]),
+        otherPlayers => _.map(otherPlayers, 'name'),
+        otherNames => _.includes(otherNames, playerName)
+      )(getPlayers())
+    ) {
+      setNameError(`"${playerName}" is already taken`);
+      return;
+    }
+    announce(networkedSetName(playerName));
+    onClose();
   };
   return (
-    <Dialog onClose={handleDialogClose} open={open}>
+    <Dialog onClose={handleConfirmName} open={open}>
       <DialogTitle id="alert-dialog-title">Please enter your name</DialogTitle>
       <DialogContent>
         <TextField
@@ -72,11 +88,6 @@ const NameDialog = ({
   );
 };
 
-const throttledNetworkedSetName = _.throttle(
-  name => announce(networkedSetName(name)),
-  1000
-);
-
 export default function Lobby() {
   const { playerId, playerName } = getSessionInfo();
   const [dialogOpen, setDialogOpen] = useState(!!!playerName);
@@ -96,7 +107,6 @@ export default function Lobby() {
   const handlePlayerNameChange = name => {
     const truncatedName = name.substring(0, NAME_LIMIT);
     dispatch(setPlayerName(playerId, truncatedName));
-    throttledNetworkedSetName(truncatedName);
   };
 
   return (
