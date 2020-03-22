@@ -1,6 +1,8 @@
 // @flow
 
+import Color from 'color';
 import _ from 'lodash';
+import stringToColor from 'string-to-color';
 
 import type { Socket } from 'socket.io-client';
 
@@ -79,6 +81,13 @@ export function getInRound(): boolean {
 
 export function getPlayer(playerId: string): Player {
   return getPlayers()[playerId];
+}
+
+export function generatePlayerColor(playerName: string): string {
+  const somePastelColor = '#ffb7b2';
+  return Color(somePastelColor)
+    .rotate(Color(stringToColor(playerName)).hue())
+    .hex();
 }
 
 export function getNodes(): Nodes {
@@ -267,4 +276,3 @@ export const getNumberOfLovers = (numberOfPlayers: number): number => {
   if (numberOfPlayers === 8) return 5;
   throw new Error('Whoa!! Too many folks for love. Let me breathe the air');
 };
-

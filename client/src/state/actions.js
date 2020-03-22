@@ -7,6 +7,7 @@ import type { Socket } from 'socket.io-client';
 import {
   getCrushSelections,
   getNode,
+  generatePlayerColor,
   getPartyLeader,
   getPhase,
   getPlayer,
@@ -526,7 +527,7 @@ export function silentDispatch(action: Action) {
       mergeIntoPlayers(action.id, {
         id: action.id,
         name: action.name,
-        color: action.color,
+        color: generatePlayerColor(action.name),
         inRound: action.inRound,
       });
       break;
@@ -535,6 +536,7 @@ export function silentDispatch(action: Action) {
       mergeIntoPlayers(action.playerId, {
         ...getPlayer(action.playerId),
         name: action.name,
+        color: generatePlayerColor(action.name),
       });
 
       // Update sessionInfo

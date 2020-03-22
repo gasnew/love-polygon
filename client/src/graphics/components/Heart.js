@@ -2,7 +2,6 @@
 
 import Color from 'color';
 import React from 'react';
-import stringToColor from 'string-to-color';
 import Typography from '@material-ui/core/Typography';
 
 import { getNode, getPlayer } from '../../state/getters';
@@ -18,9 +17,7 @@ type Props = {
 export default function Heart({ token, style }: Props) {
   const player = getPlayer(getNode(token.nodeId).playerIds[0]);
 
-  const playerColor = Color('#ffb7b2').rotate(
-    Color(stringToColor(player.name)).hue()
-  );
+  const playerColor = Color(player.color);
   const heartImageColor = Color({ r: 255, g: 163, b: 152 });
   const hueRotation = playerColor.hue() - heartImageColor.hue();
   const colorBrightness =
