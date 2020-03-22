@@ -84,7 +84,8 @@
     + This is sorted so you can see who entered first
     + Hearts have players' names on them
     + If leader leaves, next up becomes leader
-    - Players have unique colors (preselected 6?)
+    + Players have unique colors (preselected 6?)
+    - Sixth person cannot enter jar
   + New start button that shows how many players are in the game and what roles
     will be filled
   + Test that multiple players can interact with the jar at once
