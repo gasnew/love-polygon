@@ -73,21 +73,39 @@
   + This probably occurs after voting once all the information is out there
   + lock-in
 + Milestone 2 complete!!
-/ Playtest a bit more
-- Improve lobby screen
-  - Be able to see how many people are in the lobby
-  - Name character limit is imposed for styling reasons
-  - Names must be unique
-  - Name input field appears in dialog and is focused on page load (if name is
++ Playtest a bit more
++ Improve lobby screen
+  + See list of players in the lobby and their statuses
+  + Name character limit is imposed for styling reasons
+  + Names must be unique
+  + Name input field appears in dialog and is focused on page load (if name is
     empty). It can be opened again
-  - Jar of hearts (with players' names!)
-    - This is sorted so you can see who entered first
-    - If leader leaves, next up becomes leader
-  - Prevent generating sessions by navigating to session page?
-    - Route back to landing page with alert about the session not existing
+  + Jar of hearts (with players' names!)
+    + This is sorted so you can see who entered first
+    + Hearts have players' names on them
+    + If leader leaves, next up becomes leader
+    + Players have unique colors (preselected 6?)
+    + Sixth person cannot enter jar
+  + New start button that shows how many players are in the game and what roles
+    will be filled
+  + Test that multiple players can interact with the jar at once
+- Top info and navigation bar for all phases
+  - "Main Menu"
+  - Player name
+  - Phase name and round number
+  - Session ID
+  - Share and copy buttons
+  - See mockups
+- Improve romance screen
+  - Arc of plates
+  - Joint plates are colored accordingly
+  - Better header for crush
+  - Better needs indicator
+  - Better "end round" button
 - Practice mode
   - Can trade all you want but cannot end round
   - Party leader can move it back to lobby to start a real round
+  - Lots of cool tutorial info
 - Love polygon
   - Actually a graph
   - Separate tab on completion screen?
@@ -131,6 +149,8 @@
     - Perhaps this is a dialog that opens if you join a session that has at
       least one inactive player? It gives you the player name and the option to
       accept or be a new player
+  - Prevent generating sessions by navigating to session page?
+    - Route back to landing page with alert about the session not existing
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!
@@ -169,6 +189,7 @@
     3. True love (bonus points if you guess who)
 
 ## Known bugs
+- Would be nice to allow people to swipe to refresh again
 - Non-participating players' tokens may be deleted during normal play...
 - Session exists after it's over
   - Set session to expire after all users disconnect?
@@ -177,7 +198,7 @@
 - Timers (used for countdown and timing before voting) can be broken by restarting the server
   - Maybe solve with redis delayed task?
     https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-4-task-queues/6-4-2-delayed-tasks/
-- This one
+/ This one POSSIBLY SOLVED!
       events.js:170
         throw er; // Unhandled 'error' event
         ^
@@ -191,7 +212,6 @@
 - After switching to fullscreen, I will receive state updates, even for moves I make
 - What happens on the frontend when I delete a nameless player?
   - May have fixed this...
-/ Players can have the same name
 / Players can transfer tokens from another player's storage node
   / Either, current token should be set to null (maybe not great)
   / Or, transfers to another player can only occur from shared nodes
@@ -201,6 +221,7 @@
 + Someone can be a wingman for a person who has a crush on them
 + Too many dispatches when setting and updating state--make an option to only
   dispatch once
++ Players can have the same name (not any more)
 
 ## Playtest notes
 Progress is indicated in terms of where I am regarding making these actual items.

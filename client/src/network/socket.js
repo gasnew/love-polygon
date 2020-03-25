@@ -15,6 +15,7 @@ import dispatch, {
   setPartyLeader,
   setPhase,
   setPlayerName,
+  setPlayerOrder,
   setPoints,
   setRelationships,
   setRoundNumber,
@@ -54,6 +55,7 @@ export function updateState(serverState: ServerState) {
   const {
     crushSelections,
     partyLeader,
+    playerOrder,
     players,
     nodes,
     tokens,
@@ -108,6 +110,7 @@ export function updateState(serverState: ServerState) {
   });
 
   silentDispatch(setPartyLeader(partyLeader));
+  silentDispatch(setPlayerOrder(playerOrder));
   silentDispatch(setVotingOrder(votingOrder));
   silentDispatch(setCrushSelections(crushSelections));
   _.flow(
@@ -134,6 +137,7 @@ export function setState(serverState: ServerState) {
     currentVoter,
     partyLeader,
     phase,
+    playerOrder,
     players,
     points,
     needs,
@@ -169,6 +173,7 @@ export function setState(serverState: ServerState) {
   silentDispatch(setNeeds(needs));
   silentDispatch(setRelationships(relationships));
   silentDispatch(setPartyLeader(partyLeader));
+  silentDispatch(setPlayerOrder(playerOrder));
   silentDispatch(setVotingOrder(votingOrder));
   silentDispatch(setCrushSelections(crushSelections));
   silentDispatch(setTrueLoveSelections(trueLoveSelections));

@@ -92,6 +92,7 @@ export type ServerState = {|
   players: Players,
   nodes: Nodes,
   tokens: Tokens,
+  playerOrder: string[],
   relationships: Relationships,
   needs: Needs,
   partyLeader: string,

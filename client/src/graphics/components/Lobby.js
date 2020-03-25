@@ -1,10 +1,16 @@
 // @flow
 
-import Button from '@material-ui/core/Button';
 import _ from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 
+import SeriesInfoCard from './SeriesInfoCard';
+import Jar from './Jar';
 import SlotList from './SlotList';
 import { NAME_LIMIT } from '../../constants';
 import dispatch, { setPlayerName } from '../../state/actions';
@@ -13,73 +19,149 @@ import announce, {
   startGame,
 } from '../../network/network';
 import {
-  getNodes,
   getOwnNodes,
-  getPartyLeader,
+  getPlayers,
   getSessionInfo,
   getTokens,
 } from '../../state/getters';
 
-const throttledNetworkedSetName = _.throttle(
-  name => announce(networkedSetName(name)),
-  1000
-);
+type NameDialogProps = {
+  playerName: string,
+  handlePlayerNameChange: string => void,
+  open: boolean,
+  onClose: () => void,
+};
+
+const NameDialog = ({
+  playerName,
+  handlePlayerNameChange,
+  open,
+  onClose,
+}: NameDialogProps) => {
+  const [nameError, setNameError] = useState('');
+
+  const handleNameInput = event => {
+    handlePlayerNameChange(event.target.value);
+    setNameError('');
+  };
+  const handleConfirmName = () => {
+    if (!playerName) {
+      setNameError('Please enter a name');
+      return;
+    } else if (
+      _.flow(
+        players => _.reject(players, ['id', getSessionInfo().playerId]),
+        otherPlayers => _.map(otherPlayers, 'name'),
+        otherNames => _.includes(otherNames, playerName)
+      )(getPlayers())
+    ) {
+      setNameError(`"${playerName}" is already taken`);
+      return;
+    }
+    announce(networkedSetName(playerName));
+    onClose();
+  };
+  return (
+    <Dialog onClose={handleConfirmName} open={open}>
+      <DialogTitle id="alert-dialog-title">Please enter your name</DialogTitle>
+      <DialogContent>
+        <TextField
+          label="Name"
+          value={playerName}
+          onChange={handleNameInput}
+          margin="normal"
+          variant="outlined"
+          error={!!nameError}
+          helperText={nameError}
+          onKeyPress={({ key }) => {
+            if (key === 'Enter') handleConfirmName();
+          }}
+          autoFocus
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button variant="contained" color="primary" onClick={handleConfirmName}>
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 export default function Lobby() {
   const { playerId, playerName } = getSessionInfo();
+  const [dialogOpen, setDialogOpen] = useState(!!!playerName);
+
+  if (playerName == null) return <div>One sec, lads</div>;
+
   const ownNodes = getOwnNodes();
   const tokens = getTokens();
   const loveBucket = _.find(ownNodes, ['type', 'loveBucket']);
 
   if (!loveBucket) return <div>Loading, my dudes...</div>;
 
-  const loveBuckets = _.pickBy(getNodes(), ['type', 'loveBucket']);
   const storageNodes = _.pickBy(ownNodes, ['type', 'storage']);
 
-  const readyPlayerCount = _.filter(
-    getTokens(),
-    token => loveBuckets[token.nodeId]
-  ).length;
-  const handleNameInput = event => {
-    const name = event.target.value;
+  const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);
+
+  const handlePlayerNameChange = name => {
     const truncatedName = name.substring(0, NAME_LIMIT);
     dispatch(setPlayerName(playerId, truncatedName));
-    throttledNetworkedSetName(truncatedName);
   };
-  const heartIsInBucket = _.some(tokens, ['nodeId', loveBucket.id]);
 
   return (
     <div
       style={{
+        height: '100%',
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '100%',
       }}
     >
-      <div>
-        <SlotList nodes={{ [loveBucket.id]: loveBucket }} />
+      <div
+        style={{
+          height: '100%',
+          width: '100%',
+          flexBasis: '60%',
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <div style={{ marginTop: '5%', flexBasis: '40%' }}>
+          <SeriesInfoCard onClick={() => announce(startGame())} />
+        </div>
+        <div style={{ flexBasis: '60%' }}>
+          <Jar node={loveBucket} />
+        </div>
       </div>
-      <div>
-        <SlotList nodes={storageNodes} />
-      </div>
-      <TextField
-        label="Name"
-        value={playerName}
-        onChange={handleNameInput}
-        margin="normal"
-        variant="outlined"
-        disabled={heartIsInBucket}
-      />
-      {playerId === getPartyLeader() && (
+      <div
+        style={{
+          height: '100%',
+          width: '100%',
+          flexBasis: '40%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div>
+          <SlotList nodes={storageNodes} />
+        </div>
         <Button
-          variant="contained"
           color="primary"
-          onClick={() => announce(startGame())}
+          variant="contained"
+          onClick={() => setDialogOpen(true)}
+          disabled={heartIsInBucket}
         >
-          Start game for {readyPlayerCount} people
+          Change name
         </Button>
-      )}
+        <NameDialog
+          playerName={playerName}
+          handlePlayerNameChange={handlePlayerNameChange}
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+        />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 // @flow
 
+import Color from 'color';
 import _ from 'lodash';
+import stringToColor from 'string-to-color';
 
 import type { Socket } from 'socket.io-client';
 
@@ -51,12 +53,21 @@ export function getPartyLeader(): string {
   return getState().partyLeader;
 }
 
+export function getPlayerOrder(): string[] {
+  return getState().playerOrder;
+}
+
 export function getCurrentVoter(): ?string {
   return getState().currentVoter;
 }
 
 export function getPlayers(): Players {
   return getState().players;
+}
+
+export function getPlayerReady(playerId: string): boolean {
+  const loveBuckets = getLoveBuckets();
+  return _.some(getPlayerTokens(playerId), token => loveBuckets[token.nodeId]);
 }
 
 export function getParticipatingPlayers(): Players {
@@ -70,6 +81,13 @@ export function getInRound(): boolean {
 
 export function getPlayer(playerId: string): Player {
   return getPlayers()[playerId];
+}
+
+export function generatePlayerColor(playerName: string): string {
+  const somePastelColor = '#ffb7b2';
+  return Color(somePastelColor)
+    .rotate(Color(stringToColor(playerName)).hue())
+    .hex();
 }
 
 export function getNodes(): Nodes {
@@ -87,6 +105,10 @@ export function getPlayerNodes(playerId: string): Nodes {
 export function getOwnNodes(): Nodes {
   const { playerId } = getSessionInfo();
   return getPlayerNodes(playerId);
+}
+
+export function getLoveBuckets(): Nodes {
+  return _.pickBy(getNodes(), ['type', 'loveBucket']);
 }
 
 export function getTokens(): Tokens {
@@ -241,3 +263,16 @@ export function getRoundNumber(): number {
 export function getPoints(): Points {
   return getState().points;
 }
+
+// WARNING: This is copied from server/states.js and *must* be kept up-to-date.
+// We put this here instead of query-able via the API to keep things speedy
+export const getNumberOfLovers = (numberOfPlayers: number): number => {
+  if (numberOfPlayers <= 2) throw new Error('Nah, man! Too few folks for love');
+  if (numberOfPlayers === 3) return 3;
+  if (numberOfPlayers === 4) return 3;
+  if (numberOfPlayers === 5) return 3;
+  if (numberOfPlayers === 6) return 4;
+  if (numberOfPlayers === 7) return 5;
+  if (numberOfPlayers === 8) return 5;
+  throw new Error('Whoa!! Too many folks for love. Let me breathe the air');
+};

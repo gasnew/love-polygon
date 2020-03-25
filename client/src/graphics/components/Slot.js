@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useDrop } from 'react-dnd';
+import type { Item as DndItem, Monitor } from 'react-dnd';
 
 import Item, { TOKEN } from './Item';
 import announce, {
@@ -10,9 +11,31 @@ import announce, {
 } from '../../network/network';
 import dispatch, { setTokenNodeId, transferToken } from '../../state/actions';
 import { getNodeToken, getToken } from '../../state/getters';
-import type { Node } from '../../state/state';
+import type { Node, Token } from '../../state/state';
 
 const SLOT_DIMENSIONS = { width: '80px', height: '80px' };
+
+export const makeUseDropOptions = (node: Node, token: ?Token) => ({
+  accept: TOKEN,
+  drop: (item: DndItem) => {
+    const draggedToken = getToken(item.id);
+    if (draggedToken.nodeId === node.id) return;
+    if (token) {
+      const previousNodeId = getToken(draggedToken.id).nodeId;
+      dispatch(setTokenNodeId(draggedToken.id, node.id));
+      dispatch(setTokenNodeId(token.id, previousNodeId));
+      announce(swapTokens(draggedToken.id, previousNodeId, token.id, node.id));
+    } else {
+      announce(
+        networkedTransferToken(draggedToken.id, draggedToken.nodeId, node.id)
+      );
+      dispatch(transferToken(draggedToken.id, draggedToken.nodeId, node.id));
+    }
+  },
+  collect: (monitor: Monitor) => ({
+    isOver: !!monitor.isOver({ shallow: false }),
+  }),
+});
 
 type Props = {
   node: Node,
@@ -21,29 +44,7 @@ type Props = {
 export default function Slot({ node }: Props) {
   const token = getNodeToken(node.id);
 
-  const [, drop] = useDrop({
-    accept: TOKEN,
-    drop: item => {
-      const draggedToken = getToken(item.id);
-      if (draggedToken.nodeId === node.id) return;
-      if (token) {
-        const previousNodeId = getToken(draggedToken.id).nodeId;
-        dispatch(setTokenNodeId(draggedToken.id, node.id));
-        dispatch(setTokenNodeId(token.id, previousNodeId));
-        announce(
-          swapTokens(draggedToken.id, previousNodeId, token.id, node.id)
-        );
-      } else {
-        announce(
-          networkedTransferToken(draggedToken.id, draggedToken.nodeId, node.id)
-        );
-        dispatch(transferToken(draggedToken.id, draggedToken.nodeId, node.id));
-      }
-    },
-    collect: monitor => ({
-      isOver: !!monitor.isOver({ shallow: false }),
-    }),
-  });
+  const [, drop] = useDrop(makeUseDropOptions(node, token));
 
   return (
     <div
@@ -54,8 +55,8 @@ export default function Slot({ node }: Props) {
         backgroundImage:
           node.type === 'loveBucket'
             ? 'url(jar.png)'
-            : 'url(https://image.shutterstock.com/image-vector/white-dish-plate-isolated-on-260nw-1054819865.jpg)',
-        backgroundSize: 'cover',
+            : 'url(plate.png)',
+        backgroundSize: 'contain',
       }}
     >
       {token && (
