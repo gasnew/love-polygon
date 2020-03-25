@@ -66,5 +66,8 @@ export async function handleConnection(
   });
 
   // NOTE(gnewman): Perhaps this will solve the nasty uncaught errors bug...
-  socket.on('error', console.error);
+  socket.on(
+    'error',
+    error => console.error(`A socket error has occurred: ${error}`)
+  );
 }

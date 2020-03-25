@@ -3,24 +3,24 @@
 import React from 'react';
 import { useDragLayer } from 'react-dnd';
 
-import Item from './Item';
+import Item, { TOKEN_DIMENSIONS } from './Item';
 import { getToken } from '../../state/getters';
 
 export default function DragLayerComponent() {
-  const { currentOffset, isDragging, item } = useDragLayer(monitor => ({
+  const { isDragging, item, offset } = useDragLayer(monitor => ({
     item: monitor.getItem(),
     itemType: monitor.getItemType(),
-    currentOffset: monitor.getSourceClientOffset(),
+    offset: monitor.getClientOffset(),
     isDragging: !!monitor.isDragging(),
   }));
   return (
-    isDragging && currentOffset && (
+    isDragging && offset && (
       <Item
         token={getToken(item.id)}
         style={{
           position: 'absolute',
-          left: currentOffset.x,
-          top: currentOffset.y,
+          left: offset.x - TOKEN_DIMENSIONS.width / 2,
+          top: offset.y - TOKEN_DIMENSIONS.height / 2,
           pointerEvents: 'none',
         }}
       />
