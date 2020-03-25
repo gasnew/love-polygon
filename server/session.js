@@ -5,7 +5,7 @@ import _ from 'lodash';
 import uniqid from 'uniqid';
 import type { RedisClient } from 'async-redis';
 
-import { NAME_LIMIT, ROUND_COUNT } from './constants';
+import { NAME_LIMIT, PLAYER_COUNT_MAX, ROUND_COUNT } from './constants';
 import withEvents from './events';
 import getFollowEdge from './phase';
 import {
@@ -437,6 +437,24 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
         if (!fromNode.enabled || !toNode.enabled) return false;
         if (token.nodeId !== fromId) return false;
         if (_.some(tokens, ['nodeId', toId])) return false;
+
+        // Cap participating players
+        const readyPlayers = _.flow(
+          nodes => _.pickBy(nodes, ['type', 'loveBucket']),
+          loveBuckets =>
+            _.filter(serverState.tokens, token => loveBuckets[token.nodeId]),
+          readyTokens =>
+            _.map(
+              readyTokens,
+              token => serverState.nodes[token.nodeId].playerIds[0]
+            ),
+          playerIds => _.pick(serverState.players, playerIds)
+        )(serverState.nodes);
+        if (
+          toNode.type === 'loveBucket' &&
+          _.size(readyPlayers) === PLAYER_COUNT_MAX
+        )
+          return false;
 
         return true;
       } else if (message.type === 'swapTokens') {

@@ -69,7 +69,7 @@ export default function OutlinedCard({ onClick }: Props) {
   return (
     <Card className={classes.root} variant="outlined">
       <CardContent style={{ padding: 4 }}>
-        <div style={{ overflow: 'scroll' }}>
+        <div style={{ maxHeight: 320, overflow: 'scroll' }}>
           <PlayerList />
         </div>
         <Divider />

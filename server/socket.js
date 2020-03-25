@@ -64,4 +64,7 @@ export async function handleConnection(
         );
     } else socket.emit('setState', serverState);
   });
+
+  // NOTE(gnewman): Perhaps this will solve the nasty uncaught errors bug...
+  socket.on('error', console.error);
 }

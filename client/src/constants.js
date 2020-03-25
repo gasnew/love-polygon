@@ -1,6 +1,7 @@
 // NOTE: create-react-app does not allow importing outside of src/, so we have
 // to keep these up-to-date with server/constants.js
 export const PLAYER_COUNT_MIN = 3;
+export const PLAYER_COUNT_MAX = 6;
 export const NAME_LIMIT = 15;
 export const ROUND_COUNT = 3;
 export const VALID_SESSION_ID_CHARACTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';

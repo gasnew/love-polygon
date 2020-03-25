@@ -74,18 +74,18 @@
   + lock-in
 + Milestone 2 complete!!
 + Playtest a bit more
-/ Improve lobby screen
++ Improve lobby screen
   + See list of players in the lobby and their statuses
   + Name character limit is imposed for styling reasons
   + Names must be unique
   + Name input field appears in dialog and is focused on page load (if name is
     empty). It can be opened again
-  / Jar of hearts (with players' names!)
+  + Jar of hearts (with players' names!)
     + This is sorted so you can see who entered first
     + Hearts have players' names on them
     + If leader leaves, next up becomes leader
     + Players have unique colors (preselected 6?)
-    - Sixth person cannot enter jar
+    + Sixth person cannot enter jar
   + New start button that shows how many players are in the game and what roles
     will be filled
   + Test that multiple players can interact with the jar at once
@@ -198,7 +198,7 @@
 - Timers (used for countdown and timing before voting) can be broken by restarting the server
   - Maybe solve with redis delayed task?
     https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-4-task-queues/6-4-2-delayed-tasks/
-- This one
+/ This one POSSIBLY SOLVED!
       events.js:170
         throw er; // Unhandled 'error' event
         ^
@@ -212,7 +212,6 @@
 - After switching to fullscreen, I will receive state updates, even for moves I make
 - What happens on the frontend when I delete a nameless player?
   - May have fixed this...
-/ Players can have the same name
 / Players can transfer tokens from another player's storage node
   / Either, current token should be set to null (maybe not great)
   / Or, transfers to another player can only occur from shared nodes
@@ -222,6 +221,7 @@
 + Someone can be a wingman for a person who has a crush on them
 + Too many dispatches when setting and updating state--make an option to only
   dispatch once
++ Players can have the same name (not any more)
 
 ## Playtest notes
 Progress is indicated in terms of where I am regarding making these actual items.

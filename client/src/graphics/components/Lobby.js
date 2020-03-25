@@ -127,7 +127,7 @@ export default function Lobby() {
           flexDirection: 'row',
         }}
       >
-        <div style={{ marginTop: '20%', flexBasis: '40%' }}>
+        <div style={{ marginTop: '5%', flexBasis: '40%' }}>
           <SeriesInfoCard onClick={() => announce(startGame())} />
         </div>
         <div style={{ flexBasis: '60%' }}>
