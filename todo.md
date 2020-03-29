@@ -89,19 +89,29 @@
   + New start button that shows how many players are in the game and what roles
     will be filled
   + Test that multiple players can interact with the jar at once
-- Top info and navigation bar for all phases
-  - "Main Menu"
-  - Player name
-  - Phase name and round number
-  - Session ID
-  - Share and copy buttons
-  - See mockups
++ Top info and navigation bar for all phases
+  + "Main Menu"
+  + Player name
+  + Phase name and round number
+  + Session ID
+  + Share and copy buttons (share will come later when better supported)
+  + See mockups
 - Improve romance screen
   - Arc of plates
   - Joint plates are colored accordingly
   - Better header for crush
   - Better needs indicator
   - Better "end round" button
+  - Just make sure everything fits on the screen for every kind of phone/tablet
+- Host on the cloud for all to see
+  - Open-source the project
+  - Configure app environment (i.e., redis URL)
+  - Dockerize the server and client
+  - Make actual landing page
+    - Look at Google Keep notes for stuff on donations and game description
+    - Include description of what it looks like to play the game, e.g., "Players
+      are encouraged to say aloud their needs in an attempt to draw out any
+      lovers."
 - Practice mode
   - Can trade all you want but cannot end round
   - Party leader can move it back to lobby to start a real round
@@ -166,21 +176,12 @@
   - Crowns victor on final round
   - Transitions to results screen
 - Fix all or virtually all bugs
-- Host on the cloud for all to see
-  - AWS CDK?
-  - Configure app environment (i.e., redis URL)
-  - Dockerize the server and client
-- Make actual landing page
-  - Look at Google Keep notes for stuff on donations and game description
-  - Include description of what it looks like to play the game, e.g., "Players
-    are encouraged to say aloud their needs in an attempt to draw out any
-    lovers."
-- Open-source the project
 
 ## Pipe dreams
 - Technical refactors
   - Use socket.io-redis to support multiple hosts on one Redis cluster?
   - Use something other than socket.io for pubsub?
+  - AWS CDK?
 - Compose music for the lobby
 + Close session loop?
   + Three different types of round
@@ -269,7 +270,7 @@ x lose points for not meeting crush’s needs
 + final round—bonus points if mutual attraction
 + restrict name length
 
-### 2/28/19
+### 2/28/20
 + error message if drop in jar when no name -- won't be able to do this
 - guessed wrong should not be red -- not sure about this? need to rethink that
   page someday
@@ -290,3 +291,10 @@ x lose points for not meeting crush’s needs
 - can’t scroll in true love (maybe fix button to bottom of screen?)
 + true love is a sham
 - final table is a lot of info
+
+### 3/27/20
+- Perhaps assign heart colors once in jar?
+- Multiple jars? Need to think about what people do in a party setting (i.e.,
+  how do we make it not complex to straddle multiple sessions in one live
+  group?)
+- Bigger plate for heart

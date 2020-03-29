@@ -26,12 +26,12 @@ export async function checkSession(
 
   console.log(`Someone is checking to see if ${sessionId} is cool.`);
   if (sessionId === '') {
-    response.json({ error: 'Please enter a session ID' });
+    response.json({ error: 'Please enter a Room ID' });
   } else if (
     !(await sessionExists(request.app.get('redisClient'), sessionId))
   ) {
     response.json({
-      error: `The session "${sessionId}" does not exist. Try creating a new session instead!`,
+      error: `The Room "${sessionId}" does not exist. Try creating a new Room instead!`,
     });
   } else response.json({});
 }

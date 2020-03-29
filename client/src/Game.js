@@ -36,7 +36,7 @@ export default function Game({ sessionId }: Props) {
   });
 
   useEffect(() => {
-    const socket = io('', { query: { sessionId, playerId } });
+    const socket = io(`http://${window.location.hostname}:3001`, { query: { sessionId, playerId } });
     socket
       .on('connect', socketConnect)
       .on('updateState', updateState)
