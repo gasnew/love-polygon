@@ -15,12 +15,24 @@ import { handleConnection } from './socket';
 
 // Express
 const app = express();
-const server = createServer(app);
+const server = createServer((request, response, ...args) => {
+  app(request, response, ...args);
+  // NOTE(gnewman): Try to handle otherwise unhandled errors. Looks like this
+  // doesn't solve the problem we've been seeing
+  request.on('error', err => {
+    console.error(`Request error: ${err}`);
+    response.statusCode = 400;
+    response.end();
+  });
+  response.on('error', err => {
+    console.error(`Response error: ${err}`);
+  });
+});
 const io = createIO(server);
 
 const redisClient = redis.createClient();
 redisClient.on('error', function(err) {
-  console.log('Error ' + err);
+  console.log('Redis error ' + err);
 });
 
 const port = process.env.PORT || 3001;

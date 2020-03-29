@@ -6,6 +6,7 @@ import React from 'react';
 
 import DraggedItem from './DraggedItem';
 import Lobby from './Lobby';
+import NavigationBar from './NavigationBar';
 import ResultsTable from './ResultsTable';
 import Romance from './Romance';
 import TrueLoveVoting from './TrueLoveVoting';
@@ -46,27 +47,32 @@ export default function Table() {
   if (!phase) return <div>Loading, my dudes...</div>;
 
   return (
-    <div style={{ height: '100%' }}>
-      <div style={{ height: '95%' }}>
-        <Scene phase={phase} />
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flexBasis: 30, zIndex: 1 }}>
+        <NavigationBar />
       </div>
-      <div style={{ height: '5%' }}>
-        <button
-          onClick={() =>
-            axios
-              .post('api/get-server-state', { sessionId })
-              .then(response => copy(JSON.stringify(response.data)))
-          }
-        >
-          Server state -> clipboard
-        </button>
-        <button
-          onClick={() =>
-            axios.post('api/load-session-from-cache', { sessionId })
-          }
-        >
-          Load session from cache
-        </button>
+      <div style={{ height: '100%', zIndex: 0 }}>
+        <div style={{ height: '95%' }}>
+          <Scene phase={phase} />
+        </div>
+        <div style={{ height: '5%' }}>
+          <button
+            onClick={() =>
+              axios
+                .post('api/get-server-state', { sessionId })
+                .then(response => copy(JSON.stringify(response.data)))
+            }
+          >
+            Server state -> clipboard
+          </button>
+          <button
+            onClick={() =>
+              axios.post('api/load-session-from-cache', { sessionId })
+            }
+          >
+            Load session from cache
+          </button>
+        </div>
       </div>
     </div>
   );

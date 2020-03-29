@@ -50,6 +50,5 @@
     "babel-preset-flow": "^6.23.0",
     "flow-bin": "^0.107.0",
     "flow-typed": "^2.5.1"
-  },
-  "proxy": "http://localhost:3001/"
+  }
 }

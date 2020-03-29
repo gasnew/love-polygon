@@ -149,7 +149,7 @@ function LandingPage({ classes, setSessionId }: Props) {
             <StepLabel>Join or create a session</StepLabel>
             <StepContent>
               <TextField
-                label="Session ID"
+                label="Room ID"
                 value={sessionIdField.value}
                 onChange={handleTextInput(setSessionIdField)}
                 {...(sessionIdField.error
@@ -171,7 +171,7 @@ function LandingPage({ classes, setSessionId }: Props) {
                 color="secondary"
                 onClick={() => joinSession(sessionIdField.value)}
               >
-                Join Session
+                Join Room
               </Button>
               <Divider className={classes.divider} />
               <Button
@@ -180,7 +180,7 @@ function LandingPage({ classes, setSessionId }: Props) {
                 color="primary"
                 onClick={createSession}
               >
-                Create Session
+                New Room
               </Button>
               <div className={classes.actionsContainer}>
                 <Button
