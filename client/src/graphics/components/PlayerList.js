@@ -12,6 +12,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
 
+import NameTag from './NameTag';
 import {
   getPartyLeader,
   getPlayerOrder,
@@ -54,10 +55,9 @@ export default function PlayerList() {
                   <CircleOutline />
                 )}
               </ListItemIcon>
-              <ListItemText
-                primary={player.name || <i>New Player</i>}
-                style={{ color: grey[player.inRound ? 500 : 900] }}
-              />
+              <ListItemText style={{ color: grey[player.inRound ? 500 : 900] }}>
+                <NameTag playerId={player.id} />
+              </ListItemText>
             </ListItem>
           )
         )}
