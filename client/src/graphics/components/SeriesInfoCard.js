@@ -76,7 +76,7 @@ export default function OutlinedCard({ onClick }: Props) {
         <Typography variant="h5" component="h2" className={classes.title}>
           {canStartRound ? (
             <b>
-              {crushCount}&nbsp;crushes | {wingmanCount}&nbsp;
+              {crushCount}&nbsp;crushes｜{wingmanCount}&nbsp;
               {wingmanCount === 1 ? 'wingman' : 'wingmen'}
             </b>
           ) : (
