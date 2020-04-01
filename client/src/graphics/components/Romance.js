@@ -24,52 +24,61 @@ export default function Romance({ phase }: Props) {
   const { playerId } = getSessionInfo();
   const nodes = getOwnNodes();
   const relationship = getOwnRelationship();
-  const sharedNodes = _.pickBy(nodes, ['type', 'shared']);
+  const sharedNodes = _.sortBy(_.pickBy(nodes, ['type', 'shared']), 'id');
   const storageNodes = _.pickBy(nodes, ['type', 'storage']);
   const need = getOwnNeed();
+
+  if (!relationship) return <p>nah relationship</p>;
 
   return (
     <div
       style={{
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '50%',
       }}
     >
-      <div>
-        {relationship && <RelationshipBanner relationship={relationship} />}
-      </div>
-      <div>
-        <SlotList nodes={sharedNodes} />
-      </div>
-      <div>
-        <SlotList nodes={storageNodes} />
-      </div>
-      <div>
-        {need && (
-          <h2 style={{ textAlign: 'center' }}>
-            Need {need.count} {need.type}s
-          </h2>
-        )}
-      </div>
-      <div style={{ textAlign: 'center' }}>
-        {getNeedsMet(playerId) && phase.name === 'romance' && (
-          <FinishRoundButton needType={need.type} />
-        )}
-      </div>
+      <RelationshipBanner relationship={relationship} />
       <div
         style={{
-          position: 'absolute',
-          top: '50%',
-          textAlign: 'center',
-          width: '100%',
-          pointerEvents: 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
         }}
       >
-        {phase.name === 'countdown' && phase.countdownStartedAt && (
-          <CountdownTimer startedAt={phase.countdownStartedAt} />
-        )}
+        <div style={{ marginTop: 20 }}>
+          <SlotList nodes={sharedNodes} arc={true} />
+        </div>
+        <div style={{ marginBottom: 20, marginTop: 'auto' }}>
+          <SlotList nodes={storageNodes} />
+        </div>
+      </div>
+      <div>
+        <div>
+          {need && (
+            <h2 style={{ textAlign: 'center' }}>
+              Need {need.count} {need.type}s
+            </h2>
+          )}
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          {getNeedsMet(playerId) && phase.name === 'romance' && (
+            <FinishRoundButton needType={need.type} />
+          )}
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            textAlign: 'center',
+            width: '100%',
+            pointerEvents: 'none',
+          }}
+        >
+          {phase.name === 'countdown' && phase.countdownStartedAt && (
+            <CountdownTimer startedAt={phase.countdownStartedAt} />
+          )}
+        </div>
       </div>
     </div>
   );

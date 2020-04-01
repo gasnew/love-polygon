@@ -31,14 +31,14 @@ export default function Item({ token, style }: Props) {
   return (
     !isDragging &&
     (tokenType === 'heart' ? (
-      <div ref={drag}>
-        <Heart
-          token={token}
-          style={{
-            ...TOKEN_DIMENSIONS,
-            ...style,
-          }}
-        />
+      <div
+        ref={drag}
+        style={{
+          ...TOKEN_DIMENSIONS,
+          ...style,
+        }}
+      >
+        <Heart token={token} />
       </div>
     ) : (
       <img

@@ -1,16 +1,25 @@
 // @flow
 
+import Color from 'color';
+import _ from 'lodash';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import type { Item as DndItem, Monitor } from 'react-dnd';
 
 import Item, { TOKEN } from './Item';
+import NameTag from './NameTag';
 import announce, {
   swapTokens,
   transferToken as networkedTransferToken,
 } from '../../network/network';
 import dispatch, { setTokenNodeId, transferToken } from '../../state/actions';
-import { getNodeToken, getToken } from '../../state/getters';
+import {
+  getNodeToken,
+  getPlayer,
+  getSessionInfo,
+  getToken,
+  imageColorFilter,
+} from '../../state/getters';
 import type { Node, Token } from '../../state/state';
 
 const SLOT_DIMENSIONS = { width: '80px', height: '80px' };
@@ -37,44 +46,85 @@ export const makeUseDropOptions = (node: Node, token: ?Token) => ({
   }),
 });
 
+function Plate({
+  backgroundImage = 'url(plate.png)',
+  color,
+  enabled,
+  hover,
+}: {
+  backgroundImage?: string,
+  color: string,
+  enabled: boolean,
+  hover: boolean,
+}) {
+  return (
+    <div
+      style={{
+        ...SLOT_DIMENSIONS,
+        backgroundImage,
+        backgroundSize: 'contain',
+        position: 'absolute',
+        filter: imageColorFilter(
+          Color({ r: 255, g: 163, b: 152 }),
+          Color(color)
+            .darken(enabled ? 0.08 : 0.3)
+            .lighten(hover ? 0.1 : 0)
+        ),
+      }}
+    />
+  );
+}
+
 type Props = {
   node: Node,
 };
 
 export default function Slot({ node }: Props) {
+  const { playerId } = getSessionInfo();
+  const player = getPlayer(playerId);
+  const otherPlayerId =
+    node.playerIds.length === 2 &&
+    _.find(node.playerIds, id => id !== playerId);
   const token = getNodeToken(node.id);
 
-  const [, drop] = useDrop(makeUseDropOptions(node, token));
+  const [{ isOver }, drop] = useDrop(makeUseDropOptions(node, token));
 
   return (
-    <div
-      ref={drop}
-      style={{
-        ...SLOT_DIMENSIONS,
-        ...(node.enabled ? {} : { filter: 'brightness(0.7)' }),
-        backgroundImage:
-          node.type === 'loveBucket'
-            ? 'url(jar.png)'
-            : 'url(plate.png)',
-        backgroundSize: 'contain',
-      }}
-    >
-      {token && (
-        <Item
-          token={token}
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            top: 0,
-            bottom: 0,
-            marginTop: 'auto',
-            marginBottom: 'auto',
-          }}
-        />
-      )}
+    <div>
+      <div
+        ref={drop}
+        style={{
+          ...SLOT_DIMENSIONS,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <Plate color={player.color} enabled={node.enabled} hover={isOver} />
+        {otherPlayerId && (
+          <Plate
+            backgroundImage="url(plate-half.png)"
+            color={getPlayer(otherPlayerId).color}
+            enabled={node.enabled}
+            hover={isOver}
+          />
+        )}
+        {token && (
+          <Item
+            token={token}
+            style={{
+              position: 'relative',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              bottom: -10,
+            }}
+          />
+        )}
+      </div>
+      <div style={{ textAlign: 'center', margin: 5 }}>
+        {otherPlayerId && <NameTag playerId={otherPlayerId} />}
+      </div>
     </div>
   );
 }

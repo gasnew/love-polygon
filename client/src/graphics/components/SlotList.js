@@ -4,28 +4,22 @@ import _ from 'lodash';
 import React from 'react';
 
 import Slot from './Slot';
-import {
-  getPlayers,
-  getSessionInfo,
-} from '../../state/getters';
-import type { Node, Nodes } from '../../state/state';
+import type { Node } from '../../state/state';
 
 type Props = {
-  nodes: Nodes,
+  nodes: Node[],
+  arc?: boolean,
 };
 
-export default function SlotList({ nodes }: Props) {
-  const otherPlayerNameFromNode = (node: Node) => {
-    return (
-      _.find(
-        getPlayers(),
-        player =>
-          player.id !== getSessionInfo().playerId &&
-          _.includes(node.playerIds, player.id)
-      ) || { name: '' }
-    ).name;
-  };
-
+export default function SlotList({ nodes, arc = false }: Props) {
+  const arcMargin = node =>
+    70 *
+    (1 -
+      Math.sin(
+        (nodes.indexOf(node) / nodes.length) *
+          ((nodes.length + 1) / nodes.length) *
+          Math.PI
+      ));
   return (
     <div
       style={{
@@ -38,11 +32,12 @@ export default function SlotList({ nodes }: Props) {
         <div
           key={node.id}
           style={{
-            margin: 'auto',
+            marginLeft: 'auto',
+            marginRight: 'auto',
             position: 'relative',
+            marginTop: arc ? arcMargin(node) : 0,
           }}
         >
-          <span>{otherPlayerNameFromNode(node)}</span>
           <Slot node={node} />
         </div>
       ))}

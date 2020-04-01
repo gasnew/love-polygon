@@ -4,26 +4,20 @@ import Color from 'color';
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 
-import { getNode, getPlayer } from '../../state/getters';
+import { getNode, getPlayer, imageColorFilter } from '../../state/getters';
 import { TOKEN_DIMENSIONS } from './Item';
 
 import type { Token } from '../../state/state';
 
 type Props = {
   token: Token,
-  style: { [string]: any },
+  style?: { [string]: any },
 };
 
-export default function Heart({ token, style }: Props) {
+export default function Heart({ token, style={} }: Props) {
   const player = getPlayer(getNode(token.nodeId).playerIds[0]);
 
-  const playerColor = Color(player.color);
   const heartImageColor = Color({ r: 255, g: 163, b: 152 });
-  const hueRotation = playerColor.hue() - heartImageColor.hue();
-  const colorBrightness =
-    (playerColor.luminosity() - heartImageColor.luminosity() + 1) * 100;
-  const saturation =
-    playerColor.saturationl() - heartImageColor.saturationl() + 100;
   return (
     <div
       style={{
@@ -31,7 +25,10 @@ export default function Heart({ token, style }: Props) {
         ...style,
         backgroundImage: 'url(heart.png)',
         backgroundSize: 'cover',
-        filter: `hue-rotate(${hueRotation}deg) brightness(${colorBrightness}%) saturate(${saturation}%)`,
+        filter: imageColorFilter(
+          heartImageColor,
+          Color(player.color)
+        ),
         display: 'flex',
         textAlign: 'center',
       }}
@@ -48,7 +45,7 @@ export default function Heart({ token, style }: Props) {
           wordBreak: 'break-word',
         }}
       >
-          <b>{player.name.toUpperCase()}</b>
+        <b>{player.name.toUpperCase()}</b>
       </Typography>
     </div>
   );

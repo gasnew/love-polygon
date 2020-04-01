@@ -161,6 +161,7 @@
       accept or be a new player
   - Prevent generating sessions by navigating to session page?
     - Route back to landing page with alert about the session not existing
+  - Some way to cancel a round and return to lobby?
 - Milestone 3!!
 - Playtest, playtest, playtest!
 - Sound effects!

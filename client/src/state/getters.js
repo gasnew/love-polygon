@@ -276,3 +276,11 @@ export const getNumberOfLovers = (numberOfPlayers: number): number => {
   if (numberOfPlayers === 8) return 5;
   throw new Error('Whoa!! Too many folks for love. Let me breathe the air');
 };
+
+export function imageColorFilter(baseColor: Color, targetColor: Color): string {
+  const hueRotation = targetColor.hue() - baseColor.hue();
+  const colorBrightness =
+    (targetColor.luminosity() - baseColor.luminosity() + 1) * 100;
+  const saturation = targetColor.saturationl() - baseColor.saturationl() + 100;
+  return `hue-rotate(${hueRotation}deg) brightness(${colorBrightness}%) saturate(${saturation}%)`;
+}
