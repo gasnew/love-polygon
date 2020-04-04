@@ -17,12 +17,12 @@ import {
   getNodeToken,
   getPlayer,
   getSessionInfo,
+  getSlotDimensions,
   getToken,
   imageColorFilter,
 } from '../../state/getters';
 import type { Node, Token } from '../../state/state';
 
-const SLOT_DIMENSIONS = { width: '80px', height: '80px' };
 
 export const makeUseDropOptions = (node: Node, token: ?Token) => ({
   accept: TOKEN,
@@ -60,7 +60,7 @@ function Plate({
   return (
     <div
       style={{
-        ...SLOT_DIMENSIONS,
+        ...getSlotDimensions(),
         backgroundImage,
         backgroundSize: 'contain',
         position: 'absolute',
@@ -94,7 +94,7 @@ export default function Slot({ node }: Props) {
       <div
         ref={drop}
         style={{
-          ...SLOT_DIMENSIONS,
+          ...getSlotDimensions(),
           marginLeft: 'auto',
           marginRight: 'auto',
           display: 'flex',

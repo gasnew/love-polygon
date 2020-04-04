@@ -4,9 +4,9 @@ import React from 'react';
 import { useDrag } from 'react-dnd';
 
 import Heart from './Heart';
+import { getTokenDimensions } from '../../state/getters';
 import type { Token } from '../../state/state';
 
-export const TOKEN_DIMENSIONS = { width: 60, height: 60 };
 export const TOKEN = 'token';
 const IMAGES_URLS = {
   heart: 'heart.png',
@@ -34,7 +34,7 @@ export default function Item({ token, style }: Props) {
       <div
         ref={drag}
         style={{
-          ...TOKEN_DIMENSIONS,
+          ...getTokenDimensions(),
           ...style,
         }}
       >
@@ -45,7 +45,7 @@ export default function Item({ token, style }: Props) {
         ref={drag}
         alt="I am a delicious food"
         style={{
-          ...TOKEN_DIMENSIONS,
+          ...getTokenDimensions(),
           ...style,
         }}
         src={IMAGES_URLS[tokenType]}

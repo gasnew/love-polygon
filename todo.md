@@ -96,13 +96,19 @@
   + Session ID
   + Share and copy buttons (share will come later when better supported)
   + See mockups
-- Improve romance screen
-  - Arc of plates
-  - Joint plates are colored accordingly
-  - Better header for crush
+/ Improve romance screen
+  + Arc of plates
+  + Joint plates are colored accordingly
+  - Better header for crush and wingman
   - Better needs indicator
   - Better "end round" button
   - Just make sure everything fits on the screen for every kind of phone/tablet
+    - Verify for all phases
+  - Plates have colored rim and glow when pending
+  - Empty slots are dotted circles with names under them (arced?)
+  - Move whole plates around
+  - Just six colors (gray heart when not deposited?)
+  - Use updated art
 - Host on the cloud for all to see
   - Open-source the project
   - Configure app environment (i.e., redis URL)

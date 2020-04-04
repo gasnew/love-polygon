@@ -4,8 +4,12 @@ import Color from 'color';
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 
-import { getNode, getPlayer, imageColorFilter } from '../../state/getters';
-import { TOKEN_DIMENSIONS } from './Item';
+import {
+  getNode,
+  getPlayer,
+  getTokenDimensions,
+  imageColorFilter,
+} from '../../state/getters';
 
 import type { Token } from '../../state/state';
 
@@ -14,21 +18,18 @@ type Props = {
   style?: { [string]: any },
 };
 
-export default function Heart({ token, style={} }: Props) {
+export default function Heart({ token, style = {} }: Props) {
   const player = getPlayer(getNode(token.nodeId).playerIds[0]);
 
   const heartImageColor = Color({ r: 255, g: 163, b: 152 });
   return (
     <div
       style={{
-        ...TOKEN_DIMENSIONS,
+        ...getTokenDimensions(),
         ...style,
         backgroundImage: 'url(heart.png)',
         backgroundSize: 'cover',
-        filter: imageColorFilter(
-          heartImageColor,
-          Color(player.color)
-        ),
+        filter: imageColorFilter(heartImageColor, Color(player.color)),
         display: 'flex',
         textAlign: 'center',
       }}

@@ -107,6 +107,29 @@ export function getOwnNodes(): Nodes {
   return getPlayerNodes(playerId);
 }
 
+export function getJarScale(): number {
+  return 60;
+}
+
+export function getTokenScale(): number {
+  if ((getPhase() || {}).name === 'lobby') return getJarScale() / 4;
+  return 60 / _.size(_.filter(getOwnNodes(), ['type', 'shared']));
+}
+
+export function getSlotScale(): number {
+  return (getTokenScale() * 4) / 3;
+}
+
+function makeDimensions(
+  getScale: () => number
+): () => { width: string, height: string } {
+  return () => ({ width: `${getScale()}vw`, height: `${getScale()}vw` });
+}
+
+export const getSlotDimensions = makeDimensions(getSlotScale);
+export const getTokenDimensions = makeDimensions(getTokenScale);
+export const getJarDimensions = makeDimensions(getJarScale);
+
 export function getLoveBuckets(): Nodes {
   return _.pickBy(getNodes(), ['type', 'loveBucket']);
 }

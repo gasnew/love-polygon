@@ -5,9 +5,10 @@ import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
 import Heart from './Heart';
-import { TOKEN, TOKEN_DIMENSIONS } from './Item';
+import { TOKEN } from './Item';
 import { makeUseDropOptions } from './Slot';
 import {
+  getJarDimensions,
   getNode,
   getNodeToken,
   getPlayerOrder,
@@ -70,8 +71,7 @@ export default function Jar({ node }: Props) {
         ownToken && getNode(ownToken.nodeId).type === 'loveBucket' ? drag : drop
       }
       style={{
-        height: TOKEN_DIMENSIONS.height * 4,
-        width: TOKEN_DIMENSIONS.width * 4,
+        ...getJarDimensions(),
         backgroundImage: 'url(jar.png)',
         backgroundSize: 'contain',
         position: 'relative',

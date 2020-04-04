@@ -13,13 +13,8 @@ type Props = {
 
 export default function SlotList({ nodes, arc = false }: Props) {
   const arcMargin = node =>
-    70 *
-    (1 -
-      Math.sin(
-        (nodes.indexOf(node) / nodes.length) *
-          ((nodes.length + 1) / nodes.length) *
-          Math.PI
-      ));
+    100 *
+    (1 - Math.sin(((nodes.indexOf(node) + 0.5) / nodes.length) * Math.PI));
   return (
     <div
       style={{
