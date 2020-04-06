@@ -113,11 +113,11 @@ export function getJarScale(): number {
 
 export function getTokenScale(): number {
   if ((getPhase() || {}).name === 'lobby') return getJarScale() / 4;
-  return 60 / _.size(_.filter(getOwnNodes(), ['type', 'shared']));
+  return 30 / _.size(_.filter(getOwnNodes(), ['type', 'shared']));
 }
 
 export function getSlotScale(): number {
-  return (getTokenScale() * 4) / 3;
+  return (getTokenScale() * 4) / 2;
 }
 
 function makeDimensions(

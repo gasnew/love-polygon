@@ -20,6 +20,7 @@
     "react-dnd-touch-backend": "^10.0.2",
     "react-dnd-touch-backend-cjs": "^9.5.1",
     "react-dom": "^16.8.0",
+    "react-motion": "^0.5.2",
     "react-scripts": "^3.0.0",
     "react-swipeable-views": "^0.13.1",
     "screenfull": "^4.0.0",
