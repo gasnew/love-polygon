@@ -111,13 +111,12 @@ export function getJarScale(): number {
   return 60;
 }
 
-export function getTokenScale(): number {
-  if ((getPhase() || {}).name === 'lobby') return getJarScale() / 4;
-  return 30 / _.size(_.filter(getOwnNodes(), ['type', 'shared']));
+export function getHeartScale(): number {
+  return getJarScale() / 4;
 }
 
 export function getSlotScale(): number {
-  return (getTokenScale() * 4) / 2;
+  return 90 / _.size(_.filter(getOwnNodes(), ['type', 'shared']));
 }
 
 function makeDimensions(
@@ -127,7 +126,7 @@ function makeDimensions(
 }
 
 export const getSlotDimensions = makeDimensions(getSlotScale);
-export const getTokenDimensions = makeDimensions(getTokenScale);
+export const getHeartDimensions = makeDimensions(getHeartScale);
 export const getJarDimensions = makeDimensions(getJarScale);
 
 export function getLoveBuckets(): Nodes {

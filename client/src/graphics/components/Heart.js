@@ -7,7 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import {
   getNode,
   getPlayer,
-  getTokenDimensions,
+  getHeartDimensions,
   imageColorFilter,
 } from '../../state/getters';
 
@@ -25,7 +25,7 @@ export default function Heart({ token, style = {} }: Props) {
   return (
     <div
       style={{
-        ...getTokenDimensions(),
+        ...getHeartDimensions(),
         ...style,
         backgroundImage: 'url(heart.png)',
         backgroundSize: 'cover',

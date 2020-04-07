@@ -36,6 +36,7 @@ export default function Romance({ phase }: Props) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        backgroundColor: '#FAFAFA',
       }}
     >
       <RelationshipBanner relationship={relationship} />

@@ -99,14 +99,16 @@
 / Improve romance screen
   + Arc of plates
   + Joint plates are colored accordingly
+  + Plates have colored rim and glow when pending
+  + Empty slots are dotted circles with names under them (arced?)
+    + Dotted circle animations
+    + Gray background
+  + Move whole plates around
   - Better header for crush and wingman
   - Better needs indicator
   - Better "end round" button
   - Just make sure everything fits on the screen for every kind of phone/tablet
     - Verify for all phases
-  - Plates have colored rim and glow when pending
-  - Empty slots are dotted circles with names under them (arced?)
-  - Move whole plates around
   - Just six colors (gray heart when not deposited?)
   - Use updated art
 - Host on the cloud for all to see
@@ -155,6 +157,8 @@
   - Players can select avatars
   - Make sure note-taker is noticeable
   - Descriptions for points in table
+  - Verb pop-up over thumb?
+  - Arced names?
 - More gameplay upgrades
   - Ask the voter whether the note-taker's selections are correct
   - Include "pick"ing, which will prevent a player from stealing an item from

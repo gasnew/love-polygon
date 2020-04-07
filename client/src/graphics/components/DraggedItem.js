@@ -4,7 +4,11 @@ import React from 'react';
 import { useDragLayer } from 'react-dnd';
 
 import Item from './Item';
-import { getToken, getTokenScale } from '../../state/getters';
+import {
+  getSlotDimensions,
+  getSlotScale,
+  getToken,
+} from '../../state/getters';
 
 export default function DragLayerComponent() {
   const { isDragging, item, offset } = useDragLayer(monitor => ({
@@ -14,16 +18,19 @@ export default function DragLayerComponent() {
     isDragging: !!monitor.isDragging(),
   }));
   return (
-    isDragging && offset && (
-      <Item
-        token={getToken(item.id)}
+    isDragging &&
+    offset && (
+      <div
         style={{
           position: 'absolute',
-          left: offset.x - window.innerWidth * getTokenScale() / 200,
-          top: offset.y - window.innerWidth * getTokenScale() / 200,
+          ...getSlotDimensions(),
+          left: offset.x - (window.innerWidth * getSlotScale()) / 200,
+          top: offset.y - (window.innerWidth * (getSlotScale() + 10)) / 200,
           pointerEvents: 'none',
         }}
-      />
+      >
+        <Item token={getToken(item.id)} />
+      </div>
     )
   );
 }
