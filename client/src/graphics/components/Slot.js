@@ -78,6 +78,7 @@ export default function Slot({ node }: Props) {
             .hex()}
           hover={isOver}
           holdingItem={!!token && (item || {}).id !== token.id}
+          isDragging={!!item}
         />
       </div>
       {token && (

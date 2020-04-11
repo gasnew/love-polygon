@@ -12,9 +12,10 @@ type Props = {
   color: string,
   hover: boolean,
   holdingItem: boolean,
+  isDragging: boolean,
 };
 
-export default function Ring({ color, hover, holdingItem }: Props) {
+export default function Ring({ color, hover, holdingItem, isDragging }: Props) {
   return (
     <div
       style={{
@@ -41,7 +42,10 @@ export default function Ring({ color, hover, holdingItem }: Props) {
       </Motion>
       <Motion
         defaultStyle={{ strokeWidth: 0 }}
-        style={{ strokeWidth: holdingItem ? 0 : spring(6, SPRING_CONFIG) }}
+        style={{
+          strokeWidth:
+            !holdingItem || isDragging ? spring(6, SPRING_CONFIG) : 0,
+        }}
       >
         {({ strokeWidth }) => (
           <div
@@ -62,7 +66,7 @@ export default function Ring({ color, hover, holdingItem }: Props) {
         style={{
           radius: hover
             ? spring(50, SPRING_CONFIG)
-            : holdingItem
+            : holdingItem && !isDragging
             ? 0
             : spring(0, SPRING_CONFIG),
         }}

@@ -109,8 +109,8 @@
   - Better "end round" button
   - Just make sure everything fits on the screen for every kind of phone/tablet
     - Verify for all phases
-  - Just six colors (gray heart when not deposited?)
-  - Use updated art
+  - Just six colors (gray or red heart when not deposited?)
+  + Use updated art
 - Host on the cloud for all to see
   - Open-source the project
   - Configure app environment (i.e., redis URL)
@@ -201,6 +201,7 @@
     3. True love (bonus points if you guess who)
 
 ## Known bugs
+- Loading my dudes loop?
 - Would be nice to allow people to swipe to refresh again
 - Non-participating players' tokens may be deleted during normal play...
 - Session exists after it's over
