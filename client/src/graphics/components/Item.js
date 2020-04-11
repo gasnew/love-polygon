@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { useDrag } from 'react-dnd';
 
 import { useInterval } from './CountdownTimer';
+import Heart from './Heart';
 import {
   getNode,
   getPlayer,
@@ -119,8 +120,7 @@ export default function Item({ token }: Props) {
         >
           <Plate color={color} enabled={node.enabled} other={!!otherPlayerId} />
         </div>
-        <img
-          alt="I am a delicious food"
+        <div
           style={{
             position: 'absolute',
             height: '60%',
@@ -128,8 +128,17 @@ export default function Item({ token }: Props) {
             left: '15%',
             bottom: '8%',
           }}
-          src={IMAGES_URLS[tokenType]}
-        />
+        >
+          {tokenType === 'heart' ? (
+            <Heart token={token} />
+          ) : (
+            <img
+              alt="I am a delicious food"
+              style={{ height: '100%', width: '100%' }}
+              src={IMAGES_URLS[tokenType]}
+            />
+          )}
+        </div>
       </div>
     )
   );

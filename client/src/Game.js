@@ -9,6 +9,7 @@ import HTML5toTouch from 'react-dnd-multi-backend/lib/HTML5toTouch';
 import io from 'socket.io-client';
 import uniqid from 'uniqid';
 
+import getEnv from './env';
 import Table from './graphics/components/Table';
 import {
   setState,
@@ -36,7 +37,7 @@ export default function Game({ sessionId }: Props) {
   });
 
   useEffect(() => {
-    const socket = io(`http://${window.location.hostname}:3001`, { query: { sessionId, playerId } });
+    const socket = io(getEnv('API_URL'), { query: { sessionId, playerId } });
     socket
       .on('connect', socketConnect)
       .on('updateState', updateState)

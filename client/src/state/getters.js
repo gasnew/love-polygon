@@ -116,6 +116,8 @@ export function getHeartScale(): number {
 }
 
 export function getSlotScale(): number {
+  if ((getPhase() || {}).name === 'lobby')
+    return getHeartScale() * 1 / 0.6; // A cheater's magic number
   return 90 / _.size(_.filter(getOwnNodes(), ['type', 'shared']));
 }
 

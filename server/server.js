@@ -1,5 +1,6 @@
 // @flow
 
+import cors from 'cors';
 import express from 'express';
 import { createServer } from 'http';
 import redis from 'async-redis';
@@ -15,6 +16,13 @@ import { handleConnection } from './socket';
 
 // Express
 const app = express();
+
+// Allow everyone to talk to me when not prod
+// To whitelist specific origins:
+//   app.use(cors({ origin: 'http://localhost:3000' }));
+if (process.env.NODE_ENV !== 'production')
+  app.use(cors());
+
 const server = createServer((request, response, ...args) => {
   app(request, response, ...args);
   // NOTE(gnewman): Try to handle otherwise unhandled errors. Looks like this

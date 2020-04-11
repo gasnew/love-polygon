@@ -7,6 +7,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import React, { useState } from 'react';
 import queryString from 'query-string';
+import urljoin from 'url-join';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -22,6 +23,7 @@ import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 
 import { SESSION_ID_LENGTH, VALID_SESSION_ID_CHARACTERS } from './constants';
+import getEnv from './env';
 
 const styles = theme => ({
   main: {
@@ -90,7 +92,7 @@ function LandingPage({ classes, setSessionId }: Props) {
 
   const joinSession = async sessionId => {
     const { error } = (
-      await axios.post('api/check-session', {
+      await axios.post(urljoin(getEnv('API_URL'), 'api/check-session'), {
         sessionId,
       })
     ).data;
@@ -106,7 +108,9 @@ function LandingPage({ classes, setSessionId }: Props) {
   };
 
   const createSession = async () => {
-    const { error, sessionId } = (await axios.get('api/create-session')).data;
+    const { error, sessionId } = (
+      await axios.get(urljoin(getEnv('API_URL'), 'api/create-session'))
+    ).data;
     if (error) {
       setSessionIdField({
         ...sessionIdField,

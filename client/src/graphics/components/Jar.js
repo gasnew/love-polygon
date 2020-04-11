@@ -57,7 +57,7 @@ export default function Jar({ node }: Props) {
   const ownToken = getNodeToken(node.id);
   const tokens = _.map(
     getPlayerOrder(),
-    playerId => _.values(getPlayerTokens(playerId))[0]
+    playerId => _.find(getPlayerTokens(playerId), ['type', 'heart'])
   );
 
   const [, drop] = useDrop(makeUseDropOptions(node, ownToken));

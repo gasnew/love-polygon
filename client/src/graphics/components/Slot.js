@@ -69,6 +69,7 @@ export default function Slot({ node }: Props) {
           width: '200%',
           left: '-50%',
           top: '-50%',
+          pointerEvents: 'none',
         }}
       >
         <Ring
@@ -90,6 +91,7 @@ export default function Slot({ node }: Props) {
             display: 'flex',
             flexDirection: 'row',
             position: 'absolute',
+            pointerEvents: item ? 'none' : 'auto',
           }}
         >
           <Item token={token} />

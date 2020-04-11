@@ -3,7 +3,9 @@
 import axios from 'axios';
 import copy from 'copy-to-clipboard';
 import React from 'react';
+import urljoin from 'url-join';
 
+import getEnv from '../../env';
 import DraggedItem from './DraggedItem';
 import Lobby from './Lobby';
 import NavigationBar from './NavigationBar';
@@ -59,7 +61,9 @@ export default function Table() {
           <button
             onClick={() =>
               axios
-                .post('api/get-server-state', { sessionId })
+                .post(urljoin(getEnv('API_URL'), 'api/get-server-state'), {
+                  sessionId,
+                })
                 .then(response => copy(JSON.stringify(response.data)))
             }
           >
@@ -67,7 +71,10 @@ export default function Table() {
           </button>
           <button
             onClick={() =>
-              axios.post('api/load-session-from-cache', { sessionId })
+              axios.post(
+                urljoin(getEnv('API_URL'), 'api/load-session-from-cache'),
+                { sessionId }
+              )
             }
           >
             Load session from cache

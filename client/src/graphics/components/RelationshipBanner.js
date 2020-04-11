@@ -2,7 +2,10 @@
 
 import _ from 'lodash';
 import React from 'react';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 
+import NameTag from './NameTag';
 import {
   getNeeds,
   getPlayer,
@@ -17,12 +20,16 @@ type RelationshipProps = {
 
 function Crush({ targetPlayer, needType }: RelationshipProps) {
   return (
-    <div>
-      <div>You have a crush on {targetPlayer.name}</div>
-      <div>
-        {targetPlayer.name} needs {needType}
-      </div>
-    </div>
+    <p>
+      <Typography>
+        You have a{' '}
+        <span style={{ fontWeight: 'bold', color: '#FF0000' }}>crush</span> on{' '}
+        <NameTag playerId={targetPlayer.id} />
+      </Typography>
+      <Typography>
+        <NameTag playerId={targetPlayer.id} /> needs {needType}
+      </Typography>
+    </p>
   );
 }
 
@@ -47,7 +54,7 @@ export default function RelationshipBanner({ relationship }: Props) {
   const targetPlayer = getPlayer(relationship.toId);
 
   return (
-    <div>
+    <Paper elevation={3} square style={{ padding: 10 }}>
       {relationship.type === 'crush' ? (
         <Crush
           targetPlayer={targetPlayer}
@@ -61,6 +68,6 @@ export default function RelationshipBanner({ relationship }: Props) {
           )}
         />
       )}
-    </div>
+    </Paper>
   );
 }
