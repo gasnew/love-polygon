@@ -4,11 +4,12 @@ import _ from 'lodash';
 import React from 'react';
 
 import CountdownTimer from './CountdownTimer';
-import FinishRoundButton from './FinishRoundButton';
+import NeedsBanner from './NeedsBanner';
+import Paper from '@material-ui/core/Paper';
 import RelationshipBanner from './RelationshipBanner';
 import SlotList from './SlotList';
 import {
-  getNeedsMet,
+  getNeedsLeft,
   getOwnNeed,
   getOwnNodes,
   getOwnRelationship,
@@ -36,12 +37,18 @@ export default function Romance({ phase }: Props) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#FAFAFA',
       }}
     >
-      <RelationshipBanner relationship={relationship} />
-      <div
+      <Paper elevation={9} square style={{ zIndex: 1, padding: 10 }}>
+        <RelationshipBanner relationship={relationship} />
+      </Paper>
+      <Paper
+        elevation={0}
+        square
         style={{
+          zIndex: 0,
+          padding: 10,
+          backgroundColor: '#F8F8F8',
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
@@ -53,33 +60,26 @@ export default function Romance({ phase }: Props) {
         <div style={{ marginBottom: 20, marginTop: 'auto' }}>
           <SlotList nodes={storageNodes} />
         </div>
-      </div>
-      <div>
-        <div>
-          {need && (
-            <h2 style={{ textAlign: 'center' }}>
-              Need {need.count} {need.type}s
-            </h2>
-          )}
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          {getNeedsMet(playerId) && phase.name === 'romance' && (
-            <FinishRoundButton needType={need.type} />
-          )}
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            textAlign: 'center',
-            width: '100%',
-            pointerEvents: 'none',
-          }}
-        >
-          {phase.name === 'countdown' && phase.countdownStartedAt && (
-            <CountdownTimer startedAt={phase.countdownStartedAt} />
-          )}
-        </div>
+      </Paper>
+      <Paper elevation={15} square style={{ zIndex: 1 }}>
+        <NeedsBanner
+          need={need}
+          needsLeft={getNeedsLeft(playerId)}
+          enabled={phase.name === 'romance'}
+        />
+      </Paper>
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          textAlign: 'center',
+          width: '100%',
+          pointerEvents: 'none',
+        }}
+      >
+        {phase.name === 'countdown' && phase.countdownStartedAt && (
+          <CountdownTimer startedAt={phase.countdownStartedAt} />
+        )}
       </div>
     </div>
   );

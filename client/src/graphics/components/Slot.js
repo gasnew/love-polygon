@@ -7,6 +7,7 @@ import { useDrop } from 'react-dnd';
 import type { Item as DndItem, Monitor } from 'react-dnd';
 
 import Item, { TOKEN } from './Item';
+import NameTag from './NameTag';
 import Ring from './Ring';
 import announce, {
   swapTokens,
@@ -73,6 +74,7 @@ export default function Slot({ node }: Props) {
         }}
       >
         <Ring
+          playerName={otherPlayerId ? getPlayer(otherPlayerId).name : ''}
           color={Color(color)
             .darken(0.2)
             .hex()}
@@ -80,6 +82,21 @@ export default function Slot({ node }: Props) {
           holdingItem={!!token && (item || {}).id !== token.id}
           isDragging={!!item}
         />
+        {otherPlayerId && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '3vw',
+              display: 'flex',
+              flexDirection: 'row',
+              margin: 'auto',
+              justifyContent: 'center',
+              width: '100%',
+            }}
+          >
+            <NameTag playerId={otherPlayerId} />
+          </div>
+        )}
       </div>
       {token && (
         <div

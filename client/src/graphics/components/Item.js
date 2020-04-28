@@ -14,6 +14,7 @@ import {
   imageColorFilter,
 } from '../../state/getters';
 import type { Token } from '../../state/state';
+import type { TokenType } from '../../../../server/networkTypes';
 
 export const TOKEN = 'token';
 const IMAGES_URLS = {
@@ -22,6 +23,8 @@ const IMAGES_URLS = {
   cake: 'cake.png',
   candy: 'candy.png',
 };
+export const getItemImage = (type: TokenType) =>
+  _.has(IMAGES_URLS, type) ? IMAGES_URLS[type] : '';
 
 function Plate({
   color,
@@ -135,7 +138,7 @@ export default function Item({ token }: Props) {
             <img
               alt="I am a delicious food"
               style={{ height: '100%', width: '100%' }}
-              src={IMAGES_URLS[tokenType]}
+              src={getItemImage(tokenType)}
             />
           )}
         </div>

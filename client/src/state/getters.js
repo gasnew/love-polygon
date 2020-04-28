@@ -116,9 +116,12 @@ export function getHeartScale(): number {
 }
 
 export function getSlotScale(): number {
-  if ((getPhase() || {}).name === 'lobby')
-    return getHeartScale() * 1 / 0.6; // A cheater's magic number
-  return 90 / _.size(_.filter(getOwnNodes(), ['type', 'shared']));
+  if ((getPhase() || {}).name === 'lobby') return (getHeartScale() * 1) / 0.6; // A cheater's magic number
+  const maxNodeWidth = _.max([
+    _.size(_.filter(getOwnNodes(), ['type', 'shared'])),
+    _.size(_.filter(getOwnNodes(), ['type', 'storage'])),
+  ]);
+  return 90 / maxNodeWidth;
 }
 
 function makeDimensions(
@@ -214,14 +217,18 @@ export function getVotingOrder(): string[] {
   return getState().votingOrder;
 }
 
-export function getNeedsMet(playerId: string): boolean {
+export function getNeedsLeft(playerId: string): number {
   const nodes = getPlayerNodes(playerId);
   const storedTokens = _.pickBy(
     getPlayerTokens(playerId),
     token => nodes[token.nodeId].type === 'storage'
   );
   const need = getPlayerNeed(playerId) || {};
-  return _.filter(storedTokens, ['type', need.type]).length >= need.count;
+  return (need.count || 0) - _.filter(storedTokens, ['type', need.type]).length;
+}
+
+export function getNeedsMet(playerId: string): boolean {
+  return getNeedsLeft(playerId) === 0;
 }
 
 export function getGuessedCrushesCorrectly(playerId: string): boolean {

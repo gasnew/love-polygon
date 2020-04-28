@@ -98,7 +98,7 @@ export default function Lobby() {
   const tokens = getTokens();
   const loveBucket = _.find(ownNodes, ['type', 'loveBucket']);
 
-  if (!loveBucket) return <div>Loading, my dudes...</div>;
+  if (!loveBucket) return <div>Loading, my dudes (no love bucket)...</div>;
 
   const storageNodes = _.pickBy(ownNodes, ['type', 'storage']);
 

@@ -46,6 +46,7 @@ const useStyles = makeStyles({
   title: {
     fontSize: 15,
     textAlign: 'center',
+    fontFamily: "'Baloo Paaji 2', cursive",
   },
   pos: {
     marginBottom: 12,

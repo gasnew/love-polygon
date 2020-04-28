@@ -1,14 +1,26 @@
 // @flow
 
+// NOTE(gnewman): Maybe uncomment this once we can figure out how to load it
+// prior to initial render
+//import 'typeface-roboto';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+const theme = createMuiTheme({
+  nicefont: {
+    fontFamily: "'Baloo Paaji 2', cursive",
+  },
+});
+
 ReactDOM.render(
-  <App />,
+  <ThemeProvider theme={theme}>
+    <App />
+  </ThemeProvider>,
   document.getElementById('root') || document.createElement('div')
 );
 

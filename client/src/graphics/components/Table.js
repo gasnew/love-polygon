@@ -46,7 +46,7 @@ export default function Table() {
 
   const phase = getPhase();
   const { sessionId } = getSessionInfo();
-  if (!phase) return <div>Loading, my dudes...</div>;
+  if (!phase) return <div>Loading, my dudes (no phase)...</div>;
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

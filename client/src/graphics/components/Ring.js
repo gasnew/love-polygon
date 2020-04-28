@@ -9,13 +9,14 @@ import DottedCircle from './DottedCircle';
 const SPRING_CONFIG = { stiffness: 270, damping: 27 };
 
 type Props = {
+  playerName: string,
   color: string,
   hover: boolean,
   holdingItem: boolean,
   isDragging: boolean,
 };
 
-export default function Ring({ color, hover, holdingItem, isDragging }: Props) {
+export default function Ring({ playerName, color, hover, holdingItem, isDragging }: Props) {
   return (
     <div
       style={{

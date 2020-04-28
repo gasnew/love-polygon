@@ -104,7 +104,7 @@
     + Dotted circle animations
     + Gray background
   + Move whole plates around
-  - Better header for crush and wingman
+  / Better header for crush and wingman
   - Better needs indicator
   - Better "end round" button
   - Just make sure everything fits on the screen for every kind of phone/tablet
@@ -202,6 +202,8 @@
 
 ## Known bugs
 - Loading my dudes loop?
+  - We can fix this by continually re-rendering the component when it's in that
+    state
 - Would be nice to allow people to swipe to refresh again
 - Non-participating players' tokens may be deleted during normal play...
 - Session exists after it's over
