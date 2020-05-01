@@ -2,10 +2,10 @@
 
 import Color from 'color';
 import _ from 'lodash';
-import stringToColor from 'string-to-color';
 
 import type { Socket } from 'socket.io-client';
 
+import { COLORS } from '../constants';
 import type {
   CrushSelection,
   CrushSelections,
@@ -83,11 +83,12 @@ export function getPlayer(playerId: string): Player {
   return getPlayers()[playerId];
 }
 
-export function generatePlayerColor(playerName: string): string {
-  const somePastelColor = '#ffb7b2';
-  return Color(somePastelColor)
-    .rotate(Color(stringToColor(playerName)).hue())
-    .hex();
+export function generatePlayerColor(playerId: string): string {
+  const { RED, GREEN, TEAL, YELLOW, BLUE, PURPLE, GRAY } = COLORS;
+  const colorsInOrder = [RED, GREEN, TEAL, YELLOW, BLUE, PURPLE];
+  return _.flow(index => (index === -1 ? GRAY : colorsInOrder[index]))(
+    getPlayerOrder().indexOf(playerId)
+  );
 }
 
 export function getNodes(): Nodes {

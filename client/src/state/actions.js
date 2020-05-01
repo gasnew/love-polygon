@@ -527,7 +527,7 @@ export function silentDispatch(action: Action) {
       mergeIntoPlayers(action.id, {
         id: action.id,
         name: action.name,
-        color: generatePlayerColor(action.name),
+        color: generatePlayerColor(action.id),
         inRound: action.inRound,
       });
       break;
@@ -536,7 +536,6 @@ export function silentDispatch(action: Action) {
       mergeIntoPlayers(action.playerId, {
         ...getPlayer(action.playerId),
         name: action.name,
-        color: generatePlayerColor(action.name),
       });
 
       // Update sessionInfo
@@ -586,6 +585,14 @@ export function silentDispatch(action: Action) {
       break;
     case SET_PLAYER_ORDER:
       mergeIntoState('playerOrder', action.playerOrder);
+
+      _.each(getPlayers(), player =>
+        mergeIntoPlayers(player.id, {
+          ...getPlayer(player.id),
+          color: generatePlayerColor(player.id),
+        })
+      );
+
       break;
     case SET_CRUSH_SELECTIONS:
       mergeIntoState('crushSelections', action.crushSelections);
@@ -674,11 +681,11 @@ export function silentDispatch(action: Action) {
         const playerId = fromNode.playerIds[0];
         const playerOrder = getPlayerOrder();
         if (toNode.type === 'loveBucket') {
-          mergeIntoState('playerOrder',  [...playerOrder, playerId]);
+          dispatch(setPlayerOrder([...playerOrder, playerId]));
           if (!getPartyLeader()) mergeIntoState('partyLeader', playerId);
         } else if (fromNode.type === 'loveBucket') {
           const newPlayerOrder = _.difference(playerOrder, [playerId]);
-          mergeIntoState('playerOrder', newPlayerOrder);
+          dispatch(setPlayerOrder(newPlayerOrder));
           mergeIntoState('partyLeader', newPlayerOrder[0] || null);
         }
       }

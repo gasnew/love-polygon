@@ -86,7 +86,7 @@ export default function Slot({ node }: Props) {
           <div
             style={{
               position: 'absolute',
-              bottom: '3vw',
+              bottom: '-2vw',
               display: 'flex',
               flexDirection: 'row',
               margin: 'auto',

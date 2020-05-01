@@ -104,12 +104,12 @@
     + Dotted circle animations
     + Gray background
   + Move whole plates around
-  / Better header for crush and wingman
-  - Better needs indicator
-  - Better "end round" button
+  + Better header for crush and wingman
+  + Better needs indicator
+  + Better "end round" button
+  + Just six colors (gray or red heart when not deposited?)
   - Just make sure everything fits on the screen for every kind of phone/tablet
     - Verify for all phases
-  - Just six colors (gray or red heart when not deposited?)
   + Use updated art
 - Host on the cloud for all to see
   - Open-source the project
