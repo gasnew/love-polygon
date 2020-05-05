@@ -507,6 +507,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
           'playerId',
           sourcePlayerId,
         ]);
+        if (trueLoveSelection.finalized) return false;
         return (
           trueLoveSelection.player1Id !== targetPlayerId &&
           trueLoveSelection.player2Id !== targetPlayerId
@@ -519,6 +520,7 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
           'playerId',
           sourcePlayerId,
         ]);
+        if (trueLoveSelection.finalized) return false;
         return (
           trueLoveSelection.player1Id === targetPlayerId ||
           trueLoveSelection.player2Id === targetPlayerId

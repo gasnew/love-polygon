@@ -45,8 +45,8 @@ export default function PlayerList() {
               : playerOrder.length
           ),
           player => (
-            <ListItem key={player.id}>
-              <ListItemIcon style={{ minWidth: 40 }}>
+            <ListItem key={player.id} style={{ padding: 0 }}>
+              <ListItemIcon style={{ minWidth: '2rem' }}>
                 {player.id === partyLeader ? (
                   <Flag style={{ color: green[500] }} />
                 ) : getPlayerReady(player.id) || player.inRound ? (

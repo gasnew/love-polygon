@@ -42,7 +42,7 @@ function Crush({ targetPlayer, needType }: RelationshipProps) {
         <NameTag playerId={targetPlayer.id} /> needs{' '}
         <img
           alt="I am a delicious food"
-          style={{ position: 'relative', top: 5, height: 30, width: 30 }}
+          style={{ position: 'relative', top: '0.4rem', height: '2rem', width: '2rem' }}
           src={getItemImage(needType)}
         />
       </Typography>
@@ -64,7 +64,7 @@ function Wingman({ targetPlayer, needType }: RelationshipProps) {
         's crush needs{' '}
         <img
           alt="I am a delicious food"
-          style={{ position: 'relative', top: 5, height: 30, width: 30 }}
+          style={{ position: 'relative', top: '0.4rem', height: '2rem', width: '2rem' }}
           src={getItemImage(needType)}
         />
       </Typography>

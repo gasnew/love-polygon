@@ -44,12 +44,9 @@ const useStyles = makeStyles({
     transform: 'scale(0.8)',
   },
   title: {
-    fontSize: 15,
+    fontSize: '1rem',
     textAlign: 'center',
     fontFamily: "'Baloo Paaji 2', cursive",
-  },
-  pos: {
-    marginBottom: 12,
   },
 });
 
@@ -99,13 +96,14 @@ export default function OutlinedCard({ onClick }: Props) {
               variant="contained"
               color="primary"
               onClick={onClick}
+              style={{ fontSize: '0.8rem' }}
               fullWidth
             >
               Start Series ({participatingPlayerCount}&nbsp;Players)
             </Button>
           </CardActions>
         ) : (
-          <div style={{ fontSize: 12, textAlign: 'center' }}>
+          <div style={{ fontSize: '0.8rem', textAlign: 'center' }}>
             <i>
               Waiting for party leader <b>{getPlayer(getPartyLeader()).name}</b>{' '}
               to start the series...

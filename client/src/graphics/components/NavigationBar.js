@@ -12,7 +12,7 @@ import type { PhaseName } from '../../../../server/networkTypes';
 // NOTE(gnewman): We have to declare this ourselves because content_copy is
 // mysteriously absent from the material-ui package
 const Copy = () => (
-  <i className="material-icons" style={{ fontSize: 30 }}>
+  <i className="material-icons" style={{ fontSize: '2.5rem' }}>
     content_copy
   </i>
 );

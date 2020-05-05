@@ -50,10 +50,21 @@ export default function Table() {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ flexBasis: 30, zIndex: 1 }}>
+      <div
+        style={{
+          flex: '0 1 auto',
+          zIndex: 1,
+        }}
+      >
         <NavigationBar />
       </div>
-      <div style={{ height: '100%', zIndex: 0 }}>
+      <div
+        style={{
+          flex: '1 1 auto',
+          zIndex: 0,
+          overflow: 'scroll',
+        }}
+      >
         <div style={{ height: '95%' }}>
           <Scene phase={phase} />
         </div>

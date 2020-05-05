@@ -42,7 +42,7 @@ export default function Heart({ token, style = {} }: Props) {
           left: -3,
           overflow: 'hidden',
           color: heartImageColor.darken(0.5).hex(),
-          fontSize: 10,
+          fontSize: '2.5vw',
           wordBreak: 'break-word',
         }}
       >

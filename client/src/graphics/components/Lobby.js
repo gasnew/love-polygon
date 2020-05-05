@@ -127,7 +127,7 @@ export default function Lobby() {
           flexDirection: 'row',
         }}
       >
-        <div style={{ marginTop: '5%', flexBasis: '40%' }}>
+        <div style={{ marginLeft: '3%', marginTop: '5%', flexBasis: '40%' }}>
           <SeriesInfoCard onClick={() => announce(startGame())} />
         </div>
         <div style={{ flexBasis: '60%' }}>
@@ -139,29 +139,29 @@ export default function Lobby() {
           height: '100%',
           width: '100%',
           flexBasis: '40%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
         }}
       >
-        <div>
+        <div style={{ width: '100%' }}>
           <SlotList nodes={storageNodes} />
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => setDialogOpen(true)}
+              disabled={heartIsInBucket}
+              style={{  margin: 'auto', marginTop: '10%' }}
+            >
+              Change name
+            </Button>
+          </div>
         </div>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => setDialogOpen(true)}
-          disabled={heartIsInBucket}
-        >
-          Change name
-        </Button>
-        <NameDialog
-          playerName={playerName}
-          handlePlayerNameChange={handlePlayerNameChange}
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-        />
       </div>
+      <NameDialog
+        playerName={playerName}
+        handlePlayerNameChange={handlePlayerNameChange}
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+      />
     </div>
   );
 }

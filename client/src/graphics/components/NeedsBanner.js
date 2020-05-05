@@ -24,13 +24,6 @@ const useStyles = makeStyles(theme => ({
 export default function NeedsBanner({ need, needsLeft, enabled }: Props) {
   const classes = useStyles();
 
-  const Item = () => (
-    <img
-      alt="I am a delicious food"
-      style={{ position: 'relative', top: 5, height: 30, width: 30 }}
-      src={getItemImage(need.type)}
-    />
-  );
   return (
     <Paper
       elevation={3}
@@ -39,7 +32,7 @@ export default function NeedsBanner({ need, needsLeft, enabled }: Props) {
         padding: 10,
         display: 'flex',
         flexDirection: 'column',
-        height: 100,
+        height: '6rem',
       }}
     >
       <Typography
@@ -48,12 +41,33 @@ export default function NeedsBanner({ need, needsLeft, enabled }: Props) {
         variant="h5"
       >
         {needsLeft === 0 ? (
-          <span>
-            All <Item />s acquired!
+          <span style={{ fontSize: '1.5rem' }}>
+            All{' '}
+            <img
+              alt="I am a delicious food"
+              style={{
+                position: 'relative',
+                top: '0.4rem',
+                height: '2rem',
+                width: '2rem',
+              }}
+              src={getItemImage(need.type)}
+            />
+            s acquired!
           </span>
         ) : (
-          <span>
-            Need {needsLeft} more <Item />
+          <span style={{ fontSize: '2rem' }}>
+            Need {needsLeft} more{' '}
+            <img
+              alt="I am a delicious food"
+              style={{
+                position: 'relative',
+                top: '0.5rem',
+                height: '3rem',
+                width: '3rem',
+              }}
+              src={getItemImage(need.type)}
+            />
           </span>
         )}
       </Typography>

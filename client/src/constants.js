@@ -4,7 +4,7 @@
 // to keep these up-to-date with server/constants.js
 export const PLAYER_COUNT_MIN = 3;
 export const PLAYER_COUNT_MAX = 6;
-export const NAME_LIMIT = 15;
+export const NAME_LIMIT = 12;
 export const ROUND_COUNT = 3;
 export const VALID_SESSION_ID_CHARACTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 export const SESSION_ID_LENGTH = 4;
