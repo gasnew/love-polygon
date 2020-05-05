@@ -111,7 +111,7 @@
   + Just make sure everything fits on the screen for every kind of phone/tablet
     + Verify for all phases
   + Use updated art
-  - Make debug toggleable
+  + Make debug toggleable
   - Fix navigation bar colors
 - Host on the cloud for all to see
   - Open-source the project

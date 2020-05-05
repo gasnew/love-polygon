@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import copy from 'copy-to-clipboard';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import urljoin from 'url-join';
 
 import getEnv from '../../env';
@@ -18,6 +18,43 @@ import { useGameState } from '../../state/state';
 
 import { getInRound, getSessionInfo } from '../../state/getters';
 import type { Phase } from '../../../../server/networkTypes';
+
+// Mercilessly ripped from https://usehooks.com/useEventListener/, which
+// itself appears to be somewhat of a rip from Abramov's useInterval...
+function useEventListener(eventName, handler, element = window) {
+  // Create a ref that stores handler
+  const savedHandler = useRef();
+
+  // Update ref.current value if handler changes.
+  // This allows our effect below to always get latest handler without us
+  // needing to pass it in effect deps array and potentially cause effect to
+  // re-run every render.
+  useEffect(() => {
+    savedHandler.current = handler;
+  }, [handler]);
+
+  useEffect(
+    () => {
+      // Make sure element supports addEventListener
+      // On
+      const isSupported = element && element.addEventListener;
+      if (!isSupported) return;
+
+      // Create event listener that calls handler function stored in ref
+      const eventListener = event =>
+        savedHandler.current && savedHandler.current(event);
+
+      // Add event listener
+      element.addEventListener(eventName, eventListener);
+
+      // Remove event listener on cleanup
+      return () => {
+        element.removeEventListener(eventName, eventListener);
+      };
+    },
+    [eventName, element] // Re-run if eventName or element changes
+  );
+}
 
 const Scene = ({ phase }: { phase: Phase }) => {
   const slotLists = {
@@ -43,6 +80,12 @@ const Scene = ({ phase }: { phase: Phase }) => {
 
 export default function Table() {
   useGameState();
+  const [showDebugTools, setShowDebugTools] = useState(false);
+
+  useEventListener(
+    'keydown',
+    ({ key }) => key === 'h' && setShowDebugTools(!showDebugTools)
+  );
 
   const phase = getPhase();
   const { sessionId } = getSessionInfo();
@@ -65,32 +108,34 @@ export default function Table() {
           overflow: 'scroll',
         }}
       >
-        <div style={{ height: '95%' }}>
+        <div style={{ height: showDebugTools ? '95%' : '100%' }}>
           <Scene phase={phase} />
         </div>
-        <div style={{ height: '5%' }}>
-          <button
-            onClick={() =>
-              axios
-                .post(urljoin(getEnv('API_URL'), 'api/get-server-state'), {
-                  sessionId,
-                })
-                .then(response => copy(JSON.stringify(response.data)))
-            }
-          >
-            Server state -> clipboard
-          </button>
-          <button
-            onClick={() =>
-              axios.post(
-                urljoin(getEnv('API_URL'), 'api/load-session-from-cache'),
-                { sessionId }
-              )
-            }
-          >
-            Load session from cache
-          </button>
-        </div>
+        {showDebugTools && (
+          <div style={{ height: '5%' }}>
+            <button
+              onClick={() =>
+                axios
+                  .post(urljoin(getEnv('API_URL'), 'api/get-server-state'), {
+                    sessionId,
+                  })
+                  .then(response => copy(JSON.stringify(response.data)))
+              }
+            >
+              Server state -> clipboard
+            </button>
+            <button
+              onClick={() =>
+                axios.post(
+                  urljoin(getEnv('API_URL'), 'api/load-session-from-cache'),
+                  { sessionId }
+                )
+              }
+            >
+              Load session from cache
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
