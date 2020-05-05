@@ -18,13 +18,13 @@ const Copy = () => (
 );
 
 const BACKGROUND_COLORS: { [PhaseName]: string } = {
-  lobby: '#D4F9E5', // green
-  romance: '#F7DEE0', // red
-  countdown: '#c0564a', // red
-  finished: '#c0564a', // red
-  voting: '#CCDBE4', // blue
-  trueLove: '#FDE7BF', // yellow
-  results: '#D2CFD5', // purple
+  lobby: '#cbf2c0', // green
+  romance: '#fbdbdd', // red
+  countdown: '#fbdbdd', // red
+  finished: '#fbdbdd', // red
+  voting: '#dfe7fb', // blue
+  trueLove: '#fbf4db', // yellow
+  results: '#ecdbfb', // purple
 };
 
 // TODO(gnewman): Support sharing once on https (or if navigator.share is

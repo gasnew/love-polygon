@@ -96,7 +96,7 @@
   + Session ID
   + Share and copy buttons (share will come later when better supported)
   + See mockups
-/ Improve romance screen
++ Improve romance screen
   + Arc of plates
   + Joint plates are colored accordingly
   + Plates have colored rim and glow when pending
@@ -112,7 +112,7 @@
     + Verify for all phases
   + Use updated art
   + Make debug toggleable
-  - Fix navigation bar colors
+  + Fix navigation bar colors
 - Host on the cloud for all to see
   - Open-source the project
   - Configure app environment (i.e., redis URL)
