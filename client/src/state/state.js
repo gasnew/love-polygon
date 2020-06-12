@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { Socket } from 'socket.io-client';
 
 import { getState } from './getters';
+import type { Action } from './actions';
 import type {
   CrushSelections,
   NodeType,
@@ -92,6 +93,7 @@ export type State = {|
   trueLoveSelections: TrueLoveSelections,
   roundNumber: number,
   points: Points,
+  actions: Action[],
 |};
 
 export default function generateState(sessionInfo: SessionInfo): State {
@@ -119,6 +121,7 @@ export default function generateState(sessionInfo: SessionInfo): State {
     trueLoveSelections: {},
     roundNumber: 1,
     points: {},
+    actions: [],
   };
 }
 

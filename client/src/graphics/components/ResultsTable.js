@@ -94,7 +94,7 @@ export default function ResultsTable() {
     <div style={{ height: '100%', overflow: 'scroll' }}>
       <TableContainer component={Paper}>
         <Table>
-          <TableHead>
+          <TableHead style={{boxShadow: '0px 0px 10px' }}>
             <TableRow>
               <TableCell>Place</TableCell>
               <TableCell>Player name</TableCell>

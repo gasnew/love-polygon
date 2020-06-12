@@ -87,6 +87,9 @@ export default function Table() {
     ({ key }) => key === 'h' && setShowDebugTools(!showDebugTools)
   );
 
+  const trueShowDebugTools =
+    process.env.NODE_ENV === 'development' && showDebugTools;
+
   const phase = getPhase();
   const { sessionId } = getSessionInfo();
   if (!phase) return <div>Loading, my dudes (no phase)...</div>;
@@ -105,13 +108,14 @@ export default function Table() {
         style={{
           flex: '1 1 auto',
           zIndex: 0,
-          overflow: 'scroll',
+          overflowY: 'scroll',
+          overflowX: 'hidden',
         }}
       >
-        <div style={{ height: showDebugTools ? '95%' : '100%' }}>
+        <div style={{ height: trueShowDebugTools ? '95%' : '100%' }}>
           <Scene phase={phase} />
         </div>
-        {showDebugTools && (
+        {trueShowDebugTools && (
           <div style={{ height: '5%' }}>
             <button
               onClick={() =>

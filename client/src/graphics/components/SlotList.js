@@ -13,7 +13,7 @@ type Props = {
 
 export default function SlotList({ nodes, arc = false }: Props) {
   const arcMargin = node =>
-    100 *
+    20 *
     (1 - Math.sin(((nodes.indexOf(node) + 0.5) / nodes.length) * Math.PI));
   return (
     <div
@@ -30,7 +30,7 @@ export default function SlotList({ nodes, arc = false }: Props) {
             marginLeft: 'auto',
             marginRight: 'auto',
             position: 'relative',
-            marginTop: arc ? arcMargin(node) : 0,
+            marginTop: `${arc ? arcMargin(node) : 0}vh`,
           }}
         >
           <Slot node={node} />

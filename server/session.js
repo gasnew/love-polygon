@@ -575,9 +575,6 @@ function getSession({ id, redisClient, emit }: SessionProps): Session {
         );
 
         await update('players', { [playerId]: { name } });
-        if (name === '')
-          await update('nodes', { [loveBucket.id]: { enabled: false } });
-        else await update('nodes', { [loveBucket.id]: { enabled: true } });
       } else if (message.type === 'startGame') {
         await followEdge('startGame');
       } else if (message.type === 'transferToken') {

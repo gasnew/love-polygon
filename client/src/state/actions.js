@@ -5,6 +5,7 @@ import _ from 'lodash';
 import type { Socket } from 'socket.io-client';
 
 import {
+  getActions,
   getCrushSelections,
   getNode,
   generatePlayerColor,
@@ -77,7 +78,7 @@ const SUBMIT_TRUE_LOVE_SELECTIONS = 'submitTrueLoveSelections';
 const SET_ROUND_NUMBER = 'setRoundNumber';
 const SET_POINTS = 'setPoints';
 
-type Action =
+export type Action =
   | {
       type: 'addNode',
       id: string,
@@ -548,17 +549,6 @@ export function silentDispatch(action: Action) {
             playerName: action.name,
           }: SessionInfo)
         );
-
-      // Enable or disable loveBucket
-      const loveBucket = _.find(getPlayerNodes(action.playerId), [
-        'type',
-        'loveBucket',
-      ]);
-      if (loveBucket) {
-        if (action.name === '') {
-          mergeIntoNodes(loveBucket.id, { ...loveBucket, enabled: false });
-        } else mergeIntoNodes(loveBucket.id, { ...loveBucket, enabled: true });
-      }
       break;
     case ADD_TOKEN:
       mergeIntoTokens(action.id, {
@@ -740,6 +730,8 @@ export function silentDispatch(action: Action) {
     default:
       throw new Error(`Yo, action ${action.type} doesn't exist!`);
   }
+  if (process.env.NODE_ENV)
+    mergeIntoState('actions', ([...getActions(), action]: Action[]));
 }
 
 const event = new Event(GAME_STATE_UPDATED);

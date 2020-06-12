@@ -113,7 +113,15 @@
   + Use updated art
   + Make debug toggleable
   + Fix navigation bar colors
+  - iPhone too squashered... :(
+  / Fix nametag distance
+  + disable scroll to right
+  + Prevent debug when plugging in name
+  - Fix API error from iOS?
+  / Fix no love bucket error!! Maybe fixed!!
+  - table heading dropshadow
 - Host on the cloud for all to see
+  - phones can zoom in
   - Open-source the project
   - Configure app environment (i.e., redis URL)
   - Dockerize the server and client
@@ -314,3 +322,15 @@ x lose points for not meeting crush’s needs
   how do we make it not complex to straddle multiple sessions in one live
   group?)
 - Bigger plate for heart
+
+### 6/11/20
+- Leave tab--can't come back
+  - Need to allow rejoining inactive player in new tab
+- Prevent landscape on main game
+- Sometimes completely frozen
+- Points and re-ranking animation would be nice
+- Table scrolling
+  - Force landscape?
+  - Eliminate information when we add love graph?
+  - Scrolling animation first time?
+- SOUND EFFECTS!

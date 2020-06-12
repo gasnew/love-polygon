@@ -54,7 +54,7 @@ export default function Romance({ phase }: Props) {
           height: '100%',
         }}
       >
-        <div style={{ marginTop: 20 }}>
+        <div style={{ marginTop: '0.2vh' }}>
           <SlotList nodes={sharedNodes} arc={true} />
         </div>
         <div style={{ marginBottom: 20, marginTop: 'auto' }}>

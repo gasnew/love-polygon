@@ -15,6 +15,7 @@ import type {
   TrueLoveSelection,
   TrueLoveSelections,
 } from '../../../server/networkTypes';
+import type { Action } from './actions';
 import type {
   Need,
   Needs,
@@ -123,6 +124,10 @@ export function getSlotScale(): number {
     _.size(_.filter(getOwnNodes(), ['type', 'storage'])),
   ]);
   return 90 / maxNodeWidth;
+}
+
+export function getActions(): Action[] {
+  return getState().actions;
 }
 
 function makeDimensions(

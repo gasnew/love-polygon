@@ -49,7 +49,7 @@ export function getNewPlayerState({
         id: nodeId2,
         playerIds: [playerId],
         type: 'loveBucket',
-        enabled: false,
+        enabled: true,
       },
     },
     tokens: {
